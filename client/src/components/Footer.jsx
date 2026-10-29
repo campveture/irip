@@ -1,0 +1,59 @@
+import { Link } from 'react-router-dom';
+import { ShieldCheck, GraduationCap } from 'lucide-react';
+
+export function Footer() {
+  return (
+    <footer className="border-t border-slate-200 bg-slate-900 text-slate-300 mt-auto">
+      <div className="container-page py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <GraduationCap className="h-5 w-5 text-brand-400" />
+              <span className="font-semibold text-white">Unknown<span className="text-brand-400">Academy</span></span>
+            </div>
+            <p className="text-sm text-slate-400 max-w-xs">
+              Structured theory courses with supervised practical research projects for learners in Bangladesh.
+            </p>
+          </div>
+          <div>
+            <h4 className="text-white font-semibold mb-4">Platform</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/programs" className="hover:text-white">Programs</Link></li>
+              <li><Link to="/projects" className="hover:text-white">Projects</Link></li>
+              <li><Link to="/mentors" className="hover:text-white">Mentors</Link></li>
+              <li><Link to="/about" className="hover:text-white">About</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-semibold mb-4">Learner</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/app" className="hover:text-white">Student Portal</Link></li>
+              <li><Link to="/certificates" className="hover:text-white">Certificates</Link></li>
+              <li><Link to="/app/support" className="hover:text-white">Support</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-semibold mb-4">Policy</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/policies/terms" className="hover:text-white">Terms</Link></li>
+              <li><Link to="/policies/privacy" className="hover:text-white">Privacy</Link></li>
+              <li><Link to="/policies/refund" className="hover:text-white">Refund</Link></li>
+              <li><Link to="/policies/integrity" className="hover:text-white">Integrity</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-semibold mb-4">Contact</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/contact" className="hover:text-white">Send an inquiry</Link></li>
+              <li><Link to="/certificates" className="flex items-center gap-2 hover:text-white"><ShieldCheck className="h-4 w-4" /> Verify a certificate</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+          <span>Unknown Academy. Local prototype guided by the 28-sheet workbook.</span>
+          <span>P0 launch essentials · No unverified commercial claims.</span>
+        </div>
+      </div>
+    </footer>
+  );
+}

@@ -1,0 +1,21 @@
+{
+  "name": "unknown-academy-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Express + SQLite backend for Unknown Academy demo platform.",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --preserve-symlinks --preserve-symlinks-main server.js",
+    "start": "node --preserve-symlinks --preserve-symlinks-main server.js",
+    "seed": "node --preserve-symlinks --preserve-symlinks-main seed.js",
+    "test": "node --preserve-symlinks --preserve-symlinks-main test-demo.js && node --preserve-symlinks --preserve-symlinks-main test-expansion.js && node --preserve-symlinks --preserve-symlinks-main test-admin-workspaces.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0"
+  }
+}

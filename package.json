@@ -1,0 +1,17 @@
+{
+  "name": "unknown-academy-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Unknown Academy local prototype based on the 28-sheet website_skull.xlsx workbook.",
+  "scripts": {
+    "setup": "npm install && cd server && npm install && cd ../client && npm install",
+    "serve": "node --preserve-symlinks --preserve-symlinks-main serve.mjs",
+    "seed": "npm --prefix server run seed",
+    "build": "npm --prefix client run build",
+    "test": "npm --prefix server test",
+    "demo": "echo 'Run npm run build, then npm run serve, and open http://localhost:43137'"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
