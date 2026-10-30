@@ -4,11 +4,11 @@ import { api } from '../../lib/api';
 import { Button } from '../../components/Button';
 import { Card, CardContent, CardTitle } from '../../components/Card';
 import { Badge } from '../../components/Badge';
-import { PageHeader, ProgressBar } from '../../components';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
+import { ProgressBar } from '../../components';
 import { cn } from '../../components/utils';
-import { Search, Filter, X, ArrowRight } from 'lucide-react';
+import { Search, X, ArrowRight, SlidersHorizontal, BookOpen, Layers, Sparkles } from 'lucide-react';
 
 export default function Programs() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,6 +17,7 @@ export default function Programs() {
   const [levels, setLevels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showFilters, setShowFilters] = useState(true);
 
   const domain = searchParams.get('domain') || '';
   const level = searchParams.get('level') || '';
@@ -56,18 +57,13 @@ export default function Programs() {
       }
     };
     fetchPrograms();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [domain, level, search]);
 
   const setParam = (key, value) => {
     const params = new URLSearchParams(searchParams);
-    if (value === undefined || value === '') {
-      params.delete(key);
-    } else {
-      params.set(key, value);
-    }
+    if (value === undefined || value === '') params.delete(key);
+    else params.set(key, value);
     setSearchParams(params);
   };
 
@@ -75,10 +71,10 @@ export default function Programs() {
 
   const chip = (active) =>
     cn(
-      'px-3 py-1.5 rounded-full text-xs font-medium border transition',
+      'px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200',
       active
-        ? 'bg-brand-600 border-brand-600 text-white'
-        : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200',
+        ? 'bg-white text-brand-700 border-white shadow-soft'
+        : 'bg-white/10 text-white/90 border-white/20 hover:bg-white/20 hover:text-white',
     );
 
   const activeFilters = [];
@@ -105,52 +101,26 @@ export default function Programs() {
   }
 
   return (
-    <div className="container-page py-8">
-      <PageHeader title="Programs" subtitle="Browse proposed programs by domain or level. Enrollment is not yet available." />
-      <div className="mb-8 -mt-4">
-        <Link to="/" className="text-sm text-slate-600 hover:text-brand-600 transition inline-flex items-center">
-          ← Back to home
-        </Link>
-      </div>
+    <div className="flex flex-col">
+      {/* Hero */}
+      <section className="relative bg-gradient-to-br from-brand-900 via-brand-900 to-brand-700 text-white overflow-hidden">
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 15% 40%, white 0, transparent 40%), radial-gradient(circle at 85% 60%, white 0, transparent 45%)' }} />
+        <div className="container-page relative z-10 py-14 sm:py-20">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-3 py-1 text-xs font-medium text-brand-200 mb-5">
+              <Sparkles className="h-3.5 w-3.5" /> {programs.length} programs available
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-bold text-balance leading-tight mb-4">
+              Find the program that fits your research goals
+            </h1>
+            <p className="text-brand-100 text-lg mb-8 max-w-2xl leading-relaxed">
+              Browse proposed programs by domain, level, or keyword. Each program combines structured theory with a supervised practical project.
+            </p>
 
-      {/* Filters */}
-      <Card className="mb-8">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            <div className="md:col-span-4 flex flex-col sm:flex-row sm:items-center gap-2">
-              <span className="text-sm font-medium text-slate-700 leading-tight">Domain</span>
-              <div className="flex flex-wrap gap-2">
-                {domains.map((d) => (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => setParam('domain', domain === d ? undefined : d)}
-                    className={chip(domain === d)}
-                  >
-                    {d}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="md:col-span-4 flex flex-col sm:flex-row sm:items-center gap-2">
-              <span className="text-sm font-medium text-slate-700 leading-tight">Level</span>
-              <div className="flex flex-wrap gap-2">
-                {levels.map((l) => (
-                  <button
-                    key={l}
-                    type="button"
-                    onClick={() => setParam('level', level === l ? undefined : l)}
-                    className={chip(level === l)}
-                  >
-                    {l}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="md:col-span-4 flex items-end gap-2">
-              <label htmlFor="program-search" className="sr-only">Search programs</label>
+            {/* Search bar */}
+            <div className="relative max-w-xl">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
               <input
-                id="program-search"
                 type="search"
                 value={search}
                 onChange={(e) => {
@@ -159,82 +129,119 @@ export default function Programs() {
                   else params.delete('search');
                   setSearchParams(params);
                 }}
-                placeholder="Search programs…"
-                className="w-full min-w-[180px] rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-brand-600 focus:ring-1 focus:ring-brand-600 outline-none"
+                placeholder="Search programs, topics, skills…"
+                className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white text-slate-900 placeholder-slate-400 shadow-elevated focus:outline-none focus:ring-2 focus:ring-brand-300 text-sm"
               />
             </div>
+
+            {/* Domain pills */}
+            {domains.length > 0 && (
+              <div className="mt-6 flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-brand-200 mr-1">Domains:</span>
+                <button onClick={() => setParam('domain', undefined)} className={chip(!domain)}>All</button>
+                {domains.map((d) => (
+                  <button key={d} onClick={() => setParam('domain', domain === d ? undefined : d)} className={chip(domain === d)}>
+                    {d}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Level pills */}
+            {levels.length > 0 && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-brand-200 mr-1">Levels:</span>
+                <button onClick={() => setParam('level', undefined)} className={chip(!level)}>All</button>
+                {levels.map((l) => (
+                  <button key={l} onClick={() => setParam('level', level === l ? undefined : l)} className={chip(level === l)}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          {activeFilters.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="text-xs font-medium text-slate-500">Active:</span>
-              {activeFilters.map((f) => (
-                <button
-                  key={`${f.key}-${f.label}`}
-                  type="button"
-                  onClick={() => setParam(f.key, undefined)}
-                  className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-sm text-slate-600 hover:bg-slate-50 transition"
-                >
-                  {f.label}
+        </div>
+      </section>
+
+      {/* Results section */}
+      <section className="container-page py-10">
+        {/* Active filters + count */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-slate-900">
+              {programs.length} program{programs.length !== 1 ? 's' : ''} found
+            </h2>
+            {activeFilters.length > 0 && (
+              <button
+                onClick={clearAll}
+                className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200 transition-colors"
+              >
+                <X className="h-3 w-3" /> Clear all
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {activeFilters.map((f) => (
+              <span
+                key={`${f.key}-${f.label}`}
+                className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 border border-brand-100 px-3 py-1 text-xs font-medium text-brand-700"
+              >
+                {f.label}
+                <button onClick={() => setParam(f.key, undefined)} className="hover:text-brand-900">
                   <X className="h-3 w-3" />
                 </button>
-              ))}
-              <button type="button" onClick={clearAll} className="ml-2 text-xs font-medium text-slate-500 underline underline-offset-4 hover:text-slate-900">
-                Clear all
-              </button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Results */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-slate-900">
-          {programs.length} program{programs.length !== 1 ? 's' : ''} found
-        </h2>
-        {activeFilters.length > 0 && (
-          <Button onClick={clearAll} variant="outline" size="sm">
-            Clear filters
-          </Button>
-        )}
-      </div>
-
-      {programs.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <p className="text-slate-500 mb-4">No programs match your filters.</p>
-            <Button onClick={clearAll} variant="outline">
-              Clear filters
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {programs.map((p) => (
-            <Card key={p.slug || p.id} className="hover:shadow-md transition border">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="default">{p.domain}</Badge>
-                  <Badge variant="default">{p.level}</Badge>
-                </div>
-                <Link to={`/programs/${p.slug}`}>
-                  <CardTitle className="mb-2 line-clamp-1">{p.title}</CardTitle>
-                </Link>
-                <p className="text-slate-500 text-sm mb-4 line-clamp-2">{p.summary}</p>
-                <div className="flex items-center justify-between text-sm text-slate-600 mb-2">
-                  <span>BDT {Number(p.fee ?? 0).toLocaleString()}</span>
-                  <span>{p.capacity ?? 0} seats</span>
-                </div>
-                <ProgressBar value={p.enrolled_count || 0} max={p.capacity || 1} label="Enrolled" color="brand" size="sm" className="mb-4" />
-                <Link to={`/programs/${p.slug}`}>
-                  <Button variant="outline" className="w-full">
-                    View details <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ))}
+              </span>
+            ))}
+          </div>
         </div>
-      )}
+
+        {programs.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <Search className="h-7 w-7" />
+              </div>
+              <p className="text-slate-700 font-medium mb-1">No programs match your filters</p>
+              <p className="text-slate-500 text-sm mb-4">Try adjusting or clearing your filters.</p>
+              <Button onClick={clearAll} variant="outline">Clear filters</Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {programs.map((p) => (
+              <Card key={p.slug || p.id} hover className="group overflow-hidden">
+                <div className="h-1.5 bg-gradient-to-r from-brand-500 to-brand-900" />
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Badge variant="default">{p.domain}</Badge>
+                    <Badge variant="default">{p.level}</Badge>
+                  </div>
+                  <Link to={`/programs/${p.slug}`}>
+                    <CardTitle className="mb-2 line-clamp-1 group-hover:text-brand-600 transition-colors">{p.title}</CardTitle>
+                  </Link>
+                  <p className="text-slate-500 text-sm mb-4 line-clamp-2">{p.summary}</p>
+                  <div className="flex items-center justify-between text-sm text-slate-600 mb-2">
+                    <span className="font-medium">BDT {Number(p.fee ?? 0).toLocaleString()}</span>
+                    <span className="flex items-center gap-1"><Layers className="h-3.5 w-3.5" /> {p.capacity ?? 0} seats</span>
+                  </div>
+                  <ProgressBar value={p.enrolled_count || 0} max={p.capacity || 1} label="Enrolled" color="brand" size="sm" className="mb-4" />
+                  <Link to={`/programs/${p.slug}`}>
+                    <Button variant="outline" className="w-full group-hover:bg-brand-600 group-hover:text-white group-hover:border-brand-600 transition-colors">
+                      View details <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-10 text-center">
+          <Link to="/" className="text-sm text-slate-500 hover:text-brand-600 transition-colors inline-flex items-center">
+            ← Back to home
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }
