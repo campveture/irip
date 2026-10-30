@@ -4,8 +4,8 @@ import { api } from '../../lib/api';
 import { Button } from '../../components/Button';
 import { Card, CardContent, CardTitle } from '../../components/Card';
 import { Badge } from '../../components/Badge';
-import { StatCard, ProgressBar, BarChart } from '../../components';
-import { ArrowRight, GraduationCap, ShieldCheck, Users, BookOpen, Target, Award, CalendarDays, CheckCircle2, Sparkles, TrendingUp } from 'lucide-react';
+import { StatCard, ProgressBar } from '../../components';
+import { ArrowRight, GraduationCap, ShieldCheck, Users, BookOpen, Target, Award, CalendarDays, CheckCircle2, Sparkles, TrendingUp, Layers } from 'lucide-react';
 
 const features = [
   { icon: BookOpen, title: 'Structured theory', body: 'A twelve-week scaffold with weekly evidence checkpoints, quizzes, and academic gates that keep learners on track.', color: 'brand' },
@@ -136,25 +136,38 @@ export default function Home() {
         </section>
       )}
 
-      {/* Program domains chart */}
+      {/* Program domains */}
       {domainChartData.length > 0 && (
         <section className="py-16 bg-white border-y border-slate-200">
-          <div className="container-page grid md:grid-cols-2 gap-10 items-center">
-            <div>
+          <div className="container-page">
+            <div className="max-w-2xl mb-10">
               <h2 className="text-3xl font-bold text-slate-900 mb-3">Programs by domain</h2>
               <p className="text-slate-600 leading-relaxed">
-                Our catalog spans multiple research domains so learners can find a track that matches their interests — from data science and economics to education and public policy.
+                Our catalog spans multiple research domains so learners can find a track that matches their interests — from data science and economics to education and public policy. Each card shows how much of the catalog that domain represents.
               </p>
-              <div className="mt-6 flex flex-wrap gap-2">
-                {Object.entries(domainCounts).map(([k, v]) => (
-                  <Badge key={k} variant="default">{k} · {v}</Badge>
-                ))}
-              </div>
             </div>
-            <Card className="p-6">
-              <SectionTitle title="Domain distribution" />
-              <BarChart data={domainChartData} height={200} />
-            </Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(domainCounts).map(([name, count]) => {
+                const share = programs.length ? Math.round((count / programs.length) * 100) : 0;
+                return (
+                  <Card key={name} hover className="p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-brand-100">
+                          <Layers className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-semibold text-slate-900 truncate">{name}</div>
+                          <div className="text-xs text-slate-500">{count} program{count !== 1 ? 's' : ''}</div>
+                        </div>
+                      </div>
+                      <span className="text-xl font-bold text-brand-600 tabular-nums">{share}%</span>
+                    </div>
+                    <ProgressBar value={count} max={programs.length} color="brand" size="sm" showValue={false} />
+                  </Card>
+                );
+              })}
+            </div>
           </div>
         </section>
       )}
@@ -255,6 +268,3 @@ export default function Home() {
   );
 }
 
-function SectionTitle({ title }) {
-  return <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">{title}</h3>;
-}
