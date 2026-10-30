@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { db } = require('../db');
 const { requireAuth, requireRoles } = require('../middleware/auth');
+const { programOffers, enrollmentOption } = require('../catalog');
 
 router.post('/inquiries', (req, res) => {
   const name = String(req.body?.name || '').trim();
@@ -41,16 +42,25 @@ router.get('/programs', (req, res) => {
   }
   sql += ' GROUP BY p.id ORDER BY p.created_at DESC';
   const rows = db.prepare(sql).all(params);
-  res.json(rows);
+  res.json(rows.map((row) => ({ ...row, enrollment: enrollmentOption(row.id) })));
 });
 
 router.get('/programs/:slug', (req, res) => {
   const program = db.prepare('SELECT * FROM programs WHERE slug = ? AND status = ?').get(req.params.slug, 'published');
   if (!program) return res.status(404).json({ error: 'not_found', message: 'Program not found.' });
   const cohorts = db.prepare('SELECT * FROM cohorts WHERE program_id = ? AND status = ? ORDER BY start_date').all(program.id, 'open');
-  const offers = db.prepare('SELECT * FROM offers WHERE program_id = ? AND status = ? ORDER BY price ASC').all(program.id, 'published');
+  const offers = programOffers(program.id);
   const courses = db.prepare('SELECT * FROM courses WHERE program_id = ? AND status = ? ORDER BY id ASC').all(program.id, 'published');
-  res.json({ program, cohorts, offers, courses });
+  res.json({ program, cohorts, offers, courses, enrollment: enrollmentOption(program.id) });
+});
+
+router.get('/courses', (req, res) => {
+  const rows = db.prepare(`SELECT c.id, c.slug, c.title, c.summary, c.program_id,
+      p.title AS program_title, p.slug AS program_slug, p.domain, p.level
+    FROM courses c JOIN programs p ON p.id = c.program_id
+    WHERE c.status = 'published' AND p.status = 'published'
+    ORDER BY p.title, c.id`).all();
+  res.json(rows.map((row) => ({ ...row, enrollment: enrollmentOption(row.program_id) })));
 });
 
 router.get('/courses/:slug', (req, res) => {
@@ -63,7 +73,8 @@ router.get('/courses/:slug', (req, res) => {
     const lessons = db.prepare('SELECT id, module_id, title, kind, duration_min, release_window FROM lessons WHERE module_id = ? ORDER BY id').all(m.id);
     return { ...m, lessons };
   });
-  res.json({ course, program, modules: modulesWithLessons });
+  res.json({ course, program, modules: modulesWithLessons,
+    enrollment: program ? enrollmentOption(program.id) : null });
 });
 
 router.get('/mentors', (req, res) => {

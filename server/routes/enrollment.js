@@ -1,6 +1,7 @@
 const express = require('express');
 const { db } = require('../db');
 const { requireAuth } = require('../middleware/auth');
+const { commercialStatus } = require('../catalog');
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router.get('/offers/:id', (req, res) => {
   const cohorts = db.prepare(`SELECT c.id, c.name, c.start_date, c.end_date, c.capacity,
       (SELECT COUNT(*) FROM enrollments e WHERE e.cohort_id = c.id AND e.state IN ('active','pending')) AS allocated
     FROM cohorts c WHERE c.program_id = ? AND c.status = 'open' ORDER BY c.start_date`).all(offer.program_id);
-  res.json({ offer, cohorts, commercial_status: 'awaiting_approval' });
+  res.json({ offer, cohorts, commercial_status: commercialStatus });
 });
 
 router.get('/admission-offers/:id', requireAuth, (req, res) => {
@@ -24,7 +25,7 @@ router.get('/admission-offers/:id', requireAuth, (req, res) => {
     JOIN cohorts c ON c.id = ao.cohort_id JOIN programs p ON p.id = a.program_id
     WHERE ao.id = ? AND a.user_id = ?`).get(req.params.id, req.session.userId);
   if (!row) return res.status(404).json({ error: 'not_found', message: 'Admission offer not found.' });
-  res.json({ offer: row, commercial_status: 'awaiting_approval' });
+  res.json({ offer: row, commercial_status: commercialStatus });
 });
 
 router.get('/orders/:id', requireAuth, (req, res) => {
@@ -32,7 +33,7 @@ router.get('/orders/:id', requireAuth, (req, res) => {
   if (!order) return res.status(404).json({ error: 'not_found', message: 'Order not found.' });
   const items = db.prepare('SELECT id, name, price, cohort_id, offer_id FROM order_items WHERE order_id = ?').all(order.id);
   const attempts = db.prepare('SELECT id, provider, reference, amount, currency, state, settled_at, created_at FROM payment_attempts WHERE order_id = ? ORDER BY created_at DESC').all(order.id);
-  res.json({ order, items, attempts, commercial_status: 'awaiting_approval' });
+  res.json({ order, items, attempts, commercial_status: commercialStatus });
 });
 
 module.exports = router;

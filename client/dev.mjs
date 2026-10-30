@@ -6,9 +6,9 @@ const server = await createServer({
   plugins: [react()],
   server: {
     host: '127.0.0.1',
-    port: 5173,
+    port: Number(process.env.VITE_PORT || 5173),
     strictPort: true,
-    proxy: { '/api': 'http://127.0.0.1:5000' },
+    proxy: { '/api': `http://127.0.0.1:${process.env.API_PORT || 5000}` },
   },
 });
 

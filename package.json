@@ -5,6 +5,7 @@
   "description": "Unknown Academy local prototype based on the 28-sheet website_skull.xlsx workbook.",
   "scripts": {
     "setup": "npm install && cd server && npm install && cd ../client && npm install",
+    "dev": "node --preserve-symlinks --preserve-symlinks-main dev.mjs",
     "serve": "node --preserve-symlinks --preserve-symlinks-main serve.mjs",
     "seed": "npm --prefix server run seed",
     "build": "npm --prefix client run build",
