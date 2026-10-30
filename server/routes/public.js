@@ -152,19 +152,19 @@ router.get('/pages/:key', (req, res) => {
   const pages = {
     about: {
       title: 'About Unknown Academy',
-      body: 'Unknown Academy combines structured theory courses with supervised practical research projects. Learners prepare for research and further study through a three-month bootcamp model.',
+      body: 'Unknown Academy is a research-focused learning platform built for learners in Bangladesh who want to move from curiosity to a finished, supervised research project.\n\nWe combine structured theory courses with hands-on, supervisor-guided practical projects. A typical cohort runs for three months and includes weekly teaching sessions, research clinics, assignments with feedback, and a final assessed project.\n\nOur mentors teach theory and research literacy. Our approved supervisors guide practical work, review milestones, and assess final submissions. Completion is earned, not assumed — certificates are issued only when all completion rules are met.\n\nThis platform is currently a local prototype built from a 28-sheet specification workbook. Academy identity, faculty, pricing, and policies are pending approval before any live enrollment or payment.',
     },
     'how-it-works': {
       title: 'How It Works',
-      body: 'Choose a program, enroll in a cohort, attend teaching sessions and supervised clinics, complete assignments, and submit a final assessed project.',
+      body: '1. Choose a program. Browse published programs, compare cohorts, and pick the track that fits your goals and schedule.\n2. Apply and enroll. Submit an application, receive an admission outcome, and confirm enrollment in an open cohort.\n3. Learn and practice. Attend teaching and clinic sessions, complete weekly assignments, and build research skills step by step.\n4. Join a supervised project. Apply to a project team, work with an approved supervisor, hit milestones, and receive feedback.\n5. Earn your certificate. Meet completion rules and receive a verifiable certificate with a public token anyone can check.\n\nEvery step is gated: applications are reviewed, cohorts have capacity limits, and certificates are issued only on verified completion.',
     },
     faq: {
       title: 'Frequently Asked Questions',
-      body: 'Q: Can I enroll without prior research experience? A: Yes. The bootcamp starts with research literacy.\nQ: Is a certificate guaranteed? A: Certificates are issued only when completion requirements are met.',
+      body: 'Q: Can I enroll without prior research experience?\nA: Yes. The bootcamp starts with research literacy and builds up to a supervised project.\n\nQ: How long is a cohort?\nA: Typically three months, with weekly sessions and a final project.\n\nQ: Is a certificate guaranteed?\nA: No. Certificates are issued only when all completion requirements, including the final project, are met.\n\nQ: Can I learn at my own pace?\nA: Sessions are scheduled, but assignments and materials remain available for review within your cohort window.\n\nQ: How are supervisors assigned?\nA: Supervisor matching considers capacity, expertise, and project fit. You can see supervisor profiles before applying to a project.\n\nQ: Is payment available now?\nA: No. This is a local demonstration. Payment, refund, and enrollment settlement are disabled until policies and providers are approved.\n\nQ: Is my data real?\nA: No. This demo uses synthetic people and transactions. Do not enter real personal information.',
     },
     contact: {
       title: 'Contact Us',
-      body: 'Email: support@unknown.academy\nPhone: +880 2 0000000',
+      body: 'Email: support@unknown.academy\nPhone: +880 2 0000000\nAddress: Dhaka, Bangladesh\n\nSend a question using the form below. This local demo stores your inquiry in its sample CRM; it does not send an email or create a booking. If you are already learning with us, open a support ticket from your student portal instead.',
     },
     policies: {
       title: 'Policies',

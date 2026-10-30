@@ -1,9 +1,13 @@
 import { cn } from './utils';
 
-export function Card({ className, children, ...props }) {
+export function Card({ className, children, hover = false, ...props }) {
   return (
     <div
-      className={cn('rounded-xl border border-slate-200 bg-white shadow-sm', className)}
+      className={cn(
+        'rounded-xl border border-slate-200 bg-white shadow-soft transition-all duration-200 ease-out',
+        hover && 'hover:shadow-card hover:-translate-y-0.5',
+        className,
+      )}
       {...props}
     >
       {children}

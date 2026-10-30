@@ -4,6 +4,7 @@ import { api } from '../../lib/api';
 import { Button } from '../../components/Button';
 import { Card, CardContent, CardTitle } from '../../components/Card';
 import { Badge } from '../../components/Badge';
+import { PageHeader, ProgressBar } from '../../components';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
 import { cn } from '../../components/utils';
@@ -105,14 +106,9 @@ export default function Programs() {
 
   return (
     <div className="container-page py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Programs</h1>
-          <p className="text-slate-500 text-sm">
-            Browse proposed programs by domain or level. Enrollment is not yet available.
-          </p>
-        </div>
-        <Link to="/" className="text-sm text-slate-600 hover:text-brand-600 transition">
+      <PageHeader title="Programs" subtitle="Browse proposed programs by domain or level. Enrollment is not yet available." />
+      <div className="mb-8 -mt-4">
+        <Link to="/" className="text-sm text-slate-600 hover:text-brand-600 transition inline-flex items-center">
           ← Back to home
         </Link>
       </div>
@@ -224,10 +220,11 @@ export default function Programs() {
                   <CardTitle className="mb-2 line-clamp-1">{p.title}</CardTitle>
                 </Link>
                 <p className="text-slate-500 text-sm mb-4 line-clamp-2">{p.summary}</p>
-                <div className="flex items-center justify-between text-sm text-slate-600 mb-4">
+                <div className="flex items-center justify-between text-sm text-slate-600 mb-2">
                   <span>BDT {Number(p.fee ?? 0).toLocaleString()}</span>
                   <span>{p.capacity ?? 0} seats</span>
                 </div>
+                <ProgressBar value={p.enrolled_count || 0} max={p.capacity || 1} label="Enrolled" color="brand" size="sm" className="mb-4" />
                 <Link to={`/programs/${p.slug}`}>
                   <Button variant="outline" className="w-full">
                     View details <ArrowRight className="h-4 w-4 ml-1" />
