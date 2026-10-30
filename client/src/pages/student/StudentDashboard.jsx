@@ -5,7 +5,9 @@ import { Button } from '../../components/Button';
 import { Card, CardContent, CardTitle, CardHeader } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { Alert } from '../../components/Alert';
-import { StatCard, ProgressBar, RingProgress, BarChart, EmptyState, PageHeader, SectionHeader } from '../../components';
+import { StatCard, ProgressBar, RingProgress, EmptyState, PageHeader, SectionHeader } from '../../components';
+import { BarChart as RBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { CHART_COLORS, CHART_PALETTE, tooltipStyle, axisStyle, gridStyle } from '../../lib/charts';
 import { Clock, BookOpen, FileText, Bell, ArrowRight, CalendarDays, CheckCircle2, Target, TrendingUp, LayoutDashboard } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -88,7 +90,19 @@ export default function StudentDashboard() {
         {/* Submission state chart */}
         <Card className="lg:col-span-2 p-6">
           <SectionHeader title="Submission status" subtitle="Breakdown of your assignments by state" />
-          <BarChart data={submissionChartData} height={180} color="brand" />
+          <ResponsiveContainer width="100%" height={200}>
+            <RBarChart data={submissionChartData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+              <CartesianGrid {...gridStyle} vertical={false} />
+              <XAxis dataKey="label" {...axisStyle} />
+              <YAxis {...axisStyle} allowDecimals={false} />
+              <Tooltip {...tooltipStyle} />
+              <Bar dataKey="value" radius={[8, 8, 0, 0]} animationDuration={900}>
+                {submissionChartData.map((d, i) => (
+                  <Cell key={i} fill={d.color === 'success' ? CHART_COLORS.success : d.color === 'warning' ? CHART_COLORS.warning : d.color === 'danger' ? CHART_COLORS.danger : d.color === 'slate' ? CHART_COLORS.slate : CHART_COLORS.brand} />
+                ))}
+              </Bar>
+            </RBarChart>
+          </ResponsiveContainer>
         </Card>
       </div>
 

@@ -6,7 +6,9 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/Card'
 import { Badge } from '../../components/Badge';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
-import { StatCard, BarChart, ProgressBar, PageHeader, SectionHeader, EmptyState } from '../../components';
+import { StatCard, ProgressBar, PageHeader, SectionHeader, EmptyState } from '../../components';
+import { BarChart as RBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { CHART_COLORS, CHART_PALETTE, tooltipStyle, axisStyle, gridStyle } from '../../lib/charts';
 import { Users, Banknote, Layers, AlertTriangle, Headphones, TrendingUp, ArrowRight, Building2, CalendarDays } from 'lucide-react';
 
 function statusVariant(v) {
@@ -103,7 +105,19 @@ export default function AdminDashboard() {
         <Card className="p-6">
           <SectionHeader title="Admission funnel" subtitle="Inquiry → enrollment" />
           {funnelChartData.length > 0 ? (
-            <BarChart data={funnelChartData} height={180} />
+            <ResponsiveContainer width="100%" height={200}>
+              <RBarChart data={funnelChartData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                <CartesianGrid {...gridStyle} vertical={false} />
+                <XAxis dataKey="label" {...axisStyle} />
+                <YAxis {...axisStyle} allowDecimals={false} />
+                <Tooltip {...tooltipStyle} />
+                <Bar dataKey="value" radius={[8, 8, 0, 0]} animationDuration={900}>
+                  {funnelChartData.map((d, i) => (
+                    <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
+                  ))}
+                </Bar>
+              </RBarChart>
+            </ResponsiveContainer>
           ) : (
             <EmptyState title="No funnel data" description="Funnel aggregates will appear once records exist." />
           )}
@@ -111,7 +125,15 @@ export default function AdminDashboard() {
         <Card className="p-6">
           <SectionHeader title="Active learners per cohort" subtitle="Current active enrollments" />
           {cohortChartData.length > 0 ? (
-            <BarChart data={cohortChartData} height={180} color="brand" />
+            <ResponsiveContainer width="100%" height={200}>
+              <RBarChart data={cohortChartData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                <CartesianGrid {...gridStyle} vertical={false} />
+                <XAxis dataKey="label" {...axisStyle} />
+                <YAxis {...axisStyle} allowDecimals={false} />
+                <Tooltip {...tooltipStyle} />
+                <Bar dataKey="value" fill={CHART_COLORS.brand} radius={[8, 8, 0, 0]} animationDuration={900} />
+              </RBarChart>
+            </ResponsiveContainer>
           ) : (
             <EmptyState title="No cohorts" description="Cohorts will appear once created." />
           )}
@@ -119,7 +141,19 @@ export default function AdminDashboard() {
         <Card className="p-6">
           <SectionHeader title="Recent order status" subtitle="Last 8 orders" />
           {orderStatusData.length > 0 ? (
-            <BarChart data={orderStatusData} height={180} horizontal />
+            <ResponsiveContainer width="100%" height={200}>
+              <RBarChart data={orderStatusData} layout="vertical" margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                <CartesianGrid {...gridStyle} horizontal={false} />
+                <XAxis type="number" {...axisStyle} allowDecimals={false} />
+                <YAxis type="category" dataKey="label" {...axisStyle} width={90} />
+                <Tooltip {...tooltipStyle} />
+                <Bar dataKey="value" radius={[0, 8, 8, 0]} animationDuration={900}>
+                  {orderStatusData.map((d, i) => (
+                    <Cell key={i} fill={d.color === 'success' ? CHART_COLORS.success : d.color === 'warning' ? CHART_COLORS.warning : d.color === 'danger' ? CHART_COLORS.danger : CHART_COLORS.slate} />
+                  ))}
+                </Bar>
+              </RBarChart>
+            </ResponsiveContainer>
           ) : (
             <EmptyState title="No orders" description="Orders will appear once placed." />
           )}
