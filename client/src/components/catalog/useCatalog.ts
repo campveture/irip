@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { clearFilters, facetOptions, filterPrograms, parsePrograms, readFilters, toggleFilter } from './catalogModel';
 import type { CatalogState, FilterGroup } from './types';
+import { appFetch } from '../../lib/readOnlyPreview';
 
 export function useCatalog() {
   const [params, setParams] = useSearchParams();
@@ -13,7 +14,7 @@ export function useCatalog() {
     setState({ status: 'loading' });
     async function load() {
       try {
-        const response = await fetch('/api/public/programs', { credentials: 'include', signal: controller.signal, headers: { Accept: 'application/json' } });
+        const response = await appFetch('/api/public/programs', { credentials: 'include', signal: controller.signal, headers: { Accept: 'application/json' } });
         if (!response.ok) throw new Error(`The catalog is unavailable (${response.status}). Please retry.`);
         const payload: unknown = await response.json();
         const programs = parsePrograms(payload);

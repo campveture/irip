@@ -4,6 +4,8 @@ Source: `website_skull.xlsx` (28 sheets, 81 page/screen entries, 24 acceptance s
 
 ## Working locally
 
+- A separate **read-only Vercel/GitHub preview build** is available via `npm run build:preview`, with configuration in `vercel.json` and instructions in `DEPLOYMENT.md`. It exports 36 public responses from a fresh synthetic in-memory database and publishes static assets only. Accounts, portals, forms, certificate lookup and writes are disabled; no SQLite file, runtime API or source maps are deployed. The local full-system build is unchanged. Preparing/testing this configuration does not itself establish that Vercel project access, GitHub linking or deployment has succeeded.
+
 - One-process run path: `npm run build`, then `npm run serve`; browser and API share `http://localhost:43137`.
 - Public catalog, projects, mentor directory, certificate lookup, inquiries, and draft policy pages.
 - Account profile, password change, notification consent, learner/mentor/admin workspaces, and scoped local demo records.
@@ -67,7 +69,7 @@ The current prototype has no verified payment or refund settlement, email verifi
 ## Verification
 
 - `npm run build` passes.
-- `npm test` passes the demo API suite (56 checks), expansion curation/flow checks, admin workspace checks, scholarship validation/matching/account-isolation/deletion checks, recorded-course validation/private-draft/role-isolation/commercial-gate checks, learner-success prerequisite/account-isolation/reviewer-revocation/revision/triage/alumni-consent-moderation/cascade-deletion checks, strict frontend type checking and 24 frontend unit tests. These are local synthetic tests.
+- `npm test` passes the demo API suite (56 checks), expansion curation/flow checks, admin workspace checks, scholarship validation/matching/account-isolation/deletion checks, recorded-course validation/private-draft/role-isolation/commercial-gate checks, learner-success prerequisite/account-isolation/reviewer-revocation/revision/triage/alumni-consent-moderation/cascade-deletion checks, strict frontend type checking and 25 frontend unit tests. These are local synthetic tests.
 - `npm run test:e2e` passes 25 Playwright scenarios against a separate in-memory server on port 43139 (build first; install Playwright Chromium, or set `PW_CHANNEL=msedge` when Edge is available). It covers catalog filtering/history, failure recovery, mobile focus/navigation, role-scoped portal links, disclaimer/certificate routes, the opaque header, route/hash scrolling, scholarship profile/discovery/tracker/deletion flows, recorded-course catalog/filter/detail/membership/instructor-draft flows, public/mobile/learner opportunity-roadmap honesty, and guided practice, private-artifact → mentor-feedback → revision, support triage, moderated alumni withdrawal and no-stale-data deletion flows. Failed updates preserve notes/drafts; successful deletion followed by a failed refresh does not display stale profile/work data. Browser artifacts live under ignored `client/test-results/`.
 - Dependency audit still flags the legacy Vite/React Router dependency tree. A supported Node/toolchain and router upgrade, bundle splitting and the remaining JavaScript migration are required before production review.
 - Headless Chrome rendered the Programs and My Research Ideas pages without JavaScript console errors after the blank-page spinner error was fixed.

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { appFetch } from '../../lib/readOnlyPreview';
 
 export async function courseRequest(path: string, init: RequestInit = {}): Promise<unknown> {
-  const response = await fetch(`/api/recorded-courses${path}`, { ...init, credentials: 'include', cache: 'no-store', headers: { Accept: 'application/json', 'Content-Type': 'application/json' } });
+  const response = await appFetch(`/api/recorded-courses${path}`, { ...init, credentials: 'include', cache: 'no-store', headers: { Accept: 'application/json', 'Content-Type': 'application/json' } });
   const data: unknown = await response.json();
   if (!response.ok) {
     const message = data && typeof data === 'object' && 'message' in data && typeof data.message === 'string' ? data.message : `Course request failed (${response.status}).`;

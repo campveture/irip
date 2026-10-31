@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { READ_ONLY_PREVIEW, allowsPreviewRoute } from './lib/readOnlyPreview';
+import { ReadOnlyPreviewPage } from './components/shared/ReadOnlyPreview';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { PortalLayout, ProtectedRoute } from './components';
 import { AppShell } from './components/shared/AppShell';
@@ -100,12 +102,15 @@ import AdminAutomations from './pages/admin/AdminAutomations';
 
 function RouterApp() {
   const { user, roles, loading } = useAuth();
+  const { pathname } = useLocation();
+  if (READ_ONLY_PREVIEW && !allowsPreviewRoute(pathname)) return <ReadOnlyPreviewPage />;
   if (loading) return <main className="container-page flex min-h-[45vh] items-center justify-center" aria-label="Loading account"><Spinner size="lg" /></main>;
 
   return (
     <Routes>
       {/* Public */}
       <Route path="/" element={<Home />} />
+      {READ_ONLY_PREVIEW && <Route path="/preview-info" element={<ReadOnlyPreviewPage />} />}
       <Route path="/demo-guide" element={<DemoGuide />} />
       <Route path="/student-value" element={<StudentValueRoadmap />} />
       <Route path="/programs" element={<Programs />} />

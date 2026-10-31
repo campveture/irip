@@ -2,6 +2,8 @@ node_modules/
 client/node_modules/
 server/node_modules/
 client/dist/
+client/dist-preview/
+.vercel/
 server/data.sqlite
 server/data.sqlite-*
 *.log
@@ -9,3 +11,5 @@ server/data.sqlite-*
 .chrome-verify*/
 client/test-results/
 client/playwright-report/
+
+.vercel

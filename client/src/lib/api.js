@@ -1,8 +1,9 @@
+import { appFetch } from './readOnlyPreview';
 const BASE = '/api';
 
 async function request(path, init = {}) {
   const headers = { 'Content-Type': 'application/json', ...(init.headers || {}) };
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await appFetch(`${BASE}${path}`, {
     ...init,
     headers,
     credentials: 'include',

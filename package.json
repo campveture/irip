@@ -9,6 +9,9 @@
     "serve": "node --preserve-symlinks --preserve-symlinks-main serve.mjs",
     "seed": "npm --prefix server run seed",
     "build": "npm --prefix client run build",
+    "build:preview": "node --preserve-symlinks --preserve-symlinks-main build-preview.mjs",
+    "serve:preview": "node serve-preview.mjs",
+    "test:preview": "npm --prefix client run test:preview",
     "test": "npm run test:api && npm run test:client",
     "test:api": "npm --prefix server test",
     "test:client": "npm --prefix client test",
@@ -17,6 +20,6 @@
     "demo": "echo 'Run npm run build, then npm run serve, and open http://localhost:43137'"
   },
   "engines": {
-    "node": ">=20"
+    "node": "22.x"
   }
 }

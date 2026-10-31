@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
+import { READ_ONLY_PREVIEW } from '../lib/readOnlyPreview';
 
 const AuthContext = createContext(null);
 
@@ -15,6 +16,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const loadMe = useCallback(async () => {
+    if (READ_ONLY_PREVIEW) { setUser(null); setRoles([]); setLoading(false); return; }
     try {
       const data = await api.get('/auth/me');
       setUser(data.user);
