@@ -1,8 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
+import { apiHeaders } from './http';
 import { DEMO_DISCLAIMER } from '../../src/components/shared/compliance';
 
 async function login(page: Page, account = 'learner') {
-  const result = await page.request.post('/api/auth/login', { data: { email: `${account}@unknown.academy`, password: 'demo1234' } });
+  const result = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: `${account}@unknown.academy`, password: 'demo1234' } });
   expect(result.ok()).toBe(true);
 }
 async function createArtifact(page: Page, title: string) {
@@ -18,7 +19,7 @@ async function createArtifact(page: Page, title: string) {
 }
 test('guided path saves language, enforces prerequisites, and never awards alumni eligibility for self-completion', async ({ page }, info) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await login(page); await page.request.delete('/api/growth/workspace');
+  await login(page); await page.request.delete('/api/growth/workspace', { headers: apiHeaders });
   await page.goto('/app'); await page.getByRole('link', { name: 'Start guided practice', exact: true }).click();
   await expect(page).toHaveURL(/\/app\/growth$/);
   await expect(page.getByRole('complementary', { name: 'Local demonstration disclaimer' })).toHaveText(DEMO_DISCLAIMER);
@@ -42,7 +43,7 @@ test('guided path saves language, enforces prerequisites, and never awards alumn
 });
 
 test('private portfolio → assigned feedback → revision preserves the earlier reviewed text', async ({ page, browser }, info) => {
-  await login(page); await page.request.delete('/api/growth/workspace');
+  await login(page); await page.request.delete('/api/growth/workspace', { headers: apiHeaders });
   await page.goto('/app/portfolio');
   const title = 'Synthetic protocol for review';
   await createArtifact(page, title);
@@ -77,7 +78,7 @@ test('private portfolio → assigned feedback → revision preserves the earlier
 });
 
 test('career support receives a local operations reply and alumni listings require independent moderation and can be withdrawn', async ({ page, browser }) => {
-  await login(page, 'student2'); await page.request.delete('/api/growth/workspace');
+  await login(page, 'student2'); await page.request.delete('/api/growth/workspace', { headers: apiHeaders });
   await page.goto('/app/career');
   await page.getByLabel('What would help?', { exact: false }).fill('Please help me explain the research contribution in this synthetic application without ghostwriting it.');
   await page.getByLabel('Store this request', { exact: false }).check();
@@ -107,7 +108,7 @@ test('career support receives a local operations reply and alumni listings requi
 });
 
 test('failed saves retain the draft, and successful deletion with a failed refresh never exposes stale private work', async ({ page }) => {
-  await login(page); await page.request.delete('/api/growth/workspace');
+  await login(page); await page.request.delete('/api/growth/workspace', { headers: apiHeaders });
   await page.goto('/app/portfolio'); await createArtifact(page, 'A deletable private baseline');
   await page.getByRole('button', { name: 'Revise artifact', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Revise private artifact', exact: true });

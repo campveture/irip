@@ -99,6 +99,8 @@ export default function AdminLearnerDetail() {
               <p className="text-sm text-slate-700 line-clamp-2">{profile.goals}</p>
             </div>
           )}
+          {profile.interests && <div className="mt-4 border-t border-slate-100 pt-4"><p className="text-xs uppercase text-slate-500">Areas of interest</p><p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{profile.interests}</p></div>}
+          {profile.study_plan && <div className="mt-4 border-t border-slate-100 pt-4"><p className="text-xs uppercase text-slate-500">Study plan</p><p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{profile.study_plan}</p></div>}
         </CardContent>
       </Card>
 

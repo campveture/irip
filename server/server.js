@@ -6,6 +6,7 @@ const path = require('path');
 
 const { db, initSchema, seed } = require('./db');
 const { attachUser } = require('./middleware/auth');
+const { apiSafety, localOrigins, rateLimit } = require('./middleware/security');
 
 const authRoutes = require('./routes/auth');
 const publicRoutes = require('./routes/public');
@@ -23,7 +24,13 @@ const SESSION_SECRET = process.env.SESSION_SECRET || require('crypto').randomByt
 
 const app = express();
 
-app.use(cors({ origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], credentials: true }));
+app.disable('x-powered-by');
+const origins = localOrigins(PORT);
+app.use(cors({ origin: (origin, done) => done(null, !origin || origins.has(origin)), credentials: true,
+  allowedHeaders: ['Content-Type', 'X-UA-Request'], methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'] }));
+app.use('/api', apiSafety(origins));
+app.use('/api/auth/login', rateLimit({ limit: 60, windowMs: 60000 }));
+app.use('/api/auth/signup', rateLimit({ limit: 15, windowMs: 60000 }));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/growth', (error, req, res, next) => {
@@ -58,6 +65,8 @@ app.get('/api/me', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/accounts', require('./profiles/routes'));
+app.use('/api/mentor-applications', require('./profiles/intake-routes'));
 app.use('/api/public', publicRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/scholarships', require('./routes/scholarships'));
@@ -72,6 +81,11 @@ app.use('/api/expansion', require('./routes/expansion'));
 
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'not_found', message: `API route ${req.method} ${req.path} not implemented.` });
+});
+app.use((error, req, res, next) => {
+  if (!req.path.startsWith('/api/')) return next(error);
+  const status = error.type === 'entity.too.large' ? 413 : error.type === 'entity.parse.failed' ? 400 : 500;
+  res.status(status).json({ error: status === 500 ? 'server' : 'validation', message: status === 500 ? 'The request could not be completed.' : 'Provide a valid JSON object within the request size limit.' });
 });
 
 if (process.env.SERVE_CLIENT === '1') {
@@ -94,10 +108,6 @@ db.prepare(`INSERT OR IGNORE INTO teaching_assignments(mentor_id, cohort_id)
   SELECT u.id, c.id FROM users u JOIN cohorts c ON c.name = 'Cohort November 2026'
   JOIN programs p ON p.id = c.program_id AND p.slug = 'research-bootcamp'
   WHERE u.email = 'mentor@unknown.academy'`).run();
-db.prepare(`INSERT INTO role_grants(user_id, role, scope, created_at)
-  SELECT u.id, 'supervisor', 'global', datetime('now') FROM users u
-  WHERE u.email = 'mentor@unknown.academy' AND NOT EXISTS
-  (SELECT 1 FROM role_grants g WHERE g.user_id = u.id AND g.role = 'supervisor')`).run();
 
 app.listen(PORT, '127.0.0.1', () => {
   console.log(`Unknown Academy server running on http://localhost:${PORT}`);

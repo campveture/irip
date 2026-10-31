@@ -7,6 +7,7 @@ const vitePort = await availablePort(5173);
 process.chdir(fileURLToPath(new URL('./server/', import.meta.url)));
 process.env.PORT = String(apiPort);
 process.env.SERVE_CLIENT = '0';
+process.env.LOCAL_WEB_ORIGIN = `http://127.0.0.1:${vitePort}`;
 await import('./server/server.js');
 
 process.chdir(fileURLToPath(new URL('./client/', import.meta.url)));

@@ -6,10 +6,11 @@ interface SheetProps {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  className?: string;
 }
 
 // Native modal dialog supplies focus containment, background inertness and focus restoration.
-export function Sheet({ open, title, onClose, children }: SheetProps) {
+export function Sheet({ open, title, onClose, children, className = '' }: SheetProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   useEffect(() => {
@@ -38,7 +39,7 @@ export function Sheet({ open, title, onClose, children }: SheetProps) {
     if (!first || !last) return;
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-  }} onCancel={event => { event.preventDefault(); onClose(); }} onClick={event => { if (event.target === event.currentTarget) onClose(); }} className="m-0 ml-auto h-dvh max-h-dvh w-full max-w-md border-0 bg-canvas p-0 text-slate-900 shadow-elevated backdrop:bg-brand-950/60">
+  }} onCancel={event => { event.preventDefault(); onClose(); }} onClick={event => { if (event.target === event.currentTarget) onClose(); }} className={`m-0 ml-auto h-dvh max-h-dvh w-full max-w-md border-0 bg-canvas p-0 text-slate-900 shadow-elevated backdrop:bg-brand-950/60 ${className}`}>
     <div className="flex min-h-full flex-col" onClick={event => event.stopPropagation()}>
       <div className="flex items-center justify-between gap-4 border-b border-slate-200 bg-surface p-5">
         <h2 id={titleId} className="text-xl font-semibold text-brand-900">{title}</h2>

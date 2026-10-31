@@ -47,18 +47,11 @@ router.get('/dashboard', (req, res) => {
 
 // ---------- Application ----------
 router.get('/application', (req, res) => {
-  const userId = req.session.userId;
-  const profile = db.prepare('SELECT * FROM mentor_profiles WHERE user_id = ?').get(userId);
-  res.json({ profile });
+  res.json(require('../profiles/service').ownApplication(req.user.id));
 });
 
 router.post('/application', (req, res) => {
-  const userId = req.session.userId;
-  const { bio, expertise, rate } = req.body || {};
-  db.prepare(
-    'INSERT OR REPLACE INTO mentor_profiles(user_id, bio, expertise, rate, status, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
-  ).run(userId, bio || null, expertise || null, rate ? parseInt(rate, 10) : null, 'pending', new Date().toISOString());
-  res.json({ ok: true, status: 'pending' });
+  res.status(410).json({ message: 'Use the versioned /api/accounts/mentor-application workflow. No profile was changed.' });
 });
 
 // ---------- Classes ----------

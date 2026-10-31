@@ -10,12 +10,14 @@ test('a page link starts at the destination top instead of retaining footer posi
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 });
 
-test('hash destinations land below the solid header, including targets mounted after loading', async ({ page }) => {
+test('hash destinations clear the measured global header, including delayed targets', async ({ page }) => {
   await page.goto('/#how-it-works');
   const section = page.locator('#how-it-works');
   await expect(section).toBeVisible();
-  await expect.poll(() => section.evaluate(element => Math.round(element.getBoundingClientRect().top))).toBeGreaterThanOrEqual(64);
-  await expect.poll(() => section.evaluate(element => Math.round(element.getBoundingClientRect().top))).toBeLessThan(110);
+  await expect.poll(() => section.evaluate(element => {
+    const header = document.querySelector('.academy-header > .container-page')!;
+    return Math.round(element.getBoundingClientRect().top - header.getBoundingClientRect().height);
+  })).toBe(16);
   await page.route('**/api/public/programs/research-bootcamp', async route => {
     const response = await route.fetch();
     await new Promise(resolve => setTimeout(resolve, 250));
@@ -24,8 +26,10 @@ test('hash destinations land below the solid header, including targets mounted a
   await page.goto('/programs/research-bootcamp#program-tab-panel');
   const panel = page.locator('#program-tab-panel');
   await expect(panel).toBeVisible();
-  await expect.poll(() => panel.evaluate(element => Math.round(element.getBoundingClientRect().top))).toBeGreaterThanOrEqual(120);
-  await expect.poll(() => panel.evaluate(element => Math.round(element.getBoundingClientRect().top))).toBeLessThan(180);
+  await expect.poll(() => panel.evaluate(element => {
+    const height = document.querySelector('.academy-header > .container-page')!.getBoundingClientRect().height;
+    return Math.round(element.getBoundingClientRect().top - height);
+  })).toBe(16);
 });
 
 test('query-only catalog filter updates do not reset the viewport', async ({ page }) => {

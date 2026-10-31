@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
+import { publicHeaderHeight } from './headerGeometry';
 
 /** Route navigation scrolls to the destination, not the previous page's viewport.
  * Query-only catalog updates keep position; POP restoration stays browser-managed.
@@ -36,11 +37,10 @@ export function RouteScroll() {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         if (!target.isConnected) return;
-        const header = document.querySelector('header');
         const stickySections = [...document.querySelectorAll<HTMLElement>('[data-scroll-offset]')]
           .filter(element => element.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_FOLLOWING)
           .reduce((height, element) => height + element.getBoundingClientRect().height, 0);
-        const offset = (header?.getBoundingClientRect().height || 0) + stickySections + 16;
+        const offset = publicHeaderHeight() + stickySections + 16;
         window.scrollTo({ top: Math.max(0, target.getBoundingClientRect().top + window.scrollY - offset), left: 0, behavior: 'instant' });
         if (target instanceof HTMLElement) target.focus({ preventScroll: true });
       });

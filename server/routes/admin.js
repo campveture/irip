@@ -84,10 +84,11 @@ router.get('/modules', (req, res) => {
 router.get('/learners', (req, res) => {
   const { search } = req.query;
   let sql = `SELECT u.id, u.email, u.full_name, u.status, u.email_verified,
-                    lp.phone, lp.goals,
+                    COALESCE(s.phone, lp.phone) AS phone,
                     (SELECT COUNT(*) FROM enrollments e WHERE e.user_id = u.id AND e.state = 'active') AS active_enrollments
              FROM users u
-             LEFT JOIN learner_profiles lp ON lp.user_id = u.id
+              LEFT JOIN learner_profiles lp ON lp.user_id = u.id
+              LEFT JOIN account_settings s ON s.user_id = u.id
              WHERE u.role = 'learner'`;
   const params = [];
   if (search) {
@@ -100,9 +101,12 @@ router.get('/learners', (req, res) => {
 
 router.get('/learners/:id', (req, res) => {
   const userId = req.params.id;
-  const user = db.prepare('SELECT id, email, full_name, role, status, email_verified, created_at FROM users WHERE id = ?').get(userId);
+  if (!/^[1-9]\d*$/.test(userId) || !Number.isSafeInteger(Number(userId))) return res.status(400).json({ message: 'Invalid learner ID.' });
+  const user = db.prepare("SELECT id, email, full_name, role, status, email_verified, created_at FROM users WHERE id = ? AND role = 'learner'").get(userId);
   if (!user) return res.status(404).json({ error: 'not_found' });
-  const profile = db.prepare('SELECT * FROM learner_profiles WHERE user_id = ?').get(userId);
+  const canReadLearning = (req.roles || []).some(role => ['academic_ops','admin','owner'].includes(role));
+  const savedProfile = require('../profiles/service').profile(user.id);
+  const profile = canReadLearning ? savedProfile : { phone: savedProfile.phone };
   const enrollments = db
     .prepare(
       `SELECT e.id, e.state, c.name AS cohort_name, p.title AS program_title, c.start_date, c.end_date
@@ -118,7 +122,7 @@ router.get('/learners/:id', (req, res) => {
     )
     .all(userId);
   const tickets = db.prepare('SELECT * FROM tickets WHERE user_id = ? ORDER BY created_at DESC LIMIT 5').all(userId);
-  res.json({ user, profile, enrollments, submissions, tickets });
+  res.json({ user, profile, enrollments, submissions: canReadLearning ? submissions : [], tickets });
 });
 
 // ---------- Catalog ----------

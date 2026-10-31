@@ -13,6 +13,7 @@ export const primaryLinks: readonly NavigationLink[] = [
   { to: '/projects', label: 'Projects' }, { to: '/mentors', label: 'Mentors' }, { to: '/about', label: 'About' },
 ];
 export const secondaryLinks: readonly NavigationLink[] = [
+  { to: '/teach/apply', label: 'Apply as a mentor' },
   { to: '/student-value', label: 'Student value roadmap' },
   { to: '/internships', label: 'Internship board (demo)' },
   { to: '/how-it-works', label: 'How it works' }, { to: '/faq', label: 'FAQ' },

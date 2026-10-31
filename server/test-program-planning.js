@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict');
+const { testFetch: fetch } = require('./test-http');
 process.env.DB_PATH = ':memory:';
 const { db, initSchema, seed } = require('./db');
 const { storedProgramCohorts: programCohorts } = require('./catalog');

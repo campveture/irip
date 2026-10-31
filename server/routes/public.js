@@ -85,11 +85,11 @@ router.get('/courses/:slug', (req, res) => {
 router.get('/mentors', (req, res) => {
   const rows = db
     .prepare(
-      `SELECT u.id, u.full_name, m.bio, m.expertise, m.status
+      `SELECT u.id, m.public_name AS full_name, m.bio, m.expertise, m.status
        FROM mentor_profiles m
        JOIN users u ON u.id = m.user_id
-       WHERE u.status = 'active' AND m.status = 'approved'
-       ORDER BY u.full_name`
+        WHERE u.status = 'active' AND m.status = 'approved' AND m.public_visible = 1 AND m.public_name IS NOT NULL
+        ORDER BY m.public_name`
     )
     .all();
   res.json(rows);
@@ -99,10 +99,10 @@ router.get('/mentors/:slug', (req, res) => {
   // Exact ID/name only: wildcard LIKE could return an unrelated approved profile.
   const mentor = db
     .prepare(
-      `SELECT u.id, u.full_name, m.bio, m.expertise, m.status
+      `SELECT u.id, m.public_name AS full_name, m.bio, m.expertise, m.status
        FROM mentor_profiles m
        JOIN users u ON u.id = m.user_id
-        WHERE u.status = 'active' AND m.status = 'approved' AND (u.id = ? OR u.full_name = ?)`
+         WHERE u.status = 'active' AND m.status = 'approved' AND m.public_visible = 1 AND m.public_name IS NOT NULL AND (u.id = ? OR m.public_name = ?)`
     )
     .get(req.params.slug, req.params.slug);
   if (!mentor) return res.status(404).json({ error: 'not_found', message: 'Mentor not found.' });
@@ -115,9 +115,10 @@ function projectSlug(project) {
 
 router.get('/projects', (req, res) => {
   const rows = db.prepare(`SELECT p.id, p.title, p.summary, p.capacity, p.status,
-    u.full_name AS supervisor_name,
+    m.public_name AS supervisor_name,
     (SELECT COUNT(*) FROM project_applications pa WHERE pa.project_id = p.id AND pa.state = 'accepted') AS team_size
-    FROM projects p LEFT JOIN users u ON u.id = p.supervisor_id
+    FROM projects p LEFT JOIN users u ON u.id = p.supervisor_id AND u.status='active'
+    LEFT JOIN mentor_profiles m ON m.user_id=u.id AND m.status='approved' AND m.public_visible=1
     WHERE p.status = 'open' ORDER BY p.created_at DESC`).all();
   res.json(rows.map((project) => ({ ...project, slug: projectSlug(project) })));
 });
@@ -126,9 +127,10 @@ router.get('/projects/:slug', (req, res) => {
   const id = Number(String(req.params.slug).split('-')[0]);
   if (!Number.isSafeInteger(id) || id < 1) return res.status(404).json({ error: 'not_found' });
   const project = db.prepare(`SELECT p.id, p.title, p.summary, p.capacity, p.status,
-    u.full_name AS supervisor_name,
+    m.public_name AS supervisor_name,
     (SELECT COUNT(*) FROM project_applications pa WHERE pa.project_id = p.id AND pa.state = 'accepted') AS team_size
-    FROM projects p LEFT JOIN users u ON u.id = p.supervisor_id WHERE p.id = ? AND p.status = 'open'`).get(id);
+    FROM projects p LEFT JOIN users u ON u.id = p.supervisor_id AND u.status='active'
+    LEFT JOIN mentor_profiles m ON m.user_id=u.id AND m.status='approved' AND m.public_visible=1 WHERE p.id = ? AND p.status = 'open'`).get(id);
   if (!project || (req.params.slug !== String(id) && req.params.slug !== projectSlug(project))) {
     return res.status(404).json({ error: 'not_found' });
   }
@@ -207,7 +209,7 @@ router.get('/stats', (req, res) => {
   const programs = db.prepare("SELECT COUNT(*) AS c FROM programs WHERE status = 'published'").get().c;
   const cohorts = db.prepare("SELECT COUNT(*) AS c FROM cohorts WHERE status = 'open'").get().c;
   const enrollments = db.prepare("SELECT COUNT(*) AS c FROM enrollments WHERE state = 'active'").get().c;
-  const mentors = db.prepare("SELECT COUNT(*) AS c FROM mentor_profiles WHERE status = 'approved'").get().c;
+  const mentors = db.prepare("SELECT COUNT(*) AS c FROM mentor_profiles m JOIN users u ON u.id=m.user_id WHERE m.status='approved' AND m.public_visible=1 AND u.status='active'").get().c;
   res.json({ programs, cohorts, enrollments, mentors });
 });
 

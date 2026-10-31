@@ -58,7 +58,7 @@ export function parsePlanner(value: unknown): PlannerData {
 }
 
 export async function plannerRequest(path = '', init: RequestInit = {}): Promise<unknown> {
-  const response = await fetch(`/api/scholarships${path}`, {
+  const response = await appFetch(`/api/scholarships${path}`, {
     ...init, credentials: 'include', cache: 'no-store', headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
   });
   const body: unknown = await response.json();
@@ -68,3 +68,4 @@ export async function plannerRequest(path = '', init: RequestInit = {}): Promise
   }
   return body;
 }
+import { appFetch } from '../../lib/readOnlyPreview';

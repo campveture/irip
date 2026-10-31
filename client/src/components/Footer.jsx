@@ -1,15 +1,19 @@
 import { Link } from 'react-router-dom';
-import { ShieldCheck, GraduationCap } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
+import { READ_ONLY_PREVIEW } from '../lib/readOnlyPreview';
+import { AcademyMark } from './shared/AcademyMark';
+import { DemoDisclosure } from './shared/DemoNotice';
+import { ReadOnlyPreviewNotice } from './shared/ReadOnlyPreview';
 
 export function Footer() {
   return (
     <footer className="border-t border-brand-800 bg-brand-900 text-white/75 mt-auto">
       <div className="container-page py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-8">
-          <div>
+          <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
-              <GraduationCap className="h-5 w-5 text-brand-300" />
-              <span className="font-semibold text-white">Unknown<span className="text-brand-300">Academy</span></span>
+              <AcademyMark className="h-9 w-9 shrink-0" />
+              <span className="text-sm font-semibold text-white">Unknown<span className="text-brand-300">Academy</span></span>
             </div>
             <p className="text-sm text-slate-400 max-w-xs">
               Structured theory courses with supervised practical research projects for learners in Bangladesh.
@@ -23,6 +27,7 @@ export function Footer() {
                <li><Link to="/student-value" className="hover:text-white">Student value proposals</Link></li>
               <li><Link to="/projects" className="hover:text-white">Projects</Link></li>
               <li><Link to="/mentors" className="hover:text-white">Mentors</Link></li>
+              <li><Link to={READ_ONLY_PREVIEW ? '/teach' : '/teach/apply'} className="font-semibold text-brand-100 hover:text-white">{READ_ONLY_PREVIEW ? 'Mentor application info' : 'Apply as a mentor'}</Link></li>
               <li><Link to="/about" className="hover:text-white">About</Link></li>
               <li><Link to="/demo-guide" className="hover:text-white">Validate the demo</Link></li>
             </ul>
@@ -52,7 +57,8 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-white/15 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/60">
+        <div className="mb-6 max-w-4xl space-y-2 text-brand-100"><DemoDisclosure />{READ_ONLY_PREVIEW && <ReadOnlyPreviewNotice />}</div>
+        <div className="border-t border-white/15 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/75">
           <span>Unknown Academy. Local prototype guided by the 28-sheet workbook.</span>
           <span>P0 launch essentials · No unverified commercial claims.</span>
         </div>

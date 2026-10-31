@@ -91,7 +91,7 @@ test('mobile navigation closes on selection; portal choices follow the signed-in
   await expect(page.getByRole('button', { name: 'Portal', exact: true })).toBeFocused();
 });
 
-test('header is opaque on desktop and mobile; sheets and catalog remain within the viewport', async ({ page }, testInfo) => {
+test('header uses bounded frosted glass with a clear surround; sheets and catalog remain within the viewport', async ({ page }, testInfo) => {
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 1000 });
     await page.goto('/programs');
@@ -100,7 +100,8 @@ test('header is opaque on desktop and mobile; sheets and catalog remain within t
       const style = getComputedStyle(element);
       return { background: style.backgroundColor, backdrop: style.backdropFilter };
     });
-    expect(headerStyle).toEqual({ background: 'rgb(250, 249, 246)', backdrop: 'none' });
+    expect(headerStyle).toEqual({ background: 'rgba(0, 0, 0, 0)', backdrop: 'none' });
+    expect(await page.locator('.academy-header-frame').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgba(245, 243, 237, 0.92)');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.locator('img').evaluateAll(images => Promise.all(images.map(image => {
       if (!(image instanceof HTMLImageElement)) throw new Error('Expected an image element.');

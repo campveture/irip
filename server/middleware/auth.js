@@ -8,7 +8,11 @@ const { db } = require('../db');
 const ROLES = ['learner', 'mentor', 'supervisor', 'academic_ops', 'finance', 'support', 'admin', 'owner'];
 
 function getRolesForUser(userId) {
-  const rows = db.prepare('SELECT role FROM role_grants WHERE user_id = ? AND (expiry IS NULL OR expiry > datetime(\'now\'))').all(userId);
+  const rows = db.prepare(`SELECT DISTINCT g.role FROM role_grants g JOIN users u ON u.id = g.user_id
+    WHERE g.user_id = ? AND u.status = 'active' AND g.scope = 'global'
+    AND (g.expiry IS NULL OR julianday(g.expiry) > julianday('now'))
+    AND (g.role NOT IN ('mentor','supervisor') OR EXISTS
+      (SELECT 1 FROM mentor_profiles m WHERE m.user_id = g.user_id AND m.status = 'approved'))`).all(userId);
   return rows.map((r) => r.role);
 }
 

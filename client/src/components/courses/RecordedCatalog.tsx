@@ -30,5 +30,5 @@ export default function RecordedCatalog({ library = false }: { library?: boolean
       </>}
     </div>
   </>;
-  return library ? <div className="mx-auto max-w-6xl">{content}</div> : <main>{content}</main>;
+  return library ? <div className="mx-auto max-w-6xl">{content}</div> : <main data-header-surface="deep-forest">{content}</main>;
 }

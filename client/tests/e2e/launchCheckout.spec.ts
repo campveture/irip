@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { apiHeaders } from './http';
 
 test('two launch intakes have distinct prices, deadlines and enrol links to first-installment-only demo checkout', async ({ page }, info) => {
   await page.goto('/programs/research-bootcamp#pricing');
@@ -27,7 +28,7 @@ test('checkout ignores URL amounts/paid flags and rejects old or invented intake
   await page.goto('/enrol/research-bootcamp/2027-01?amount=1&paid=true&discount=25000');
   await expect(page.getByRole('region', { name: 'First installment preview' })).toContainText('BDT 7,000');
   await expect(page.getByRole('button', { name: 'Payment gateway not connected' })).toBeDisabled();
-  const response = await request.post('/api/enrollment/launch-checkout', { data: { amount: 1, paid: true, cohort: 'research-bootcamp-2027-01' } });
+  const response = await request.post('/api/enrollment/launch-checkout', { headers: apiHeaders, data: { amount: 1, paid: true, cohort: 'research-bootcamp-2027-01' } });
   expect(response.status()).toBe(501);
   await page.goto('/enrol/research-bootcamp/2026-11');
   await expect(page.getByRole('alert')).toContainText('no longer in the enrollment window');

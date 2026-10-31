@@ -22,7 +22,7 @@ export default function PublicProjectDetail() {
     return () => { active = false; };
   }, [id]);
 
-  return <main className="bg-[#faf9f6]">
+  return <main className="bg-canvas">
     <div className="container-page py-8"><Link to="/projects" className="inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:underline"><ArrowLeft size={16} /> All projects</Link></div>
     {loading ? <div role="status" className="container-page pb-20"><span className="sr-only">Loading project</span><div className="h-72 rounded-2xl skeleton" /></div> : error ? <div className="container-page pb-20"><Alert type="error">{error}</Alert><Link to="/projects" className="mt-5 inline-flex text-sm font-semibold text-brand-700 hover:underline">Back to projects</Link></div> : project && <>
       <section className="bg-brand-900 text-white"><div className="container-page grid gap-8 py-14 sm:py-20 lg:grid-cols-[1fr_.5fr] lg:items-center"><div><p className="eyebrow !text-brand-300">Practical research / Proposed project</p><h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-[-.04em] sm:text-5xl">{project.title}</h1><p className="mt-5 max-w-2xl text-base leading-7 text-white/75">An open project outline from the local demo. Explore its focus and the proposed supervision context below.</p></div><figure className="overflow-hidden rounded-2xl border border-white/20"><img src={projectImage(project)} alt="" width="1200" height="800" className="aspect-[4/3] w-full object-cover" /><figcaption className="bg-brand-800 px-4 py-3 text-xs text-white/75">Stock topic image / Not project results</figcaption></figure></div></section>

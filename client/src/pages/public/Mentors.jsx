@@ -4,6 +4,7 @@ import { ArrowRight, ArrowUpRight, BookOpen, Search, X } from 'lucide-react';
 import { api } from '../../lib/api';
 import { Alert } from '../../components/Alert';
 import { demoImages } from '../../lib/demoImages';
+import { READ_ONLY_PREVIEW } from '../../lib/readOnlyPreview';
 
 export default function Mentors() {
   const [mentors, setMentors] = useState([]);
@@ -25,11 +26,11 @@ export default function Mentors() {
     return term ? mentors.filter(m => [m.full_name, m.expertise, m.bio].some(v => String(v || '').toLocaleLowerCase().includes(term))) : mentors;
   }, [mentors, query]);
 
-  return <main className="bg-[#faf9f6]">
-    <section className="relative overflow-hidden bg-brand-900 text-white">
+  return <main className="bg-canvas">
+    <section data-header-surface="forest" className="relative overflow-hidden bg-brand-900 text-white">
       <div aria-hidden="true" className="absolute -right-24 -top-44 h-[32rem] w-[32rem] rounded-full border border-white/10" />
       <div className="container-page relative grid gap-8 py-16 sm:py-20 lg:grid-cols-[1fr_.65fr] lg:items-end">
-        <div className="max-w-3xl"><p className="eyebrow !text-brand-300">People / Guidance</p><h1 className="mt-5 text-4xl font-semibold tracking-[-.04em] sm:text-6xl">Good questions grow <span className="text-brand-300">with good guidance.</span></h1><p className="mt-5 max-w-2xl text-base leading-7 text-white/75">Meet the approved profiles in this synthetic demo directory and learn what each mentor works on. Credentials and agreements still need verification for a real launch.</p><Link to="/teach" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-brand-200 hover:text-white">Interested in mentoring? <ArrowRight size={17} /></Link></div>
+        <div className="max-w-3xl"><p className="eyebrow !text-brand-300">People / Guidance</p><h1 className="mt-5 text-4xl font-semibold tracking-[-.04em] sm:text-6xl">Good questions grow <span className="text-brand-300">with good guidance.</span></h1><p className="mt-5 max-w-2xl text-base leading-7 text-white/75">Meet the approved profiles in this synthetic demo directory and learn what each mentor works on. Credentials and agreements still need verification for a real launch.</p><Link to={READ_ONLY_PREVIEW ? '/teach' : '/teach/apply'} className="mt-8 inline-flex min-h-12 items-center gap-2 rounded-full bg-brand-100 px-6 text-sm font-semibold text-brand-950 hover:bg-white">{READ_ONLY_PREVIEW ? 'Mentor application info' : 'Apply as a mentor'} <ArrowRight size={17} /></Link><p className="mt-3 text-xs text-brand-200">Application first. No signup or password required.</p></div>
         <figure className="overflow-hidden rounded-2xl border border-white/20 bg-brand-800"><img src={demoImages.study} alt="" width="1000" height="667" className="aspect-[4/3] w-full object-cover" /><figcaption className="px-4 py-3 text-xs text-white/75">A fresh perspective helps. / Stock guidance scene</figcaption></figure>
       </div>
     </section>
@@ -40,7 +41,7 @@ export default function Mentors() {
       {error && <Alert type="error">{error}</Alert>}
       {loading ? <div role="status" className="grid gap-5 md:grid-cols-2"><span className="sr-only">Loading mentors</span>{[0, 1].map(n => <div key={n} className="h-72 rounded-2xl skeleton" />)}</div> : !error && visible.length ? <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {visible.map(mentor => <Link key={mentor.id} to={`/mentors/${mentor.id}`} className="group flex min-h-80 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-200 hover:-translate-y-1 hover:border-brand-300 hover:shadow-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-700">
-          <div className="relative overflow-hidden bg-[#e5d6c6]"><img src={demoImages.portrait} alt="" width="800" height="1198" loading="lazy" className="aspect-[4/3] w-full object-cover object-[center_25%] transition duration-500 group-hover:scale-[1.03]" /><span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-3 py-1 text-xs font-medium text-brand-900">Stock model / Demo portrait</span></div>
+          <div className="relative overflow-hidden bg-linen"><img src={demoImages.portrait} alt="" width="800" height="1198" loading="lazy" className="aspect-[4/3] w-full object-cover object-[center_25%] transition duration-500 group-hover:scale-[1.03]" /><span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-3 py-1 text-xs font-medium text-brand-900">Stock model / Demo portrait</span></div>
           <div className="flex flex-1 flex-col p-6"><p className="text-xs font-semibold uppercase tracking-widest text-brand-700">Research mentor · Demo profile</p>
           <h3 className="mt-2 text-2xl font-semibold tracking-tight text-brand-900 group-hover:text-brand-700">{mentor.full_name}</h3>
           <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">{mentor.bio || 'Profile details are being prepared.'}</p>

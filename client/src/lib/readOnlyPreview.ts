@@ -11,7 +11,11 @@ async function publicSnapshot(): Promise<Record<string, unknown>> {
 }
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 export async function appFetch(path: string, init: RequestInit = {}): Promise<Response> {
-  if (!READ_ONLY_PREVIEW) return fetch(path, init);
+  if (!READ_ONLY_PREVIEW) {
+    const headers = new Headers(init.headers);
+    if (path.startsWith('/api/') && !['GET','HEAD','OPTIONS'].includes((init.method ?? 'GET').toUpperCase())) headers.set('X-UA-Request', '1');
+    return fetch(path, { ...init, headers });
+  }
   if (init.signal?.aborted) throw new DOMException('Request aborted.', 'AbortError');
   if ((init.method || 'GET').toUpperCase() !== 'GET') return json({ message: 'This hosted demo is read-only. No submission was sent or saved.' }, 405);
   const url = new URL(path, window.location.origin);

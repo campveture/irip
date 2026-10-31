@@ -8,7 +8,7 @@
     "dev": "node --preserve-symlinks --preserve-symlinks-main server.js",
     "start": "node --preserve-symlinks --preserve-symlinks-main server.js",
     "seed": "node --preserve-symlinks --preserve-symlinks-main seed.js",
-    "test": "node --preserve-symlinks --preserve-symlinks-main test-demo.js && node --preserve-symlinks --preserve-symlinks-main test-expansion.js && node --preserve-symlinks --preserve-symlinks-main test-admin-workspaces.js && node --preserve-symlinks --preserve-symlinks-main test-scholarships.js && node --preserve-symlinks --preserve-symlinks-main test-recorded-courses.js && node --preserve-symlinks --preserve-symlinks-main test-growth.js && node --preserve-symlinks --preserve-symlinks-main test-program-planning.js"
+    "test": "node --preserve-symlinks --preserve-symlinks-main test-demo.js && node --preserve-symlinks --preserve-symlinks-main test-expansion.js && node --preserve-symlinks --preserve-symlinks-main test-admin-workspaces.js && node --preserve-symlinks --preserve-symlinks-main test-scholarships.js && node --preserve-symlinks --preserve-symlinks-main test-recorded-courses.js && node --preserve-symlinks --preserve-symlinks-main test-growth.js && node --preserve-symlinks --preserve-symlinks-main test-program-planning.js && node --preserve-symlinks --preserve-symlinks-main test-profiles.js && node --preserve-symlinks --preserve-symlinks-main test-mentor-applications.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.0.0",

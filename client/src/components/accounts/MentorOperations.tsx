@@ -1,0 +1,67 @@
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { api } from '../../lib/api';
+import { useAuth } from '../../contexts/AuthContext';
+import { actionClass, secondaryClass, fieldClass, parseQueue, parseReview } from './accountModel';
+import { errorMessage, useAccountResource } from './useAccountResource';
+import { parseIntakeQueue } from './mentorIntakeModel';
+import { MentorIntakeCards } from './MentorIntakeOperations';
+
+export function MentorQueue({ approvals = false }: { approvals?: boolean }) {
+  const [query, setQuery] = useState(''), [search, setSearch] = useState('');
+  const { state, reload } = useAccountResource(`/accounts/operations/mentors?search=${encodeURIComponent(search)}`, parseQueue);
+  const intake = useAccountResource(`/accounts/operations/mentor-intake?search=${encodeURIComponent(search)}`, parseIntakeQueue);
+  return <section className="mx-auto max-w-6xl space-y-6">
+    <header className="rounded-2xl bg-brand-900 p-6 text-white"><p className="text-xs uppercase tracking-widest text-brand-200">Operations / Accounts and approvals</p><h1 className="mt-3 text-2xl font-semibold">{approvals ? 'Approval queue' : 'Mentor operations'}</h1><p className="mt-3 text-sm leading-6 text-brand-100">Review submitted mentor revisions, keep publication separate from access, and record every decision. This first queue covers mentor profiles only; other operational approvals remain in their own modules.</p></header>
+    <form onSubmit={event => { event.preventDefault(); setSearch(query); }} className="flex flex-wrap items-end gap-3"><div className="min-w-0 flex-1"><label htmlFor="mentor-search" className="text-sm font-semibold">Search name or email</label><input id="mentor-search" maxLength={120} value={query} onChange={e => setQuery(e.target.value)} className={fieldClass} /></div><button className={actionClass}>Search mentors</button><button type="button" onClick={() => { reload(); intake.reload(); }} className={secondaryClass}>Refresh queue</button></form>
+    <MentorIntakeCards state={intake.state} approvals={approvals} reload={intake.reload} />
+    <h2 className="text-xl font-semibold text-brand-950">Member profile revisions</h2>
+    {state.status === 'loading' && <p role="status">Loading mentor queue…</p>}
+    {state.status === 'error' && <div><p role="alert">{state.message}</p><button onClick={reload} className={secondaryClass}>Retry queue</button></div>}
+    {state.status === 'ready' && <><p className="text-sm text-slate-600">{state.data.pending} pending submissions · Up to {state.data.limit} matching records shown. {approvals && <Link to="/admin/mentors" className="font-semibold text-brand-800 underline">View all mentors</Link>}</p><div className="grid gap-4 lg:grid-cols-2">{state.data.mentors.filter(row => !approvals || row.application_state === 'pending').map(row => <article key={row.id} className="rounded-2xl border border-brand-100 bg-white p-5"><h2 className="text-lg font-semibold text-brand-950">{row.full_name}</h2><p className="mt-1 break-all text-sm text-slate-500">{row.email}</p><dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2"><div><dt className="text-xs text-slate-500">Latest application</dt><dd className="capitalize">{row.application_state?.replaceAll('_',' ') ?? 'Legacy approved profile'}</dd></div><div><dt className="text-xs text-slate-500">Mentor status / public listing</dt><dd>{row.mentor_status ?? 'Not approved'} / {row.mentor_status === 'approved' && row.public_visible ? 'Visible' : 'Hidden'}</dd></div></dl><Link to={`/admin/mentors/${row.id}`} className={`${secondaryClass} mt-5`}>Review {row.full_name}</Link></article>)}</div>{!state.data.mentors.some(row => !approvals || row.application_state === 'pending') && <p className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600">No matching mentor records.</p>}</>}
+  </section>;
+}
+
+export function MentorReview() {
+  const { id } = useParams();
+  const { user, roles } = useAuth();
+  const { state, setState, reload } = useAccountResource(`/accounts/operations/mentors/${encodeURIComponent(id ?? '')}`, parseReview);
+  const [decision, setDecision] = useState('changes_requested'), [reason, setReason] = useState(''), [verification, setVerification] = useState('');
+  const [grant, setGrant] = useState(false), [publish, setPublish] = useState(false), [busy, setBusy] = useState(false), [error, setError] = useState(''), [message, setMessage] = useState('');
+  const currentId = useRef(id); currentId.current = id;
+  useEffect(() => { setDecision('changes_requested'); setReason(''); setVerification(''); setGrant(false); setPublish(false); setError(''); setMessage(''); setBusy(false); }, [id]);
+  const canGrant = roles.some((role: string) => ['admin','owner'].includes(role));
+  async function act(action: 'decision' | 'suspend' | 'hide') {
+    if (state.status !== 'ready' || busy) return;
+    const data = state.data; setBusy(true); setError(''); setMessage('');
+    try {
+      const payload = action === 'decision' ? { application_id: data.application?.id, version: data.application?.version, decision, reason, verification_note: verification, grant_access: decision === 'approved' && grant, publish: decision === 'approved' && publish } : { version: data.approved_profile?.revision, action, reason };
+      const result: unknown = await api.post(`/accounts/operations/mentors/${data.user.id}/${action === 'decision' ? 'decision' : 'moderation'}`, payload);
+      if (currentId.current !== String(data.user.id)) return;
+      setState({ status: 'ready', data: parseReview(result) }); setReason(''); setVerification(''); setGrant(false); setPublish(false); setMessage('Decision saved. Public visibility and permissions now reflect this action.');
+    } catch (error) { if (currentId.current === String(data.user.id)) setError(errorMessage(error)); } finally { if (currentId.current === String(data.user.id)) setBusy(false); }
+  }
+  function submit(event: FormEvent) { event.preventDefault(); void act('decision'); }
+  if (state.status === 'loading') return <p role="status">Loading mentor review…</p>;
+  if (state.status === 'error') return <section><p role="alert">{state.message}</p><button className={secondaryClass} onClick={reload}>Retry review</button></section>;
+  const { application: application, approved_profile: approved, history, user: applicant } = state.data;
+  const self = user?.id === applicant.id;
+  return <section className="mx-auto max-w-4xl space-y-6">
+    <Link to="/admin/approvals" className="text-sm font-semibold text-brand-800 underline">Back to approval queue</Link>
+    <header><h1 className="mt-3 text-2xl font-semibold text-brand-950">Review mentor application</h1><p className="mt-2 text-sm text-slate-600">{applicant.full_name} · {applicant.email} · Account {applicant.account_status}</p></header>
+    {self && <p role="status" className="rounded-xl bg-amber-50 p-4 text-sm text-amber-950">You cannot approve or moderate your own mentor profile.</p>}
+    {error && <div className="rounded-xl bg-red-50 p-4"><p role="alert" className="text-sm text-red-900">{error}</p><button onClick={() => { setError(''); reload(); }} className="mt-2 text-sm font-semibold underline">Reload current revision</button></div>}
+    {message && <p role="status" className="rounded-xl bg-brand-50 p-4 text-sm text-brand-900">{message}</p>}
+    <section aria-label="Submitted mentor revision" className="rounded-2xl border border-brand-100 bg-white p-5 sm:p-7"><h2 className="text-lg font-semibold">Latest application: {application?.state.replaceAll('_',' ') ?? 'Legacy profile only'}</h2>{application ? <><p className="mt-2 text-xs text-slate-500">Revision {application.revision} · Public listing consent: {application.public_consent ? 'Yes' : 'No'}</p><dl className="mt-5 space-y-4">{([['public_name','Public display name'],['bio','Public biography'],['expertise','Areas of expertise'],['experience','Private experience and evidence'],['availability','Private availability'],['language','Teaching language']] as const).map(([key,label]) => <div key={key}><dt className="text-xs font-semibold text-slate-500">{label}</dt><dd className="mt-1 whitespace-pre-wrap break-words text-sm leading-6">{application[key]}</dd></div>)}</dl></> : <p className="mt-3 text-sm text-slate-600">This existing synthetic profile has no new application revision. Do not invent verification evidence.</p>}</section>
+    {application?.state === 'pending' && <form onSubmit={submit} className="rounded-2xl border border-brand-100 bg-white p-5 sm:p-7"><fieldset disabled={busy || self || applicant.account_status !== 'active'} className="space-y-5"><legend className="text-lg font-semibold">Review decision</legend><div><label htmlFor="review-decision" className="text-sm font-semibold">Decision</label><select id="review-decision" value={decision} onChange={e => setDecision(e.target.value)} className={fieldClass}><option value="changes_requested">Request changes</option><option value="approved">Approve revision</option><option value="rejected">Reject application</option></select></div><div><label htmlFor="review-reason" className="text-sm font-semibold">Reason shared with applicant</label><textarea id="review-reason" required minLength={10} maxLength={1500} rows={3} value={reason} onChange={e => setReason(e.target.value)} className={fieldClass} /></div>
+      {decision === 'approved' && <>
+        <div><label htmlFor="review-verification" className="text-sm font-semibold">Private verification note</label><textarea id="review-verification" required minLength={15} maxLength={2000} rows={3} value={verification} onChange={e => setVerification(e.target.value)} className={fieldClass} /><p className="mt-2 text-xs leading-5 text-slate-500">Record what was checked and the permitted teaching scope. Do not paste identity documents or secrets. This note is not shared with the applicant or public.</p></div>
+        <label className="flex items-start gap-3 text-sm"><input type="checkbox" disabled={!canGrant} checked={grant} onChange={e => setGrant(e.target.checked)} className="h-5 w-5 shrink-0 accent-brand-800" />Grant mentor workspace access. Only admin/owner can grant this; no learner, cohort or project assignment is created. Existing active access is preserved unless separately suspended.</label>
+        <label className="flex items-start gap-3 text-sm"><input type="checkbox" disabled={!application.public_consent} checked={publish} onChange={e => setPublish(e.target.checked)} className="h-5 w-5 shrink-0 accent-brand-800" />Publish this exact display name, biography and expertise. Requires applicant consent.</label>
+      </>}
+      <button disabled={busy || self} className={actionClass}>{busy ? 'Saving decision…' : 'Save review decision'}</button>
+    </fieldset></form>}
+    {approved && <section aria-label="Approved mentor profile" className="rounded-2xl border border-brand-100 bg-white p-5 sm:p-7"><h2 className="text-lg font-semibold">Approved public version</h2><p className="mt-3 text-sm">{approved.public_name} · {approved.status} · {approved.status === 'approved' && approved.public_visible ? 'Visible' : 'Hidden'}</p><p className="mt-3 whitespace-pre-wrap text-sm text-slate-600">{approved.bio}</p>{approved.status === 'approved' && <fieldset disabled={busy || self} className="mt-5 space-y-4"><div><label htmlFor="moderation-reason" className="text-sm font-semibold">Moderation reason shared with mentor</label><textarea id="moderation-reason" minLength={10} maxLength={1500} rows={3} value={reason} onChange={e => setReason(e.target.value)} className={fieldClass} /></div><div className="flex flex-wrap gap-3"><button type="button" disabled={busy || self || reason.trim().length < 10} onClick={() => void act('hide')} className={secondaryClass}>Hide public listing</button><button type="button" disabled={busy || self || reason.trim().length < 10} onClick={() => void act('suspend')} className={secondaryClass}>Suspend mentor access</button></div><p className="text-xs leading-5 text-slate-500">Hiding preserves mentor access. Suspension hides the listing and revokes mentoring grants immediately. Restoring requires a new reviewed revision.</p></fieldset>}</section>}
+    <section aria-label="Mentor review audit history" className="rounded-2xl border border-brand-100 bg-white p-5 sm:p-7"><h2 className="text-lg font-semibold">Decision history</h2>{history.length ? <ol className="mt-4 space-y-4">{history.map(row => <li key={row.id} className="rounded-xl bg-slate-50 p-4"><p className="text-sm font-semibold">{row.decision.replaceAll('_',' ')} · {row.reviewer_name}</p><p className="mt-2 whitespace-pre-wrap break-words text-sm text-slate-600">{row.reason}</p>{row.verification_note && <p className="mt-2 whitespace-pre-wrap break-words text-xs text-slate-500">Private verification: {row.verification_note}</p>}<time dateTime={row.created_at} className="mt-2 block text-xs text-slate-500">{new Date(row.created_at).toLocaleString('en-GB',{ timeZone: 'Asia/Dhaka' })} Bangladesh time</time></li>)}</ol> : <p className="mt-3 text-sm text-slate-500">No recorded decisions in this workflow.</p>}</section>
+  </section>;
+}

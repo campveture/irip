@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Card, CardContent } from '../../components/Card';
-import { demoImages } from '../../lib/demoImages';
+import { ResearchHero } from '../../components/shared/ResearchHero';
 
 export default function Teach() {
   return (
@@ -13,7 +13,7 @@ export default function Teach() {
         </div>
         <Link to="/" className="text-sm text-slate-600 hover:text-brand-600">← Back to home</Link>
       </div>
-      <figure className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white"><img src={demoImages.study} alt="" width="1000" height="667" className="aspect-[2/1] w-full object-cover" /><figcaption className="px-4 py-2 text-xs text-slate-500">Share what you know. / Stock guidance scene</figcaption></figure>
+      <section className="mb-8 grid items-center gap-8 rounded-2xl bg-brand-950 p-5 text-white sm:p-9 lg:grid-cols-2"><div><p className="text-xs font-semibold uppercase tracking-widest text-brand-200">For the people who ask one more question</p><h2 className="mt-5 text-3xl font-semibold leading-tight sm:text-4xl">Don’t just teach the answer.<br /><span className="text-brand-200">Debug the thinking.</span></h2><p className="mt-5 text-sm leading-7 text-white/75">Help a learner spot the confounder, challenge the convenient result and explain why their method works. Bring your expertise. Keep your intellectual humility.</p><Link to="/teach/apply" className="mt-6 inline-flex min-h-11 items-center rounded-full bg-brand-100 px-5 text-sm font-semibold text-brand-950">Apply as a mentor</Link></div><ResearchHero variant="overfit" /></section>
 
       <Card className="mb-8">
         <CardContent className="p-6">
@@ -47,14 +47,14 @@ export default function Teach() {
             <li>Experience in research or a related technical field.</li>
             <li>Ability to commit to weekly teaching or supervision sessions during the bootcamp term.</li>
             <li>Willingness to provide written feedback on learner milestones and final projects.</li>
-            <li>Account on Unknown Academy (sign up if you do not have one).</li>
+             <li>A completed mentor application. No account is needed to apply.</li>
           </ul>
           <h2 className="text-lg font-semibold text-slate-900 mb-3">What supervision includes</h2>
           <ul className="list-disc list-inside text-slate-600 space-y-2">
             <li>Matching with learner teams and weekly check-ins.</li>
             <li>Reviewing milestone submissions and assigning pass/resubmit outcomes.</li>
             <li>Co-assessing final assessed projects with the academic panel.</li>
-            <li>Earning a session rate per approved supervision hour (see your application for details).</li>
+             <li>Compensation, if any, requires a separately approved agreement. No payouts are connected.</li>
           </ul>
         </CardContent>
       </Card>
@@ -64,13 +64,13 @@ export default function Teach() {
           <h2 className="text-lg font-semibold text-slate-900 mb-3">Apply</h2>
           <p className="text-slate-600 mb-4">
             Submit a mentor/supervisor application to get started. Applications are reviewed by the academic
-            operations team and, once approved, you can list availability and take on learners.
+             operations team. Mentor access, public listing and learner assignments require separate approval.
           </p>
           <Link to="/teach/apply">
-            <Button>Apply to teach</Button>
+            <Button>Apply as a mentor</Button>
           </Link>
           <p className="text-xs text-slate-500 mt-3">
-            The application page is sign-in protected — you will be asked to log in if you are not already.
+             Share your qualifications, experience and mentoring approach. No signup or password is required. Account onboarding follows only after review and identity verification.
           </p>
         </CardContent>
       </Card>

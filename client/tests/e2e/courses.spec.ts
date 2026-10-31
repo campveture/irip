@@ -1,8 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
+import { apiHeaders } from './http';
 import { DEMO_DISCLAIMER } from '../../src/components/shared/compliance';
 
 async function signIn(page: Page, account: 'mentor' | 'learner' | 'admin') {
-  const response = await page.request.post('/api/auth/login', { data: { email: `${account}@unknown.academy`, password: 'demo1234' } });
+  const response = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: `${account}@unknown.academy`, password: 'demo1234' } });
   expect(response.ok()).toBe(true);
 }
 
@@ -105,10 +106,10 @@ test('learner sees the membership proposal without gaining playback, authoring a
   await expect(page).toHaveURL(/\/app\/courses$/);
   await expect(page.getByRole('status')).toHaveText('4 courses found');
   await expect(page.getByRole('link', { name: 'Course studio', exact: true })).toHaveCount(0);
-  const subscribe = await page.request.post('/api/recorded-courses/subscribe', { data: { paid: true } });
+  const subscribe = await page.request.post('/api/recorded-courses/subscribe', { headers: apiHeaders, data: { paid: true } });
   expect(subscribe.status()).toBe(501);
   const playback = await page.request.get('/api/recorded-courses/catalog/causal-diagrams/playback');
   expect(playback.status()).toBe(501);
-  const studio = await page.request.post('/api/recorded-courses/studio', { data: {} });
+  const studio = await page.request.post('/api/recorded-courses/studio', { headers: apiHeaders, data: {} });
   expect(studio.status()).toBe(403);
 });

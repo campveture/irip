@@ -23,7 +23,7 @@ import GrowthOperations from './components/growth/GrowthOperations';
 import Mentors from './pages/public/Mentors';
 import MentorDetail from './pages/public/MentorDetail';
 import Teach from './pages/public/Teach';
-import TeachApplication from './pages/public/TeachApplication';
+import TeachApplication from './components/accounts/TeachApplication';
 import About from './pages/public/About';
 import HowItWorks from './pages/public/HowItWorks';
 import FAQ from './pages/public/FAQ';
@@ -39,7 +39,7 @@ import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import Recover from './pages/auth/Recover';
 import AccountLayout from './pages/account/AccountLayout';
-import Profile from './pages/account/Profile';
+import Profile from './components/accounts/AccountProfile';
 import Security from './pages/account/Security';
 import NotificationPreferences from './pages/account/NotificationPreferences';
 import Verify from './pages/account/Verify';
@@ -53,7 +53,6 @@ import DemoCheckout from './components/pricing/DemoCheckout';
 // Student pages
 import StudentDashboard from './pages/student/StudentDashboard';
 import ScholarshipPlanner from './components/scholarships/ScholarshipPlanner';
-import Onboarding from './pages/student/Onboarding';
 import StudentLearning from './pages/student/StudentLearning';
 import EnrollmentDetail from './pages/student/EnrollmentDetail';
 import LessonPlayer from './pages/student/LessonPlayer';
@@ -71,7 +70,7 @@ import Notifications from './pages/student/Notifications';
 
 // Mentor pages
 import MentorDashboard from './pages/mentor/MentorDashboard';
-import MentorApplication from './pages/mentor/MentorApplication';
+import MentorApplication from './components/accounts/MentorApplication';
 import MentorClasses from './pages/mentor/MentorClasses';
 import ClassDetail from './pages/mentor/ClassDetail';
 import MentorGrading from './pages/mentor/MentorGrading';
@@ -97,7 +96,8 @@ import AdminCertificates from './pages/admin/AdminCertificates';
 import AdminReports from './pages/admin/AdminReports';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminAcademics from './pages/admin/AdminAcademics';
-import AdminMentors from './pages/admin/AdminMentors';
+import { MentorQueue as AdminMentors, MentorReview } from './components/accounts/MentorOperations';
+import { MentorIntakeReview } from './components/accounts/MentorIntakeOperations';
 import AdminProjects from './pages/admin/AdminProjects';
 import AdminAutomations from './pages/admin/AdminAutomations';
 
@@ -148,11 +148,13 @@ function RouterApp() {
       {/* Auth */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/signup/mentor" element={<Navigate to="/teach/apply" replace />} />
       <Route path="/recover" element={<Recover />} />
       <Route path="/verify" element={<Verify />} />
       <Route path="/account" element={<ProtectedRoute><AccountLayout /></ProtectedRoute>}>
         <Route index element={<Navigate to="profile" replace />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="mentor-application" element={<MentorApplication />} />
         <Route path="security" element={<Security />} />
         <Route path="notifications" element={<NotificationPreferences />} />
       </Route>
@@ -167,7 +169,7 @@ function RouterApp() {
         }
       >
         <Route index element={<StudentDashboard />} />
-        <Route path="onboarding" element={<Onboarding />} />
+        <Route path="onboarding" element={<Profile />} />
         <Route path="scholarships" element={<ScholarshipPlanner />} />
         <Route path="courses" element={<RecordedCatalog library />} />
         <Route path="opportunities" element={<StudentValueRoadmap portal />} />
@@ -232,7 +234,10 @@ function RouterApp() {
         <Route path="catalog" element={<AdminCatalog />} />
         <Route path="academics" element={<AdminAcademics />} />
         <Route path="learner-success" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><GrowthOperations /></ProtectedRoute>} />
-        <Route path="mentors" element={<AdminMentors />} />
+        <Route path="mentors" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><AdminMentors /></ProtectedRoute>} />
+        <Route path="approvals" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><AdminMentors approvals /></ProtectedRoute>} />
+        <Route path="mentors/:id" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><MentorReview /></ProtectedRoute>} />
+        <Route path="mentor-applications/:id" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><MentorIntakeReview /></ProtectedRoute>} />
         <Route path="projects" element={<AdminProjects />} />
         <Route path="automations" element={<AdminAutomations />} />
         <Route path="content" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><ExpansionCuration /></ProtectedRoute>} />

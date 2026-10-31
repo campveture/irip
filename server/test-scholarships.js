@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict');
+const { testFetch: fetch } = require('./test-http');
 const { spawn } = require('node:child_process');
 const { opportunities } = require('./scholarships/catalog');
 const { validateProfile, validateApplication, matchOpportunity } = require('./scholarships/matcher');

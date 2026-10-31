@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, Compass, Microscope, Search, Users, X } from 'lucide-react';
 import { api } from '../../lib/api';
 import { Alert } from '../../components/Alert';
-import { demoImages, projectImage } from '../../lib/demoImages';
+import { projectImage } from '../../lib/demoImages';
+import { ResearchHero } from '../../components/shared/ResearchHero';
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
@@ -25,17 +26,17 @@ export default function Projects() {
     return term ? projects.filter(p => [p.title, p.summary, p.supervisor_name].some(v => String(v || '').toLocaleLowerCase().includes(term))) : projects;
   }, [projects, query]);
 
-  return <main className="bg-[#faf9f6]">
-    <section className="relative overflow-hidden bg-brand-900 text-white">
+  return <main className="bg-canvas">
+    <section data-header-surface="forest" className="relative overflow-hidden bg-midnight text-white">
       <div aria-hidden="true" className="absolute -right-24 -top-44 h-[32rem] w-[32rem] rounded-full border border-white/10" />
       <div className="container-page relative grid gap-8 py-16 sm:py-20 lg:grid-cols-[1fr_.65fr] lg:items-end">
         <div className="max-w-3xl">
-          <p className="eyebrow !text-brand-300">Research / In practice</p>
+          <p className="eyebrow !text-brand-50">Research / In practice</p>
           <h1 className="mt-5 text-4xl font-semibold tracking-[-.04em] sm:text-6xl">Ideas deserve <span className="text-brand-300">a place to grow.</span></h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-white/75">Explore proposed supervised projects in the local demo. Discover the question, see the assigned supervisor, and find a direction worth pursuing.</p>
-          <Link to="/programs" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-brand-200 hover:text-white">See the learning programs <ArrowRight size={17} /></Link>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/90">Explore proposed supervised projects in the local demo. Discover the question, see the assigned supervisor, and find a direction worth pursuing.</p>
+          <Link to="/programs" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-brand-50 hover:text-white">See the learning programs <ArrowRight size={17} /></Link>
         </div>
-        <figure className="overflow-hidden rounded-2xl border border-white/20 bg-brand-800"><img src={demoImages.data} alt="" width="1200" height="800" className="aspect-[4/3] w-full object-cover" /><figcaption className="px-4 py-3 text-xs text-white/75">Finding patterns in data. / Stock analysis scene</figcaption></figure>
+        <ResearchHero variant="simpson" />
       </div>
     </section>
 

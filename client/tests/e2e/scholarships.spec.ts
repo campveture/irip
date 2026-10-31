@@ -1,10 +1,11 @@
 import { test, expect, type Page } from '@playwright/test';
+import { apiHeaders } from './http';
 import { DEMO_DISCLAIMER } from '../../src/components/shared/compliance';
 
 async function signIn(page: Page) {
-  const response = await page.request.post('/api/auth/login', { data: { email: 'learner@unknown.academy', password: 'demo1234' } });
+  const response = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: 'learner@unknown.academy', password: 'demo1234' } });
   expect(response.ok()).toBe(true);
-  expect((await page.request.delete('/api/scholarships/data')).ok()).toBe(true);
+  expect((await page.request.delete('/api/scholarships/data', { headers: apiHeaders })).ok()).toBe(true);
 }
 async function saveProfile(page: Page, destination = 'United Kingdom', level = 'masters') {
   await page.getByRole('navigation', { name: 'Planner sections' }).getByRole('button', { name: 'My profile', exact: true }).click();

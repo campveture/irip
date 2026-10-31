@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict');
+const { testFetch: fetch } = require('./test-http');
 const { spawn } = require('node:child_process');
 process.env.DB_PATH = ':memory:';
 const { validateDraft } = require('./recorded-courses');

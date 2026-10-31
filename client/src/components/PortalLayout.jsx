@@ -2,6 +2,8 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { BookOpen, CalendarDays, LayoutDashboard, Users, Banknote, Award, Headphones, LogOut, GraduationCap, ClipboardCheck, Settings, Bell, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { AcademyMark } from './shared/AcademyMark';
+import { DemoDisclosure } from './shared/DemoNotice';
 
 const menus = {
   app: [
@@ -29,17 +31,18 @@ const menus = {
   ],
   admin: [
     ['Overview', '/admin', LayoutDashboard], ['Modules', '/admin/modules', LayoutDashboard],
-    ['Learners', '/admin/learners', Users], ['Catalog', '/admin/catalog', BookOpen],
+    ['Learners', '/admin/learners', Users, ['academic_ops', 'support', 'admin', 'owner']], ['Catalog', '/admin/catalog', BookOpen, ['academic_ops', 'admin', 'owner']],
+    ['Approval queue', '/admin/approvals', ClipboardCheck, ['academic_ops', 'admin', 'owner']],
     ['Academics', '/admin/academics', BookOpen, ['academic_ops', 'admin', 'owner']],
     ['Learner success', '/admin/learner-success', GraduationCap, ['academic_ops', 'admin', 'owner']],
     ['Mentors', '/admin/mentors', GraduationCap, ['academic_ops', 'admin', 'owner']],
     ['Projects', '/admin/projects', Users, ['academic_ops', 'admin', 'owner']],
     ['Content', '/admin/content', BookOpen, ['academic_ops', 'admin', 'owner']],
     ['Automations', '/admin/automations', Bell, ['admin', 'owner']],
-    ['Cohorts', '/admin/cohorts', CalendarDays], ['Admissions', '/admin/admissions', ClipboardCheck],
-    ['CRM', '/admin/crm', Users], ['Support', '/admin/support', Headphones],
-    ['Finance', '/admin/finance', Banknote], ['Certificates', '/admin/certificates', Award],
-    ['Reports', '/admin/reports', LayoutDashboard], ['Settings', '/admin/settings', Settings],
+    ['Cohorts', '/admin/cohorts', CalendarDays, ['academic_ops', 'admin', 'owner']], ['Admissions', '/admin/admissions', ClipboardCheck, ['academic_ops', 'admin', 'owner']],
+    ['CRM', '/admin/crm', Users, ['academic_ops', 'admin', 'owner']], ['Support', '/admin/support', Headphones, ['support', 'admin', 'owner']],
+    ['Finance', '/admin/finance', Banknote, ['finance', 'admin', 'owner']], ['Certificates', '/admin/certificates', Award, ['academic_ops', 'admin', 'owner']],
+    ['Reports', '/admin/reports', LayoutDashboard, ['academic_ops', 'finance', 'admin', 'owner']], ['Settings', '/admin/settings', Settings, ['admin', 'owner']],
   ],
 };
 
@@ -70,7 +73,7 @@ export function PortalLayout() {
       {/* Mobile top bar */}
       <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:hidden">
         <Link to="/" className="flex items-center gap-2 font-semibold text-brand-900">
-          <GraduationCap size={20} /> Unknown Academy
+          <AcademyMark className="h-8 w-8 shrink-0" /> Unknown Academy
         </Link>
         <button
           onClick={() => setSidebarOpen((v) => !v)}
@@ -84,12 +87,13 @@ export function PortalLayout() {
 
       {/* Sidebar */}
       <aside
+        aria-label="Workspace sidebar"
         className={`${
           sidebarOpen ? 'block' : 'hidden'
-        } w-full shrink-0 border-b border-slate-200 bg-white md:block md:w-60 md:border-b-0 md:border-r`}
+        } w-full shrink-0 border-b border-slate-200 bg-white md:sticky md:top-0 md:block md:h-dvh md:w-60 md:self-start md:overflow-y-auto md:border-b-0 md:border-r`}
       >
         <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 p-4">
-          <Link to="/" className="flex items-center gap-2 font-semibold text-brand-900"><GraduationCap size={22} /> Unknown Academy</Link>
+          <Link to="/" className="flex min-w-0 items-center gap-2 text-sm font-semibold text-brand-900"><AcademyMark className="h-8 w-8 shrink-0" /><span>Unknown Academy</span></Link>
           <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">DEMO</span>
         </div>
         <div className="border-b border-slate-200 p-3 text-sm">
@@ -132,8 +136,9 @@ export function PortalLayout() {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 p-3 sm:p-6">
-        <Outlet />
+      <main className="min-w-0 flex-1">
+        <div className="container-page portal-page py-3 sm:py-6"><Outlet /></div>
+        <div className="container-page pb-6 text-slate-600"><DemoDisclosure /></div>
       </main>
     </div>
   );

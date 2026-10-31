@@ -562,6 +562,7 @@ function initSchema() {
     if (!db.prepare('PRAGMA table_info(cohorts)').all().some(column => column.name === 'enrollment_deadline')) {
       db.exec('ALTER TABLE cohorts ADD COLUMN enrollment_deadline TEXT');
     }
+    require('./profiles/schema').initProfiles(db);
     db.prepare("UPDATE audit_events SET meta = '{\"redacted\":true}' WHERE action IN ('login', 'signup') AND meta LIKE '%password%'").run();
   });
   stmt();
@@ -620,6 +621,7 @@ function seed() {
     grant.run(5, 'mentor', 'global', ts);
     grant.run(5, 'supervisor', 'global', ts);
     upsertMentor.run(5, 'Senior research methods instructor with 10+ years supervising undergraduate and postgraduate research.', 'Research methods, statistics, academic writing', 5000, 'approved', ts);
+    db.prepare('UPDATE mentor_profiles SET public_name = ? WHERE user_id = ?').run('Dr. Ayesha Rahman', 5);
 
     // Learner
     const learner = addUser.run('learner@unknown.academy', pw, 'Rakib Hasan', 'learner', 'active', ts);

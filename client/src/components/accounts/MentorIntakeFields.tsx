@@ -1,0 +1,15 @@
+import { fieldClass } from './accountModel';
+import { intakeLabels, type IntakeFields } from './mentorIntakeModel';
+
+export function MentorIntakeFields({ step, form, update }: { step: number; form: IntakeFields; update: <K extends keyof IntakeFields>(key: K, value: IntakeFields[K]) => void }) {
+  if (step === 0) return <>
+    {(['full_name','email','professional_title'] as const).map(key => <div key={key}><label htmlFor={`apply-${key}`} className="text-sm font-semibold">{intakeLabels.find(([field]) => field === key)?.[1]}</label><input id={`apply-${key}`} required minLength={key === 'email' ? 3 : 2} maxLength={key === 'email' ? 254 : key === 'full_name' ? 120 : 160} type={key === 'email' ? 'email' : 'text'} autoComplete={key === 'full_name' ? 'name' : key === 'email' ? 'email' : 'organization-title'} value={form[key]} onChange={e => update(key,e.target.value)} className={fieldClass} /></div>)}
+    <div><label htmlFor="apply-qualification" className="text-sm font-semibold">Qualifications and relevant training</label><textarea id="apply-qualification" required minLength={10} maxLength={1000} rows={3} value={form.qualification} onChange={e => update('qualification',e.target.value)} className={fieldClass} /></div>
+    <div><label htmlFor="apply-years" className="text-sm font-semibold">Years of relevant experience</label><input id="apply-years" type="number" required min={0} max={60} step={1} value={Number.isNaN(form.experience_years) ? '' : form.experience_years} onChange={e => update('experience_years',e.target.valueAsNumber)} className={fieldClass} /></div>
+    <div><label htmlFor="apply-profile" className="text-sm font-semibold">Professional profile or portfolio link (optional)</label><input id="apply-profile" type="url" pattern="https://.*" maxLength={500} placeholder="https://" value={form.profile_url} onChange={e => update('profile_url',e.target.value)} className={fieldClass} /><p className="mt-2 text-xs text-slate-500">A public professional profile, publication list or portfolio. No private documents or login links.</p></div>
+  </>;
+  return <>
+    {([['expertise','Areas of expertise',3,500,2],['experience','Teaching, mentoring or practical experience',40,3000,5],['availability','Weekly availability and timezone',10,500,2],['motivation','Why mentor here, and how would you guide a struggling learner?',40,2000,5]] as const).map(([key,label,min,max,rows]) => <div key={key}><label htmlFor={`apply-${key}`} className="text-sm font-semibold">{label}</label><textarea id={`apply-${key}`} required minLength={min} maxLength={max} rows={rows} value={form[key]} onChange={e => update(key,e.target.value)} className={fieldClass} /></div>)}
+    <div><label htmlFor="apply-language" className="text-sm font-semibold">Teaching language</label><select id="apply-language" value={form.language} onChange={e => update('language',e.target.value === 'bn' ? 'bn' : e.target.value === 'both' ? 'both' : 'en')} className={fieldClass}><option value="en">English</option><option value="bn">Bangla</option><option value="both">Bangla and English</option></select></div>
+  </>;
+}

@@ -27,7 +27,9 @@ export default function Login() {
       const data = await login(email, password);
       const next = location.state?.from?.pathname;
       const roles = data.roles || [];
-      const fallback = roles.includes('learner') ? '/app' : roles.some(r => ['mentor', 'supervisor'].includes(r)) ? '/mentor' : '/admin';
+      const fallback = roles.includes('learner') ? '/app' : roles.some(r => ['mentor', 'supervisor'].includes(r)) ? '/mentor'
+        : roles.some(r => ['academic_ops', 'finance', 'support', 'admin', 'owner'].includes(r)) ? '/admin'
+        : data.user.role === 'mentor_applicant' ? '/account/mentor-application' : '/account/profile';
       const workspace = typeof next === 'string' ? next.split('/')[1] : '';
       const allowed = workspace === 'app' && roles.some(r => ['learner', 'admin', 'owner'].includes(r))
         || workspace === 'mentor' && roles.some(r => ['mentor', 'supervisor', 'admin', 'owner'].includes(r))
@@ -44,7 +46,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="container-page flex min-h-[70dvh] items-center justify-center py-10">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Welcome back</CardTitle>

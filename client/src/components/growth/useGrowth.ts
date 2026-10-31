@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { appFetch } from '../../lib/readOnlyPreview';
 
 export async function growthRequest(path: string, init: RequestInit = {}): Promise<unknown> {
-  const response = await fetch(`/api/growth${path}`, { ...init, credentials: 'include', cache: 'no-store', headers: { Accept: 'application/json', 'Content-Type': 'application/json' } });
+  const response = await appFetch(`/api/growth${path}`, { ...init, credentials: 'include', cache: 'no-store', headers: { Accept: 'application/json', 'Content-Type': 'application/json' } });
   const value: unknown = await response.json();
   if (!response.ok) throw new Error(value && typeof value === 'object' && 'message' in value && typeof value.message === 'string' ? value.message : `Workspace request failed (${response.status}).`);
   return value;

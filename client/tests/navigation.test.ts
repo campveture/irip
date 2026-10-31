@@ -18,6 +18,7 @@ test('public navigation has no individual dashboard links and includes certifica
   assert.equal(all.some(item => item.to === '/certificates'), true);
   assert.equal(primaryLinks.some(item => item.to === '/courses' && item.label === 'Courses'), true);
   assert.equal(secondaryLinks.some(item => item.to === '/student-value'), true);
+  assert.equal(secondaryLinks.some(item => item.to === '/teach/apply' && item.label === 'Apply as a mentor'), true);
   assert.equal(new Set(all.map(item => item.to)).size, all.length);
 });
 test('compliance text is exact and cannot be silently replaced by a shortened banner', () => {

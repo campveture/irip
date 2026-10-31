@@ -68,12 +68,7 @@ router.get('/onboarding', (req, res) => {
 });
 
 router.post('/onboarding', (req, res) => {
-  const userId = req.session.userId;
-  const { phone, goals, study_plan } = req.body || {};
-  db.prepare(
-    'INSERT OR REPLACE INTO learner_profiles(user_id, phone, goals, study_plan, updated_at) VALUES (?, ?, ?, ?, ?)'
-  ).run(userId, phone || null, goals || null, study_plan ? JSON.stringify(study_plan) : null, new Date().toISOString());
-  res.json({ ok: true });
+  res.status(410).json({ message: 'Use the versioned /api/accounts/profile workflow. No profile was changed.' });
 });
 
 // ---------- Learning ----------

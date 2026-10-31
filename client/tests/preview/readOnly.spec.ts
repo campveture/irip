@@ -6,8 +6,9 @@ test('static preview renders public catalogs and details without calling any run
   const apiRequests: string[] = [];
   page.on('request', request => { if (new URL(request.url()).pathname.startsWith('/api/')) apiRequests.push(request.url()); });
   await page.goto('/programs');
-  await expect(page.getByRole('complementary', { name: 'Hosted read-only preview' })).toBeVisible();
-  await expect(page.getByRole('complementary', { name: 'Local demonstration disclaimer' })).toHaveText(DEMO_DISCLAIMER);
+  await expect(page.locator('header').getByRole('complementary')).toHaveCount(0);
+  await expect(page.locator('footer').getByRole('complementary', { name: 'Hosted read-only preview' })).toBeVisible();
+  await expect(page.locator('footer').getByRole('complementary', { name: 'Local demonstration disclaimer' })).toHaveText(DEMO_DISCLAIMER);
   await expect(page.getByRole('heading', { name: 'Research Methods Bootcamp (3 Months)', exact: true })).toBeVisible();
   await page.goto('/programs/research-bootcamp#curriculum');
   await expect(page.getByRole('heading', { name: 'Research Methods Bootcamp (3 Months)', exact: true })).toBeVisible();
@@ -29,6 +30,11 @@ test('static preview renders public catalogs and details without calling any run
   await page.getByRole('button', { name: 'Explore the detailed curriculum' }).click();
   await page.getByRole('button', { name: 'Expand all courses', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Detailed program curriculum' })).toContainText('Final protocol and feasibility package');
+  const tabs = page.getByRole('tablist', { name: 'Program details' });
+  expect(await tabs.evaluate(element => getComputedStyle(element.parentElement!.parentElement!).position)).toBe('static');
+  const before = await tabs.evaluate(element => element.getBoundingClientRect().top);
+  await page.evaluate(() => window.scrollBy({ top: 220, behavior: 'instant' }));
+  await expect.poll(() => tabs.evaluate((element, previousTop) => Math.round(element.getBoundingClientRect().top - previousTop), before)).toBe(-220);
   await page.goto('/enrol/research-bootcamp/2027-01?amount=1&paid=true');
   await expect(page.getByRole('region', { name: 'First installment preview' })).toContainText('BDT 7,000');
   await expect(page.getByRole('button', { name: 'Payment gateway not connected' })).toBeDisabled();
@@ -48,7 +54,7 @@ test('static preview renders public catalogs and details without calling any run
 });
 
 test('accounts, all portals and submission routes are blocked with no forms or auth cookies', async ({ page }) => {
-  for (const route of ['/login', '/signup', '/account/profile', '/app/growth', '/mentor/feedback', '/admin', '/contact', '/teach/apply', '/certificates', '/ideas/mine', '/ideas/%6dine', '/events/demo/register', '/internships/demo/apply', '/checkout/demo']) {
+  for (const route of ['/login', '/signup', '/signup/mentor', '/account/profile', '/account/mentor-application', '/app/growth', '/mentor/feedback', '/admin', '/admin/approvals', '/admin/mentors/5', '/contact', '/teach/apply', '/certificates', '/ideas/mine', '/ideas/%6dine', '/events/demo/register', '/internships/demo/apply', '/checkout/demo']) {
     await page.goto(route);
     await expect(page.getByRole('heading', { name: 'This demo is read-only.', exact: true })).toBeVisible();
     await expect(page.locator('input,textarea,form')).toHaveCount(0);
@@ -62,9 +68,9 @@ test('hosting rejects writes, exposes only a synthetic allowlist and includes no
   const data = await snapshot.json();
   expect(data.mode).toBe('read_only_synthetic');
   expect(Object.keys(data.routes)).toHaveLength(36);
-  expect(Object.keys(data.routes).some(route => /auth|growth|student|admin|scholarship|studio/.test(route))).toBe(false);
+    expect(Object.keys(data.routes).some(route => /accounts|auth|growth|student|admin|scholarship|studio/.test(route))).toBe(false);
   expect(JSON.stringify(data)).not.toMatch(/"(?:password_hash|email|phone|profile_json|session)"\s*:/);
-  for (const route of ['/api/auth/login', '/api/public/inquiries', '/api/growth/workspace']) {
+  for (const route of ['/api/auth/login', '/api/mentor-applications', '/api/accounts/profile', '/api/accounts/operations/mentors/6/decision', '/api/public/inquiries', '/api/growth/workspace']) {
     const response = await request.post(route, { data: { synthetic: true } });
     expect(response.status()).toBe(405);
   }

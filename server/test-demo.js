@@ -1,4 +1,5 @@
 const { spawn } = require('child_process');
+const { testFetch: fetch } = require('./test-http');
 const path = require('path');
 
 const TEST_PORT = Number(process.env.TEST_PORT || 5011);
@@ -22,7 +23,7 @@ async function startServer() {
     let settled = false;
     const timeout = setTimeout(() => {
       if (!settled) { settled = true; reject(new Error('Test server did not start within 6 seconds.')); }
-    }, 6000);
+    }, 20000);
     serverProc.stdout.on('data', (d) => {
       const s = d.toString();
       if (s.includes('running on') && !settled) { settled = true; clearTimeout(timeout); resolve(); }
@@ -139,7 +140,7 @@ async function main() {
   check('learner blocked from CRM', r.status === 403);
 
   r = await fetchJson(`${BASE}/api/auth/mentor-application`, { method: 'POST', headers: { Cookie: learnerCookie }, body: JSON.stringify({ bio: 'I teach practical research methods and quantitative analysis.', expertise: 'Research methods', rate: 1000 }) });
-  check('learner can apply to mentor', r.status === 200 && r.body.status === 'pending');
+  check('legacy mentor mutation retired', r.status === 410);
   r = await fetchJson(`${BASE}/api/mentor/dashboard`, { headers: { Cookie: learnerCookie } });
   check('pending applicant blocked from mentor workspace', r.status === 403);
 

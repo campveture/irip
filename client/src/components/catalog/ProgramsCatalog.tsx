@@ -18,7 +18,7 @@ export function ProgramsCatalog() {
   const count = catalog.visible.length;
 
   return <main>
-    <section className="overflow-hidden bg-brand-900 text-white">
+    <section data-header-surface="forest" className="overflow-hidden bg-brand-900 text-white">
       <div className="container-page grid grid-cols-1 items-center gap-8 py-12 sm:py-16 lg:grid-cols-[minmax(0,1fr)_340px]">
         <PageHeading inverse eyebrow="Research learning / Demo catalog" title="Find your next research direction." description="Explore proposed programs, compare topics, and see where your curiosity could take you. Choose a domain, a level, or a question to begin." />
         <figure className="overflow-hidden rounded-2xl border border-white/20 bg-brand-800"><img src={demoImages.writing} alt="" width="1200" height="800" className="aspect-[4/3] w-full object-cover" /><figcaption className="px-4 py-3 text-xs text-white/75">Make space for your next idea. / Stock photo</figcaption></figure>

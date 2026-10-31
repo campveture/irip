@@ -42,8 +42,9 @@ function serialize(row) {
     recording_status: 'not_connected' };
 }
 function publicCourses() {
-  return db.prepare(`SELECT c.*, u.full_name AS instructor_name FROM recorded_courses c JOIN users u ON u.id = c.instructor_id
-    WHERE c.state = 'demo_catalog' AND u.status = 'active' ORDER BY c.id`).all().map(serialize);
+  return db.prepare(`SELECT c.*, m.public_name AS instructor_name FROM recorded_courses c JOIN users u ON u.id = c.instructor_id
+    JOIN mentor_profiles m ON m.user_id=u.id
+    WHERE c.state = 'demo_catalog' AND u.status = 'active' AND m.status='approved' AND m.public_visible=1 AND m.public_name IS NOT NULL ORDER BY c.id`).all().map(serialize);
 }
 function seedRecordedCourses() {
   const instructor = db.prepare("SELECT id FROM users WHERE email = 'mentor@unknown.academy' AND status = 'active'").get();

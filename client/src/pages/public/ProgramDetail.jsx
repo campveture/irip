@@ -79,7 +79,8 @@ export default function ProgramDetail() {
     // Anchor the tab row before replacing a taller panel with a shorter one.
     // Otherwise the browser clamps scroll position and the whole page appears to jump.
     if (tabsRef.current) {
-      const top = tabsRef.current.getBoundingClientRect().top + window.scrollY - 72;
+      const headerHeight = document.querySelector('.academy-header > .container-page')?.getBoundingClientRect().height || 0;
+      const top = tabsRef.current.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
       window.scrollTo({ top: Math.max(0, top), behavior: 'instant' });
     }
     setTab(key);
@@ -134,11 +135,13 @@ export default function ProgramDetail() {
         </motion.div>
       </motion.div>
 
-      {/* Sticky tabs */}
-      <div ref={tabsRef} data-scroll-offset className="sticky top-16 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 mb-6 bg-slate-50/90 backdrop-blur border-b border-slate-200">
-        <div role="tablist" aria-label="Program details" className="max-w-7xl mx-auto flex gap-2 overflow-x-auto">
+      {/* Page-level tabs stay in document flow; only global navigation floats. */}
+      <div ref={tabsRef} className="academy-program-navigation mb-6">
+        <div className="academy-program-dock">
+          <span className="academy-program-dock-caption" aria-hidden="true">Program<br /><strong>Field guide</strong></span>
+          <div role="tablist" aria-label="Program details" className="academy-program-tabs">
           {TABS.map((t, index) => (
-            <motion.button
+            <button
               key={t.key}
               type="button"
               role="tab"
@@ -154,15 +157,12 @@ export default function ProgramDetail() {
                 event.currentTarget.parentElement.querySelectorAll('[role="tab"]')[next].focus();
               }}
               onClick={() => selectTab(t.key)}
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.97 }}
-              className={`relative inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                tab === t.key ? 'bg-brand-600 text-white shadow-soft' : 'text-slate-600 hover:bg-white hover:text-brand-600'
-              }`}
+              className="academy-program-tab"
             >
-              <t.icon className="h-4 w-4" /> {t.label}
-            </motion.button>
+              <t.icon className="h-4 w-4" aria-hidden="true" /> {t.label}
+            </button>
           ))}
+          </div>
         </div>
       </div>
 
