@@ -7,18 +7,20 @@ export default {
   theme: {
     extend: {
       colors: {
+        canvas: 'rgb(var(--color-canvas) / <alpha-value>)',
+        surface: 'rgb(var(--color-surface) / <alpha-value>)',
         brand: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#11335a',
-          950: '#0a1f3d',
+          50: '#f1f6ee',
+          100: '#e4ecdd',
+          200: '#d9e8c2',
+          300: '#c9ddae',
+          400: '#a7c789',
+          500: '#4d896c',
+          600: '#176b4b',
+          700: '#155b41',
+          800: '#124833',
+          900: '#102720',
+          950: '#0b1e18',
         },
         slate: {
           950: '#020617',
@@ -51,7 +53,7 @@ export default {
         soft: '0 1px 2px 0 rgb(0 0 0 / 0.04), 0 1px 3px 0 rgb(0 0 0 / 0.06)',
         card: '0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.06)',
         elevated: '0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08)',
-        glow: '0 0 0 3px rgb(37 99 235 / 0.15)',
+        glow: '0 0 0 3px rgb(23 107 75 / 0.15)',
       },
       borderRadius: {
         xl: '0.875rem',

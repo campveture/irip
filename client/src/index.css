@@ -5,12 +5,14 @@
 @layer base {
   :root {
     /* Design tokens */
-    --color-brand-50: #eff6ff;
-    --color-brand-100: #dbeafe;
-    --color-brand-500: #3b82f6;
-    --color-brand-600: #2563eb;
-    --color-brand-700: #1d4ed8;
-    --color-brand-900: #11335a;
+    --color-canvas: 250 249 246;
+    --color-surface: 255 255 255;
+    --color-brand-50: #f1f6ee;
+    --color-brand-100: #e4ecdd;
+    --color-brand-500: #4d896c;
+    --color-brand-600: #176b4b;
+    --color-brand-700: #155b41;
+    --color-brand-900: #102720;
     --color-success: #10b981;
     --color-warning: #f59e0b;
     --color-danger: #ef4444;
@@ -41,9 +43,18 @@
 
   html {
     scroll-behavior: smooth;
+    scrollbar-gutter: stable;
   }
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply font-sans text-slate-900 antialiased;
+    background: #faf9f6;
+  }
+  :where(button, a, input, select, textarea):focus-visible {
+    outline: 2px solid #176b4b;
+    outline-offset: 2px;
+  }
+  :where(input, select, textarea) {
+    accent-color: #176b4b;
   }
   ::selection {
     @apply bg-brand-100 text-brand-900;
@@ -64,6 +75,15 @@
 @layer components {
   .container-page {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .portal-canvas {
+    background: #faf9f6;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase text-brand-700;
+    letter-spacing: .2em;
   }
 
   /* Smooth card hover */
@@ -89,6 +109,15 @@
   /* Focus ring helper */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

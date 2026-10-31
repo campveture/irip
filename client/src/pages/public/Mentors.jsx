@@ -1,82 +1,53 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight, ArrowUpRight, BookOpen, Search, X } from 'lucide-react';
 import { api } from '../../lib/api';
-import { Card, CardContent, CardTitle } from '../../components/Card';
-import { Badge } from '../../components/Badge';
 import { Alert } from '../../components/Alert';
-import { Spinner } from '../../components/Spinner';
+import { demoImages } from '../../lib/demoImages';
 
 export default function Mentors() {
   const [mentors, setMentors] = useState([]);
+  const [query, setQuery] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    let cancelled = false;
+    let active = true;
     api.get('/public/mentors')
-      .then((d) => {
-        if (!cancelled) {
-          setMentors(Array.isArray(d) ? d : []);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setError(err.message || 'Failed to load mentors.');
-          setLoading(false);
-        }
-      });
-    return () => { cancelled = true; };
+      .then(rows => { if (active) setMentors(Array.isArray(rows) ? rows : []); })
+      .catch(err => { if (active) setError(err.message || 'Mentors could not be loaded.'); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="container-page py-8">
-        <div className="flex items-center justify-center min-h-[300px]">
-          <Spinner size="lg" />
-        </div>
-      </div>
-    );
-  }
+  const visible = useMemo(() => {
+    const term = query.trim().toLocaleLowerCase();
+    return term ? mentors.filter(m => [m.full_name, m.expertise, m.bio].some(v => String(v || '').toLocaleLowerCase().includes(term))) : mentors;
+  }, [mentors, query]);
 
-  if (error) {
-    return (
-      <div className="container-page py-8">
-        <Alert type="error">{error}</Alert>
+  return <main className="bg-[#faf9f6]">
+    <section className="relative overflow-hidden bg-brand-900 text-white">
+      <div aria-hidden="true" className="absolute -right-24 -top-44 h-[32rem] w-[32rem] rounded-full border border-white/10" />
+      <div className="container-page relative grid gap-8 py-16 sm:py-20 lg:grid-cols-[1fr_.65fr] lg:items-end">
+        <div className="max-w-3xl"><p className="eyebrow !text-brand-300">People / Guidance</p><h1 className="mt-5 text-4xl font-semibold tracking-[-.04em] sm:text-6xl">Good questions grow <span className="text-brand-300">with good guidance.</span></h1><p className="mt-5 max-w-2xl text-base leading-7 text-white/75">Meet the approved profiles in this synthetic demo directory and learn what each mentor works on. Credentials and agreements still need verification for a real launch.</p><Link to="/teach" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-brand-200 hover:text-white">Interested in mentoring? <ArrowRight size={17} /></Link></div>
+        <figure className="overflow-hidden rounded-2xl border border-white/20 bg-brand-800"><img src={demoImages.study} alt="" width="1000" height="667" className="aspect-[4/3] w-full object-cover" /><figcaption className="px-4 py-3 text-xs text-white/75">A fresh perspective helps. / Stock guidance scene</figcaption></figure>
       </div>
-    );
-  }
+    </section>
 
-  return (
-    <div className="container-page py-8">
-      <h1 className="text-2xl font-bold text-slate-900 mb-8">Mentors</h1>
-      {mentors.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <p className="text-slate-500">No approved mentors available at the moment.</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mentors.map((m) => (
-            <Card key={m.id} className="hover:shadow-md transition border">
-              <CardContent className="p-6">
-                <CardTitle className="mb-1"><Link className="hover:text-brand-700" to={`/mentors/${m.id}`}>{m.full_name}</Link></CardTitle>
-                <p className="text-slate-500 text-sm mb-4 line-clamp-2">{m.bio}</p>
-                <p className="text-xs font-semibold text-slate-900 mb-1">Expertise</p>
-                <p className="text-slate-600 text-sm mb-4">{m.expertise}</p>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-600">Teaching and supervision</span>
-                  <Badge variant={m.status === 'approved' ? 'active' : 'default'}>
-                    {m.status}
-                  </Badge>
-                </div>
-                <Link className="mt-4 inline-block text-sm font-semibold text-brand-700 hover:underline" to={`/mentors/${m.id}`}>View profile →</Link>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+    <section className="container-page py-14 sm:py-20" aria-labelledby="mentors-heading">
+      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between"><div><p className="eyebrow">The mentor directory</p><h2 id="mentors-heading" className="mt-3 text-3xl font-semibold tracking-tight text-brand-900 sm:text-4xl">Meet the people.</h2><p className="mt-2 text-sm leading-6 text-slate-600">Profiles marked approved in the local demo database.</p></div><label className="relative block w-full md:max-w-xs"><span className="sr-only">Search mentors by name or expertise</span><Search size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" /><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search name or expertise" className="min-h-12 w-full rounded-full border border-slate-300 bg-white pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-500 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-200" /></label></div>
+      <p className="my-7 text-sm text-slate-600" aria-live="polite">{loading ? 'Loading mentors…' : error ? 'Directory unavailable' : `${visible.length} mentor${visible.length === 1 ? '' : 's'} ${query.trim() ? 'match your search' : 'in the demo'}`}</p>
+      {error && <Alert type="error">{error}</Alert>}
+      {loading ? <div role="status" className="grid gap-5 md:grid-cols-2"><span className="sr-only">Loading mentors</span>{[0, 1].map(n => <div key={n} className="h-72 rounded-2xl skeleton" />)}</div> : !error && visible.length ? <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {visible.map(mentor => <Link key={mentor.id} to={`/mentors/${mentor.id}`} className="group flex min-h-80 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-200 hover:-translate-y-1 hover:border-brand-300 hover:shadow-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-700">
+          <div className="relative overflow-hidden bg-[#e5d6c6]"><img src={demoImages.portrait} alt="" width="800" height="1198" loading="lazy" className="aspect-[4/3] w-full object-cover object-[center_25%] transition duration-500 group-hover:scale-[1.03]" /><span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-3 py-1 text-xs font-medium text-brand-900">Stock model / Demo portrait</span></div>
+          <div className="flex flex-1 flex-col p-6"><p className="text-xs font-semibold uppercase tracking-widest text-brand-700">Research mentor · Demo profile</p>
+          <h3 className="mt-2 text-2xl font-semibold tracking-tight text-brand-900 group-hover:text-brand-700">{mentor.full_name}</h3>
+          <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">{mentor.bio || 'Profile details are being prepared.'}</p>
+          <div className="mt-auto border-t border-slate-100 pt-5"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Areas of expertise</p><p className="mt-1 line-clamp-2 text-sm text-slate-700">{mentor.expertise || 'To be confirmed'}</p><span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700">View profile <ArrowUpRight size={17} /></span></div>
+          </div>
+        </Link>)}
+      </div> : !error && <div className="rounded-2xl border border-slate-200 bg-white p-9 text-center"><BookOpen size={30} className="mx-auto text-brand-700" /><h3 className="mt-4 text-lg font-semibold">{query.trim() ? 'No matching mentors' : 'No approved profiles yet'}</h3><p className="mt-2 text-sm text-slate-600">{query.trim() ? 'Try another name or field.' : 'Demo mentor profiles will appear here when available.'}</p>{query.trim() && <button type="button" onClick={() => setQuery('')} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline"><X size={15} /> Clear search</button>}</div>}
+    </section>
+  </main>;
 }

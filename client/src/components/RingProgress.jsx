@@ -1,7 +1,7 @@
 import { cn } from './utils';
 
 const colorMap = {
-  brand: '#2563eb',
+  brand: '#176b4b',
   success: '#10b981',
   warning: '#f59e0b',
   danger: '#ef4444',

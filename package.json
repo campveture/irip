@@ -9,7 +9,11 @@
     "serve": "node --preserve-symlinks --preserve-symlinks-main serve.mjs",
     "seed": "npm --prefix server run seed",
     "build": "npm --prefix client run build",
-    "test": "npm --prefix server test",
+    "test": "npm run test:api && npm run test:client",
+    "test:api": "npm --prefix server test",
+    "test:client": "npm --prefix client test",
+    "typecheck": "npm --prefix client run typecheck",
+    "test:e2e": "npm --prefix client run test:e2e",
     "demo": "echo 'Run npm run build, then npm run serve, and open http://localhost:43137'"
   },
   "engines": {

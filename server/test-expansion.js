@@ -84,6 +84,10 @@ async function main() {
   assert.equal(result.status, 201);
   const internshipId = result.body.id;
   result = await request(`/admin/internships/${internshipId}/status`, 'PATCH', { status: 'published' }, cookie);
+  assert.equal(result.status, 400, 'Role terms and safeguarding disclosures are required');
+  result = await request(`/admin/internships/${internshipId}`, 'PATCH', { compensation_status: 'unpaid', pay_details: 'Unpaid synthetic role; no fee charged.', workload: '5 hours/week for 4 weeks', location: 'Remote demo', supervisor_name: 'Synthetic supervisor', complaints_contact: 'support@example.test' }, cookie);
+  assert.equal(result.status, 200);
+  result = await request(`/admin/internships/${internshipId}/status`, 'PATCH', { status: 'published' }, cookie);
   assert.equal(result.status, 200);
   result = await request('/internships');
   assert.equal(result.body.length, 1);

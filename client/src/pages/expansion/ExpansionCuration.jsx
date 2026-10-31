@@ -6,7 +6,7 @@ const types = {
   events: { label: 'Events', fields: ['slug', 'title', 'summary', 'agenda', 'speaker', 'starts_at', 'ends_at', 'timezone'] },
   stories: { label: 'Stories', fields: ['slug', 'title', 'summary', 'body', 'evidence', 'consent_reference', 'consent_recorded_at'] },
   ideas: { label: 'Ideas', fields: ['title', 'summary', 'scope', 'attribution', 'visibility'] },
-  internships: { label: 'Internships', fields: ['slug', 'title', 'summary', 'scope', 'eligibility', 'deadline', 'partner_id'] },
+  internships: { label: 'Internships', fields: ['slug', 'title', 'summary', 'scope', 'eligibility', 'deadline', 'partner_id', 'compensation_status', 'pay_details', 'workload', 'location', 'supervisor_name', 'complaints_contact'] },
   partners: { label: 'Partners', fields: ['kind', 'name', 'summary', 'agreement_reference'] },
 };
 
@@ -16,6 +16,7 @@ const labels = {
   evidence: 'Evidence reference', consent_reference: 'Publication consent reference', consent_recorded_at: 'Consent recorded at (ISO date/time)',
   scope: 'Scope', attribution: 'Attribution', visibility: 'Visibility', eligibility: 'Eligibility', deadline: 'Deadline (YYYY-MM-DD)',
   partner_id: 'Approved partner ID', kind: 'Partner kind', agreement_reference: 'Agreement reference',
+  compensation_status: 'Compensation status', pay_details: 'Pay / stipend details (explicitly state if unpaid)', workload: 'Workload and duration', location: 'Location / remote arrangements', supervisor_name: 'Named supervisor', complaints_contact: 'Official complaints / safeguarding contact',
 };
 
 function recordStatus(type, record) {
@@ -25,7 +26,7 @@ function recordStatus(type, record) {
 
 function Field({ field, value, onChange, id }) {
   const long = ['summary', 'body', 'citations', 'agenda', 'evidence', 'scope', 'eligibility'].includes(field);
-  const options = field === 'kind' ? ['institution', 'lab'] : field === 'visibility' ? ['private', 'team', 'public'] : null;
+  const options = field === 'kind' ? ['institution', 'lab'] : field === 'visibility' ? ['private', 'team', 'public'] : field === 'compensation_status' ? ['paid', 'unpaid'] : null;
   return <div className={long ? 'sm:col-span-2' : ''}>
     <label htmlFor={id} className="block text-sm font-medium text-slate-800">{labels[field] || field}</label>
     {long ? <textarea id={id} rows={field === 'body' ? 7 : 3} value={value} onChange={(event) => onChange(event.target.value)} className="mt-1 w-full rounded-md border border-slate-300 p-2 focus:border-brand-600 focus:outline-none" />

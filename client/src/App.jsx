@@ -1,14 +1,23 @@
 import { useState } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { Navbar, Footer, PortalLayout, ProtectedRoute } from './components';
+import { PortalLayout, ProtectedRoute } from './components';
+import { AppShell } from './components/shared/AppShell';
 import { Spinner } from './components/Spinner';
 
 // Public pages
 import Home from './pages/public/Home';
+import DemoGuide from './pages/public/DemoGuide';
 import Programs from './pages/public/Programs';
 import ProgramDetail from './pages/public/ProgramDetail';
 import CourseDetail from './pages/public/CourseDetail';
+import RecordedCatalog from './components/courses/RecordedCatalog';
+import RecordedCourseDetail from './components/courses/RecordedCourseDetail';
+import InstructorStudio from './components/courses/InstructorStudio';
+import StudentValueRoadmap from './components/opportunities/StudentValueRoadmap';
+import GrowthHub from './components/growth/GrowthHub';
+import MentorFeedback from './components/growth/MentorFeedback';
+import GrowthOperations from './components/growth/GrowthOperations';
 import Mentors from './pages/public/Mentors';
 import MentorDetail from './pages/public/MentorDetail';
 import Teach from './pages/public/Teach';
@@ -40,6 +49,7 @@ import StudentSubscription from './pages/student/StudentSubscription';
 
 // Student pages
 import StudentDashboard from './pages/student/StudentDashboard';
+import ScholarshipPlanner from './components/scholarships/ScholarshipPlanner';
 import Onboarding from './pages/student/Onboarding';
 import StudentLearning from './pages/student/StudentLearning';
 import EnrollmentDetail from './pages/student/EnrollmentDetail';
@@ -96,11 +106,15 @@ function RouterApp() {
     <Routes>
       {/* Public */}
       <Route path="/" element={<Home />} />
+      <Route path="/demo-guide" element={<DemoGuide />} />
+      <Route path="/student-value" element={<StudentValueRoadmap />} />
       <Route path="/programs" element={<Programs />} />
       <Route path="/programs/:slug" element={<ProgramDetail />} />
       <Route path="/projects" element={<Projects />} />
       <Route path="/projects/:id" element={<PublicProjectDetail />} />
       <Route path="/courses/:slug" element={<CourseDetail />} />
+      <Route path="/courses" element={<RecordedCatalog />} />
+      <Route path="/courses/recorded/:slug" element={<RecordedCourseDetail />} />
       <Route path="/mentors" element={<Mentors />} />
       <Route path="/mentors/:slug" element={<MentorDetail />} />
       <Route path="/teach" element={<Teach />} />
@@ -147,6 +161,13 @@ function RouterApp() {
       >
         <Route index element={<StudentDashboard />} />
         <Route path="onboarding" element={<Onboarding />} />
+        <Route path="scholarships" element={<ScholarshipPlanner />} />
+        <Route path="courses" element={<RecordedCatalog library />} />
+        <Route path="opportunities" element={<StudentValueRoadmap portal />} />
+        <Route path="growth" element={<GrowthHub key="path" />} />
+        <Route path="portfolio" element={<GrowthHub key="portfolio" view="portfolio" />} />
+        <Route path="career" element={<GrowthHub key="career" view="career" />} />
+        <Route path="alumni" element={<GrowthHub key="alumni" view="alumni" />} />
         <Route path="learning" element={<StudentLearning />} />
         <Route path="learning/:enrollmentId" element={<EnrollmentDetail />} />
         <Route path="lessons/:lessonId" element={<LessonPlayer />} />
@@ -176,6 +197,8 @@ function RouterApp() {
         <Route index element={<MentorDashboard />} />
         <Route path="application" element={<MentorApplication />} />
         <Route path="classes" element={<MentorClasses />} />
+        <Route path="courses" element={<InstructorStudio />} />
+        <Route path="feedback" element={<MentorFeedback />} />
         <Route path="classes/:id" element={<ClassDetail />} />
         <Route path="grading" element={<MentorGrading />} />
         <Route path="grading/:submissionId" element={<GradeSubmission />} />
@@ -201,6 +224,7 @@ function RouterApp() {
         <Route path="learners/:id" element={<AdminLearnerDetail />} />
         <Route path="catalog" element={<AdminCatalog />} />
         <Route path="academics" element={<AdminAcademics />} />
+        <Route path="learner-success" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><GrowthOperations /></ProtectedRoute>} />
         <Route path="mentors" element={<AdminMentors />} />
         <Route path="projects" element={<AdminProjects />} />
         <Route path="automations" element={<AdminAutomations />} />
@@ -223,18 +247,7 @@ function RouterApp() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppShell />
+      <AppShell><RouterApp /></AppShell>
     </AuthProvider>
   );
-}
-
-function AppShell() {
-  const { pathname } = useLocation();
-  const portal = /^\/(app|mentor|admin)(\/|$)/.test(pathname);
-  return <div className="min-h-screen flex flex-col">
-    <div role="status" className="bg-amber-100 px-4 py-2 text-center text-xs font-semibold text-amber-950">LOCAL DEMO · Synthetic people and transactions · Prices, schedule, policies and faculty require approval · No live enrollment or payment</div>
-    {!portal && <Navbar />}
-    <RouterApp />
-    {!portal && <Footer />}
-  </div>;
 }

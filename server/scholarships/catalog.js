@@ -1,0 +1,13 @@
+// Curated provider reference pages, not a feed of verified open calls.
+// Never invent a deadline, funding amount, grade threshold or citizenship decision here.
+const reviewedAt = '2026-10-31';
+const opportunities = [
+  { id: 'chevening', kind: 'scholarship', name: 'Chevening Scholarships', provider: 'Chevening', destinations: ['United Kingdom'], levels: ['masters'], url: 'https://www.chevening.org/scholarships/', summary: 'Explore the official overview for one-year master’s scholarships in the UK. Check the current country, course and work-experience requirements.' },
+  { id: 'erasmus-mundus', kind: 'scholarship', name: 'Erasmus Mundus Joint Masters', provider: 'European Commission', destinations: ['Europe (multi-country)'], levels: ['masters'], url: 'https://erasmus-plus.ec.europa.eu/opportunities/individuals/students/erasmus-mundus-joint-masters', summary: 'Explore joint master’s programmes and scholarship information. Apply to the institution running the chosen programme; rules and destinations vary by consortium.' },
+  { id: 'daad', kind: 'portal', name: 'DAAD scholarship guidance', provider: 'DAAD', destinations: ['Germany'], levels: ['masters', 'phd'], url: 'https://www.daad.de/en/studying-in-germany/scholarships/daad-scholarships/', summary: 'Start with the official funding overview and follow the scholarship database to the relevant call. Each programme has its own requirements.' },
+  { id: 'sweden-funding', kind: 'portal', name: 'Study in Sweden scholarship directory', provider: 'Swedish Institute', destinations: ['Sweden'], levels: ['bachelors', 'masters'], url: 'https://studyinsweden.se/scholarships/', summary: 'Discover funding sources through Sweden’s official study information site. Check each linked provider for the supported degree, country and application round.' },
+  { id: 'sweden-admissions', kind: 'portal', name: 'University Admissions Sweden', provider: 'University Admissions', destinations: ['Sweden'], levels: ['bachelors', 'masters'], url: 'https://www.universityadmissions.se/intl/start', summary: 'Official starting point for bachelor’s and master’s applications in Sweden. Admission applications and scholarship applications can be separate processes.' },
+  { id: 'uni-assist', kind: 'portal', name: 'uni-assist application guidance', provider: 'uni-assist e.V.', destinations: ['Germany'], levels: ['bachelors', 'masters'], url: 'https://www.uni-assist.de/en/', summary: 'Check whether your chosen German university uses uni-assist. It is an application assessment service, not a scholarship or a guaranteed route to admission.' },
+].map(item => ({ ...item, source_reviewed_at: reviewedAt, deadline: null, availability: 'not_verified', eligibility: 'not_assessed' }));
+
+module.exports = { opportunities };

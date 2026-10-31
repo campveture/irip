@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620" viewBox="0 0 1000 620">
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#eee4d5"/><stop offset="1" stop-color="#dfc5ae"/></linearGradient>
+    <pattern id="lines" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M0 40H40" stroke="#8d6149" stroke-opacity=".07"/></pattern>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="15" stdDeviation="14" flood-color="#593c29" flood-opacity=".18"/></filter>
+  </defs>
+  <rect width="1000" height="620" fill="url(#bg)"/><rect width="1000" height="620" fill="url(#lines)"/>
+  <circle cx="796" cy="300" r="251" fill="#cba88a" opacity=".35"/>
+  <g font-family="Arial, sans-serif">
+    <rect x="54" y="48" width="46" height="32" rx="8" fill="#65432f"/>
+    <text x="77" y="70" text-anchor="middle" font-size="18" font-weight="700" fill="#fff6e7">ua</text>
+    <text x="114" y="70" font-size="15" letter-spacing="3" fill="#78553f">THE RESEARCH SERIES</text>
+    <text x="54" y="175" font-size="15" letter-spacing="4" fill="#8d6045">GIVE YOUR IDEAS A VOICE.</text>
+    <text x="50" y="258" font-size="66" font-weight="700" letter-spacing="-3" fill="#473829">Academic</text>
+    <text x="50" y="336" font-size="70" font-weight="700" letter-spacing="-3" fill="#9b6043">Writing.</text>
+    <path d="M56 370H170" stroke="#9b6043" stroke-width="3"/>
+    <text x="54" y="415" font-size="20" fill="#775d47">From first draft to a clearer argument.</text>
+    <text x="54" y="559" font-size="15" letter-spacing="3" fill="#78553f">STRUCTURE → REFINE → PUBLISH</text>
+  </g>
+  <g transform="translate(624 119) rotate(8 130 170)" filter="url(#shadow)">
+    <rect x="15" y="18" width="265" height="355" rx="12" fill="#d3b99c"/>
+    <rect width="265" height="355" rx="12" fill="#fffdf4"/>
+    <text x="29" y="41" font-family="Arial" font-size="10" letter-spacing="2" fill="#9a7b5b">THE WORKING PAPER</text>
+    <path d="M29 55H236" stroke="#d7cbb9"/>
+    <text x="29" y="94" font-family="Georgia" font-size="29" fill="#463a2e">Ideas into</text>
+    <text x="29" y="128" font-family="Georgia" font-size="29" fill="#463a2e">arguments.</text>
+    <rect x="28" y="156" width="128" height="10" fill="#dce6cc"/>
+    <g stroke="#c7bcab" stroke-width="4"><path d="M29 180H235M29 194H235M29 208H216M29 236H235M29 250H235M29 264H190M29 292H235M29 306H196"/></g>
+    <path d="M27 217Q94 226 158 217M177 260l13 13 26-28" fill="none" stroke="#b26949" stroke-width="2"/>
+  </g>
+  <g transform="translate(850 409) rotate(31)" filter="url(#shadow)"><rect x="-8" y="-135" width="17" height="180" rx="5" fill="#254b3e"/><rect x="-8" y="-134" width="17" height="23" rx="4" fill="#c4a269"/><path d="M-8 45L0 67 9 45Z" fill="#d8b78d"/><path d="M-3 60L0 67 3 60Z" fill="#263b32"/></g>
+  <g transform="translate(547 450) rotate(-12)" filter="url(#shadow)"><rect width="129" height="44" rx="8" fill="#9b6043"/><text x="64" y="29" text-anchor="middle" font-family="Arial" font-size="13" letter-spacing="2" fill="#fff5e7">DRAFT / 01</text></g>
+</svg>

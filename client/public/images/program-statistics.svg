@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620" viewBox="0 0 1000 620">
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#f0f1e8"/><stop offset="1" stop-color="#cfdccc"/></linearGradient>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#2d5241" opacity=".1"/></pattern>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="16" stdDeviation="15" flood-color="#253d2d" flood-opacity=".17"/></filter>
+  </defs>
+  <rect width="1000" height="620" fill="url(#bg)"/><rect width="1000" height="620" fill="url(#dots)"/>
+  <circle cx="837" cy="323" r="260" fill="#c3d4b5" opacity=".55"/>
+  <g font-family="Arial, sans-serif">
+    <rect x="54" y="48" width="46" height="32" rx="8" fill="#1c493a"/>
+    <text x="77" y="70" text-anchor="middle" font-size="18" font-weight="700" fill="#eef3e6">ua</text>
+    <text x="114" y="70" font-size="15" letter-spacing="3" fill="#345543">THE RESEARCH SERIES</text>
+    <text x="54" y="175" font-size="15" letter-spacing="4" fill="#58765b">FIND THE SIGNAL.</text>
+    <text x="50" y="258" font-size="70" font-weight="700" letter-spacing="-3" fill="#183e31">Statistics</text>
+    <text x="50" y="336" font-size="63" font-weight="700" letter-spacing="-3" fill="#46694e">for Research.</text>
+    <path d="M56 370H170" stroke="#426749" stroke-width="3"/>
+    <text x="54" y="415" font-size="20" fill="#526b56">Make sense of the data.</text>
+    <text x="54" y="559" font-size="15" letter-spacing="3" fill="#345543">EXPLORE → ANALYZE → INTERPRET</text>
+  </g>
+  <g transform="translate(597 139) rotate(-8 155 163)" filter="url(#shadow)">
+    <rect width="320" height="333" rx="20" fill="#fffef8"/>
+    <rect width="320" height="47" rx="20" fill="#1c493a"/><rect y="25" width="320" height="22" fill="#1c493a"/>
+    <g fill="#b9cfa4"><circle cx="23" cy="24" r="4"/><circle cx="38" cy="24" r="4"/><circle cx="53" cy="24" r="4"/></g>
+    <text x="94" y="29" font-size="12" letter-spacing="2" font-family="Arial" fill="#dce8d1">DATA EXPLORER</text>
+    <g stroke="#e3e9dd"><path d="M32 90H290M32 133H290M32 176H290M32 219H290"/></g>
+    <path d="M32 78V236H291" fill="none" stroke="#b8c9b4"/>
+    <g fill="#b0c98f"><rect x="49" y="182" width="26" height="53" rx="3"/><rect x="89" y="150" width="26" height="85" rx="3"/><rect x="129" y="109" width="26" height="126" rx="3"/><rect x="169" y="137" width="26" height="98" rx="3"/><rect x="209" y="173" width="26" height="62" rx="3"/><rect x="249" y="196" width="26" height="39" rx="3"/></g>
+    <path d="M41 204C82 199 96 106 143 99S212 182 280 189" fill="none" stroke="#254f3b" stroke-width="4"/>
+    <rect x="31" y="269" width="123" height="35" rx="8" fill="#e8eedf"/><text x="92" y="292" text-anchor="middle" font-family="Arial" font-size="14" fill="#335542">Distribution</text>
+    <rect x="166" y="269" width="123" height="35" rx="8" fill="#e8eedf"/><text x="227" y="292" text-anchor="middle" font-family="Arial" font-size="14" fill="#335542">Inference</text>
+  </g>
+  <g transform="translate(815 435)" filter="url(#shadow)"><rect x="-12" y="-39" width="123" height="74" rx="15" fill="#254f3b"/><text x="49" y="12" text-anchor="middle" font-family="Georgia" font-size="46" font-style="italic" fill="#d8e7be">Σ x</text></g>
+</svg>

@@ -5,6 +5,7 @@ import { Card, CardContent } from '../../components/Card';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
 import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
+import { DemoCallout } from '../../components/shared/DemoNotice';
 
 export default function CertificateVerify() {
   const { token } = useParams();
@@ -14,7 +15,10 @@ export default function CertificateVerify() {
 
   useEffect(() => {
     let cancelled = false;
-    api.get(`/public/certificates/${token}/verify`)
+    setLoading(true);
+    setCert(null);
+    setError(null);
+    api.get(`/public/certificates/${encodeURIComponent(token)}/verify`)
       .then((d) => {
         if (!cancelled) {
           setCert(d);
@@ -60,6 +64,7 @@ export default function CertificateVerify() {
       </Link>
       <Card className="max-w-md mx-auto">
         <CardContent className="p-8 text-center">
+          <div className="mb-6 text-left"><DemoCallout>This lookup checks a synthetic local record, not a real qualification.</DemoCallout></div>
           {notFound ? (
             <>
               <AlertTriangle className="mx-auto h-10 w-10 text-slate-400 mb-3" />
@@ -74,7 +79,7 @@ export default function CertificateVerify() {
               <CheckCircle2 className="mx-auto h-10 w-10 text-green-600 mb-3" />
               <h2 className="text-xl font-bold text-slate-900 mb-2">Certificate verified</h2>
               <p className="text-sm text-slate-600 mb-6">
-                This certificate is valid and has not been revoked.
+                This demo record is marked issued and has not been revoked in the local database.
               </p>
               <dl className="text-left text-sm space-y-2 mb-6">
                 <dt className="text-slate-500">Name</dt>

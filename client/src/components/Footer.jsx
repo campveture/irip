@@ -3,13 +3,13 @@ import { ShieldCheck, GraduationCap } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-slate-900 text-slate-300 mt-auto">
+    <footer className="border-t border-brand-800 bg-brand-900 text-white/75 mt-auto">
       <div className="container-page py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <GraduationCap className="h-5 w-5 text-brand-400" />
-              <span className="font-semibold text-white">Unknown<span className="text-brand-400">Academy</span></span>
+              <GraduationCap className="h-5 w-5 text-brand-300" />
+              <span className="font-semibold text-white">Unknown<span className="text-brand-300">Academy</span></span>
             </div>
             <p className="text-sm text-slate-400 max-w-xs">
               Structured theory courses with supervised practical research projects for learners in Bangladesh.
@@ -18,10 +18,13 @@ export function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-4">Platform</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/programs" className="hover:text-white">Programs</Link></li>
+               <li><Link to="/programs" className="hover:text-white">Programs</Link></li>
+               <li><Link to="/courses" className="hover:text-white">Courses</Link></li>
+               <li><Link to="/student-value" className="hover:text-white">Student value proposals</Link></li>
               <li><Link to="/projects" className="hover:text-white">Projects</Link></li>
               <li><Link to="/mentors" className="hover:text-white">Mentors</Link></li>
               <li><Link to="/about" className="hover:text-white">About</Link></li>
+              <li><Link to="/demo-guide" className="hover:text-white">Validate the demo</Link></li>
             </ul>
           </div>
           <div>
@@ -49,7 +52,7 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+        <div className="border-t border-white/15 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/60">
           <span>Unknown Academy. Local prototype guided by the 28-sheet workbook.</span>
           <span>P0 launch essentials · No unverified commercial claims.</span>
         </div>

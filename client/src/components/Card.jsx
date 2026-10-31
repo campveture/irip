@@ -4,8 +4,8 @@ export function Card({ className, children, hover = false, ...props }) {
   return (
     <div
       className={cn(
-        'rounded-xl border border-slate-200 bg-white shadow-soft transition-all duration-200 ease-out',
-        hover && 'hover:shadow-card hover:-translate-y-0.5',
+        'rounded-2xl border border-slate-200 bg-white shadow-soft transition-all duration-200 ease-out',
+        hover && 'hover:shadow-card hover:-translate-y-0.5 hover:border-brand-300',
         className,
       )}
       {...props}

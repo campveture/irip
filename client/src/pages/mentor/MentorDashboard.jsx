@@ -5,8 +5,9 @@ import { Card, CardContent, CardTitle, CardHeader } from '../../components/Card'
 import { Badge } from '../../components/Badge';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
-import { StatCard, ProgressBar, BarChart, PageHeader, SectionHeader, EmptyState } from '../../components';
+import { StatCard, BarChart, SectionHeader, EmptyState } from '../../components';
 import { Clock, FileText, Users, Banknote, ArrowRight, CalendarDays, ClipboardCheck, TrendingUp } from 'lucide-react';
+import { demoImages } from '../../lib/demoImages';
 
 export default function MentorDashboard() {
   const [data, setData] = useState(null);
@@ -48,16 +49,17 @@ export default function MentorDashboard() {
 
   return (
     <div className="container-page py-6 animate-fade-in">
-      <PageHeader
-        title="Mentor Dashboard"
-        subtitle="Your sessions, grading queue, supervised projects, and earnings at a glance."
-        icon={Users}
-        actions={
-          <Link to="/mentor/application" className="inline-flex items-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-soft hover:bg-brand-700 transition-colors">
-            Apply to mentor <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        }
-      />
+      <div className="relative mb-8 overflow-hidden rounded-2xl bg-brand-900 p-6 text-white sm:p-9">
+        <img src={demoImages.mentoring} alt="" width="960" height="640" className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-1/3 object-cover opacity-25 lg:block" />
+        <div className="relative">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[.2em] text-brand-300">Mentor workspace</p>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div><h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Make room for progress.</h1><p className="mt-2 max-w-xl text-sm leading-6 text-white/75">Sessions, feedback and supervised projects in one place.</p></div>
+          <Link to="/mentor/classes" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-brand-200 px-5 text-sm font-semibold text-brand-900 transition hover:bg-white">View classes <ArrowRight className="ml-2 h-4 w-4" /></Link>
+        </div>
+        <p className="mt-4 hidden text-xs text-white/60 lg:block">Illustrative photo · Not your classes</p>
+        </div>
+      </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -81,14 +83,13 @@ export default function MentorDashboard() {
             <EmptyState title="No projects" description="Supervised projects will appear here." />
           )}
         </Card>
-        <Card className="p-6">
-          <SectionHeader title="Earnings progress" subtitle="Payable vs target" />
-          <div className="flex flex-col items-center justify-center py-2">
-            <RingProgress value={Number(earnings.total_payable || 0)} max={Math.max(1000, Number(earnings.total_payable || 0) * 1.5)} color="success" label="payable" sublabel={`${earnings.currency || 'BDT'}`} />
+        <Card className="flex flex-col justify-between p-6">
+          <div>
+            <SectionHeader title="Earnings overview" subtitle="Recorded payable amount in this local demo" />
+            <p className="mt-6 break-words text-3xl font-semibold tracking-tight text-brand-900 tabular-nums">{earnings.currency || 'BDT'} {fmtMoney(earnings.total_payable)}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">No payout progress or target is available. Review the itemized earnings record for details.</p>
           </div>
-          <div className="mt-3">
-            <ProgressBar value={Number(earnings.total_payable || 0)} max={Math.max(1000, Number(earnings.total_payable || 0) * 1.5)} label="Payout progress" color="success" size="sm" />
-          </div>
+          <Link to="/mentor/earnings" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:underline">View earnings <ArrowRight size={16} /></Link>
         </Card>
       </div>
 

@@ -41,8 +41,7 @@ router.get('/dashboard', (req, res) => {
     paid_enrollments: db.prepare("SELECT COUNT(*) AS c FROM enrollments WHERE state = 'active'").get().c,
     net_collected_cash: db.prepare("SELECT COALESCE(SUM(amount),0) AS s FROM payment_attempts WHERE state = 'succeeded'").get().s,
     seats: db.prepare('SELECT COALESCE(SUM(capacity),0) AS s FROM cohorts').get().s,
-    risks: 2,
-    queues: 5,
+    queues: db.prepare("SELECT COUNT(*) AS c FROM tickets WHERE state = 'open'").get().c,
   };
   const recentOrders = db
     .prepare('SELECT o.order_no, o.total, o.status, u.full_name, o.created_at FROM orders o JOIN users u ON u.id = o.user_id ORDER BY o.created_at DESC LIMIT 8')
@@ -129,14 +128,58 @@ router.get('/catalog/programs', (req, res) => {
 
 router.post('/catalog/programs', requireRoles('academic_ops', 'admin', 'owner'), (req, res) => {
   const { slug, title, summary, domain, level, fee, capacity, start_date, end_date } = req.body || {};
-  if (!slug || !title) return res.status(400).json({ error: 'validation', message: 'Slug and title required.' });
+  if (typeof slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 120 ||
+      typeof title !== 'string' || !title.trim() || title.trim().length > 180 ||
+      [summary, domain, level].some((v, i) => v != null && (typeof v !== 'string' || v.length > [2000, 100, 100][i])) ||
+      !Number.isSafeInteger(Number(fee ?? 0)) || Number(fee ?? 0) < 0 ||
+      !Number.isSafeInteger(Number(capacity ?? 30)) || Number(capacity ?? 30) < 1 || Number(capacity ?? 30) > 10000 ||
+      [start_date, end_date].some(v => v && (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v))) ||
+      (start_date && end_date && start_date > end_date)) {
+    return res.status(400).json({ error: 'validation', message: 'Provide a valid slug, title, dates, non-negative fee and capacity of 1–10,000.' });
+  }
+  if (db.prepare('SELECT 1 FROM programs WHERE slug = ?').get(slug)) return res.status(409).json({ error: 'conflict', message: 'Program slug already exists.' });
   const info = db
     .prepare(
       'INSERT INTO programs(slug, title, summary, domain, level, fee, currency, capacity, start_date, end_date, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     )
-    .run(slug, title, summary || null, domain || null, level || null, fee ? parseInt(fee, 10) : 0, 'BDT', capacity ? parseInt(capacity, 10) : 30, start_date || null, end_date || null, 'draft', new Date().toISOString());
+    .run(slug, title.trim(), summary?.trim() || null, domain?.trim() || null, level?.trim() || null, Number(fee ?? 0), 'BDT', Number(capacity ?? 30), start_date || null, end_date || null, 'draft', new Date().toISOString());
   auditLog({ actorId: req.session.userId, action: 'create_program', target: 'programs', meta: JSON.stringify({ slug }) });
   res.status(201).json({ id: info.lastInsertRowid, slug });
+});
+
+// Only draft copy can be edited. Published records require an approval/versioning
+// workflow before edits can be safely surfaced to the public catalog.
+router.patch('/catalog/programs/:id', requireRoles('academic_ops', 'admin', 'owner'), (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: 'validation', message: 'Invalid program ID.' });
+  const program = db.prepare('SELECT id, status FROM programs WHERE id = ?').get(id);
+  if (!program) return res.status(404).json({ error: 'not_found', message: 'Program not found.' });
+  if (program.status !== 'draft') return res.status(409).json({ error: 'approval_required', message: 'Published programs cannot be edited until versioning and academic approval are configured.' });
+
+  const body = req.body || {};
+  const fields = ['title', 'summary', 'domain', 'level'];
+  if (typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(k => !fields.includes(k)) || !Object.keys(body).length) {
+    return res.status(400).json({ error: 'validation', message: 'Only draft title, summary, domain and level can be edited.' });
+  }
+  const limits = { title: 180, summary: 2000, domain: 100, level: 100 };
+  const values = {};
+  for (const field of fields) {
+    if (!Object.hasOwn(body, field)) continue;
+    if (typeof body[field] !== 'string' || body[field].trim().length > limits[field] || (field === 'title' && !body[field].trim())) {
+      return res.status(400).json({ error: 'validation', message: `Invalid ${field}.` });
+    }
+    values[field] = body[field].trim();
+  }
+  const update = db.transaction(() => {
+    const columns = Object.keys(values);
+    const result = db.prepare(`UPDATE programs SET ${columns.map(k => `${k} = ?`).join(', ')} WHERE id = ? AND status = 'draft'`).run(...columns.map(k => values[k]), id);
+    if (!result.changes) return null;
+    db.prepare('INSERT INTO audit_events(actor_id, action, target, meta, created_at) VALUES (?, ?, ?, ?, ?)')
+      .run(req.session.userId, 'update_program_draft', 'programs', JSON.stringify({ id, fields: columns }), new Date().toISOString());
+    return db.prepare('SELECT * FROM programs WHERE id = ?').get(id);
+  })();
+  if (!update) return res.status(409).json({ error: 'conflict', message: 'This program is no longer an editable draft.' });
+  res.json(update);
 });
 
 // ---------- Academic, mentor and project review workspaces ----------

@@ -5,6 +5,7 @@ import { Card, CardContent } from '../../components/Card';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
 import { ArrowLeft } from 'lucide-react';
+import { demoImages } from '../../lib/demoImages';
 
 export default function HowItWorks() {
   const [page, setPage] = useState(null);
@@ -53,6 +54,7 @@ export default function HowItWorks() {
         <ArrowLeft className="h-4 w-4 mr-1" /> Back to home
       </Link>
       <h1 className="text-2xl font-bold text-slate-900 mb-6">{page?.title ?? 'How It Works'}</h1>
+      <figure className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white"><img src={demoImages.study} alt="" width="1000" height="667" className="aspect-[2/1] w-full object-cover" /><figcaption className="px-4 py-2 text-xs text-slate-500">Learn, discuss, put it into practice. / Stock demo scene</figcaption></figure>
       <Card>
         <CardContent className="p-6">
           {(page?.body ?? '').split('\n').map((line, i) => (

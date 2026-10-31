@@ -8,7 +8,8 @@ import { Alert } from '../../components/Alert';
 import { StatCard, ProgressBar, RingProgress, EmptyState, PageHeader, SectionHeader } from '../../components';
 import { BarChart as RBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { CHART_COLORS, CHART_PALETTE, tooltipStyle, axisStyle, gridStyle } from '../../lib/charts';
-import { Clock, BookOpen, FileText, Bell, ArrowRight, CalendarDays, CheckCircle2, Target, TrendingUp, LayoutDashboard } from 'lucide-react';
+import { Clock, BookOpen, FileText, Bell, ArrowRight, CalendarDays, CheckCircle2, Target, TrendingUp, LayoutDashboard, Users } from 'lucide-react';
+import { demoImages } from '../../lib/demoImages';
 
 export default function StudentDashboard() {
   const [data, setData] = useState(null);
@@ -57,16 +58,22 @@ export default function StudentDashboard() {
 
   return (
     <div className="container-page py-6 animate-fade-in">
-      <PageHeader
-        title="Welcome back 👋"
-        subtitle="Here's your learning progress, upcoming sessions, and tasks at a glance."
-        icon={LayoutDashboard}
-        actions={
-          <Link to="/app/learning" className="inline-flex items-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-soft hover:bg-brand-700 transition-colors">
-            Continue learning <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        }
-      />
+      <div className="relative mb-8 overflow-hidden rounded-2xl bg-brand-900 p-6 text-white sm:p-9">
+        <img src={demoImages.study} alt="" width="960" height="640" className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-1/3 object-cover opacity-25 lg:block" />
+        <div className="relative">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[.2em] text-brand-300">Your learning space</p>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div><h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Welcome back.</h1><p className="mt-2 max-w-xl text-sm leading-6 text-white/75">Pick up where you left off. Your sessions, assignments and next steps are below.</p></div>
+          <Link to="/app/learning" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-brand-200 px-5 text-sm font-semibold text-brand-900 transition hover:bg-white">Continue learning <ArrowRight className="ml-2 h-4 w-4" /></Link>
+        </div>
+        <p className="mt-4 hidden text-xs text-white/60 lg:block">Illustrative photo · Not your cohort</p>
+        </div>
+      </div>
+
+      <div className="mb-6 flex flex-col justify-between gap-4 rounded-2xl border border-brand-200 bg-brand-50 p-5 sm:flex-row sm:items-center">
+        <div><p className="text-xs font-semibold uppercase tracking-wider text-brand-700">Plan beyond the classroom</p><h2 className="mt-2 text-xl font-semibold text-brand-950">Find your next study opportunity.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Build a demo academic profile, explore official scholarship and application references, and organise your shortlist. Suggestions are not eligibility decisions.</p></div>
+        <Link to="/app/scholarships" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-brand-900 px-5 py-3 text-sm font-semibold text-white hover:bg-brand-700">Open scholarship planner <ArrowRight size={17} /></Link>
+      </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -213,6 +220,9 @@ export default function StudentDashboard() {
             <Link to="/app/learning" className="flex w-full items-center rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-50 transition-colors"><BookOpen className="h-4 w-4 mr-2 text-brand-600" /> Browse my courses</Link>
             <Link to="/app/calendar" className="flex w-full items-center rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-50 transition-colors"><Clock className="h-4 w-4 mr-2 text-brand-600" /> View my sessions</Link>
             <Link to="/app/plan" className="flex w-full items-center rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-50 transition-colors"><Target className="h-4 w-4 mr-2 text-brand-600" /> Update study plan</Link>
+            <Link to="/app/growth" className="flex w-full items-center rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-50 transition-colors"><Target className="h-4 w-4 mr-2 text-brand-600" /> Start guided practice</Link>
+            <Link to="/app/portfolio" className="flex w-full items-center rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-50 transition-colors"><FileText className="h-4 w-4 mr-2 text-brand-600" /> Build my private portfolio</Link>
+            <Link to="/app/opportunities" className="flex w-full items-center rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-50 transition-colors"><Users className="h-4 w-4 mr-2 text-brand-600" /> Student value & opportunity proposals</Link>
             <Link to="/app/support" className="flex w-full items-center rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-50 transition-colors"><TrendingUp className="h-4 w-4 mr-2 text-brand-600" /> Contact support</Link>
           </CardContent>
         </Card>
@@ -248,4 +258,3 @@ export default function StudentDashboard() {
     </div>
   );
 }
-

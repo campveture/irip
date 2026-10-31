@@ -101,13 +101,16 @@ if (!db.prepare('PRAGMA table_info(research_ideas)').all().some((column) => colu
 if (!db.prepare('PRAGMA table_info(research_ideas)').all().some((column) => column.name === 'public_consent_at')) {
   db.exec('ALTER TABLE research_ideas ADD COLUMN public_consent_at TEXT');
 }
+for (const column of ['compensation_status', 'pay_details', 'workload', 'location', 'supervisor_name', 'complaints_contact']) {
+  if (!db.prepare('PRAGMA table_info(internship_opportunities)').all().some(item => item.name === column)) db.exec(`ALTER TABLE internship_opportunities ADD COLUMN ${column} TEXT`);
+}
 
 const adminCollections = {
   resources: { table: 'public_resources', fields: ['slug', 'title', 'summary', 'body', 'category', 'citations'] },
   events: { table: 'public_events', fields: ['slug', 'title', 'summary', 'agenda', 'speaker', 'starts_at', 'ends_at', 'timezone'] },
   stories: { table: 'public_stories', fields: ['slug', 'title', 'summary', 'body', 'evidence', 'consent_reference', 'consent_recorded_at'] },
   ideas: { table: 'research_ideas', fields: ['title', 'summary', 'scope', 'attribution', 'visibility'] },
-  internships: { table: 'internship_opportunities', fields: ['slug', 'title', 'summary', 'scope', 'eligibility', 'deadline', 'partner_id'] },
+  internships: { table: 'internship_opportunities', fields: ['slug', 'title', 'summary', 'scope', 'eligibility', 'deadline', 'partner_id', 'compensation_status', 'pay_details', 'workload', 'location', 'supervisor_name', 'complaints_contact'] },
   partners: { table: 'partner_records', fields: ['kind', 'name', 'summary', 'agreement_reference'] },
 };
 
@@ -131,6 +134,7 @@ function cleanInput(collection, body) {
   }
   if ('slug' in result && result.slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(result.slug)) throw new Error('Slug must use lowercase letters, numbers, and hyphens.');
   if ('kind' in result && result.kind && !['institution', 'lab'].includes(result.kind)) throw new Error('Invalid partner kind.');
+  if ('compensation_status' in result && result.compensation_status && !['paid', 'unpaid'].includes(result.compensation_status)) throw new Error('Disclose paid or unpaid compensation status.');
   if ('visibility' in result && result.visibility && !['private', 'team', 'public'].includes(result.visibility)) throw new Error('Invalid visibility.');
   if ('timezone' in result && !result.timezone) result.timezone = 'Asia/Dhaka';
   return result;
@@ -156,8 +160,9 @@ function publicationError(kind, record) {
   if (kind === 'ideas' && (record.visibility !== 'public' || !record.attribution || !record.scope || (record.owner_id && !record.public_consent_at))) return 'Public visibility, attribution, scope, and owner consent are required.';
   if (kind === 'partners' && !record.agreement_reference) return 'A verified agreement reference is required.';
   if (kind === 'internships') {
+    if (!['paid', 'unpaid'].includes(record.compensation_status) || requireText(['pay_details', 'workload', 'location', 'supervisor_name', 'complaints_contact'])) return 'Disclose paid/unpaid status, pay details, workload, location, named supervisor and complaints contact before publication.';
     if (!record.eligibility || !record.scope || !record.deadline || !record.partner_id) return 'Scope, eligibility, deadline, and an approved partner are required.';
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(record.deadline) || !Number.isFinite(Date.parse(record.deadline))) return 'Deadline must be a valid YYYY-MM-DD date.';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(record.deadline) || !Number.isFinite(Date.parse(record.deadline)) || new Date(record.deadline).toISOString().slice(0, 10) !== record.deadline) return 'Deadline must be a valid YYYY-MM-DD date.';
     if (record.deadline < new Date().toISOString().slice(0, 10)) return 'An expired opportunity cannot be published.';
     const partner = db.prepare("SELECT id FROM partner_records WHERE id = ? AND status = 'published' AND agreement_reference IS NOT NULL").get(record.partner_id);
     if (!partner) return 'The partner must be verified and published first.';
@@ -301,7 +306,9 @@ router.post('/internships/:slug/apply', requireAuth, requireRoles('learner', 'ad
   const statement = String(req.body?.statement || '').trim();
   if (statement.length < 30 || statement.length > 3000 || req.body?.consent !== true) return res.status(400).json({ error: 'validation', message: 'Provide a 30–3000 character statement and consent to store it for review.' });
   const internship = db.prepare(`SELECT io.id FROM internship_opportunities io JOIN partner_records p ON p.id = io.partner_id
-    WHERE io.slug = ? AND io.status = 'published' AND io.deadline >= date('now') AND p.status = 'published' AND p.agreement_reference IS NOT NULL`).get(req.params.slug);
+    WHERE io.slug = ? AND io.status = 'published' AND io.deadline >= date('now') AND io.compensation_status IN ('paid','unpaid')
+    AND io.pay_details IS NOT NULL AND io.workload IS NOT NULL AND io.location IS NOT NULL AND io.supervisor_name IS NOT NULL AND io.complaints_contact IS NOT NULL
+    AND p.status = 'published' AND p.agreement_reference IS NOT NULL`).get(req.params.slug);
   if (!internship) return res.status(404).json({ error: 'not_found', message: 'Opportunity unavailable.' });
   const result = db.prepare('INSERT OR IGNORE INTO internship_applications(internship_id, user_id, statement, created_at) VALUES (?, ?, ?, ?)').run(internship.id, req.session.userId, statement, new Date().toISOString());
   if (result.changes) auditLog({ actorId: req.session.userId, action: 'internship_application', target: `internship:${internship.id}` });
@@ -326,8 +333,8 @@ const collections = {
     where: "moderation_state = 'approved' AND visibility = 'public'", order: 'published_at DESC, id DESC', detail: 'id, title, summary, scope, attribution, published_at', key: 'id',
   },
   internships: {
-    table: 'internship_opportunities', fields: 'slug, title, summary, eligibility, deadline',
-    where: "status = 'published' AND (deadline IS NULL OR deadline >= date('now')) AND EXISTS (SELECT 1 FROM partner_records pp WHERE pp.id = partner_id AND pp.status = 'published' AND pp.agreement_reference IS NOT NULL)", order: 'deadline ASC, id DESC', detail: 'slug, title, summary, scope, eligibility, deadline, partner_id', key: 'slug',
+    table: 'internship_opportunities', fields: 'slug, title, summary, eligibility, deadline, compensation_status, pay_details, workload, location, supervisor_name, complaints_contact',
+    where: "status = 'published' AND deadline >= date('now') AND compensation_status IN ('paid','unpaid') AND pay_details IS NOT NULL AND workload IS NOT NULL AND location IS NOT NULL AND supervisor_name IS NOT NULL AND complaints_contact IS NOT NULL AND EXISTS (SELECT 1 FROM partner_records pp WHERE pp.id = partner_id AND pp.status = 'published' AND pp.agreement_reference IS NOT NULL)", order: 'deadline ASC, id DESC', detail: 'slug, title, summary, scope, eligibility, deadline, partner_id, compensation_status, pay_details, workload, location, supervisor_name, complaints_contact', key: 'slug',
   },
 };
 

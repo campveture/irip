@@ -11,11 +11,11 @@ const colorMap = {
 export function StatCard({ icon: Icon, label, value, hint, trend, color = 'brand', className }) {
   const c = colorMap[color] || colorMap.brand;
   return (
-    <div className={cn('rounded-xl border border-slate-200 bg-white p-5 shadow-soft transition-all duration-200 hover:shadow-card hover:-translate-y-0.5', className)}>
+    <div className={cn('min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition-all duration-200 hover:border-brand-200 hover:shadow-card', className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-wider text-slate-500">{label}</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900 tabular-nums">{value}</p>
+          <p className="mt-2 break-words text-xl font-semibold tracking-tight text-brand-900 tabular-nums sm:text-2xl">{value}</p>
           {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
         </div>
         {Icon && (

@@ -6,6 +6,13 @@ import { useState } from 'react';
 const menus = {
   app: [
     ['Home', '/app', LayoutDashboard], ['Learn', '/app/learning', BookOpen],
+    ['Scholarships', '/app/scholarships', GraduationCap],
+    ['Recorded courses', '/app/courses', BookOpen],
+    ['Guided path', '/app/growth', BookOpen],
+    ['Private portfolio', '/app/portfolio', ClipboardCheck],
+    ['Career & support', '/app/career', GraduationCap],
+    ['Alumni pilot', '/app/alumni', Users],
+    ['Opportunities roadmap', '/app/opportunities', Users],
     ['Calendar', '/app/calendar', CalendarDays], ['Assignments', '/app/assignments', ClipboardCheck],
     ['Projects', '/app/projects', Users], ['Study plan', '/app/plan', BookOpen],
     ['Billing', '/app/billing', Banknote], ['Certificates', '/app/certificates', Award],
@@ -14,6 +21,8 @@ const menus = {
   ],
   mentor: [
     ['Overview', '/mentor', LayoutDashboard], ['Classes', '/mentor/classes', CalendarDays],
+    ['Course studio', '/mentor/courses', BookOpen],
+    ['Artifact feedback', '/mentor/feedback', ClipboardCheck],
     ['Grading', '/mentor/grading', ClipboardCheck], ['Projects', '/mentor/projects', Users],
     ['Availability', '/mentor/availability', CalendarDays], ['Topics', '/mentor/topics', BookOpen],
     ['Earnings', '/mentor/earnings', Banknote], ['Application', '/mentor/application', GraduationCap],
@@ -22,6 +31,7 @@ const menus = {
     ['Overview', '/admin', LayoutDashboard], ['Modules', '/admin/modules', LayoutDashboard],
     ['Learners', '/admin/learners', Users], ['Catalog', '/admin/catalog', BookOpen],
     ['Academics', '/admin/academics', BookOpen, ['academic_ops', 'admin', 'owner']],
+    ['Learner success', '/admin/learner-success', GraduationCap, ['academic_ops', 'admin', 'owner']],
     ['Mentors', '/admin/mentors', GraduationCap, ['academic_ops', 'admin', 'owner']],
     ['Projects', '/admin/projects', Users, ['academic_ops', 'admin', 'owner']],
     ['Content', '/admin/content', BookOpen, ['academic_ops', 'admin', 'owner']],
@@ -37,6 +47,15 @@ export function PortalLayout() {
   const { user, roles, logout } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
+  const [signingOut, setSigningOut] = useState(false);
+  const signOut = async () => {
+    setLogoutError('');
+    setSigningOut(true);
+    try { await logout(); }
+    catch (_) { setLogoutError('Sign out failed. Please retry.'); }
+    finally { setSigningOut(false); }
+  };
   const section = location.pathname.split('/')[1];
   const choices = [
     (roles.includes('learner') || roles.includes('admin') || roles.includes('owner')) && ['Learner', '/app'],
@@ -47,7 +66,7 @@ export function PortalLayout() {
   const navItems = (menus[section] || []).filter(([, , , requiredRoles]) => !requiredRoles || requiredRoles.some((role) => roles.includes(role)));
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 md:flex-row">
+    <div className="portal-canvas flex min-h-screen flex-col md:flex-row">
       {/* Mobile top bar */}
       <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:hidden">
         <Link to="/" className="flex items-center gap-2 font-semibold text-brand-900">
@@ -107,7 +126,8 @@ export function PortalLayout() {
           ))}
         </nav>
         <div className="flex flex-col gap-1 p-3 border-t border-slate-200 mt-2">
-          <button onClick={logout} className="flex items-center gap-2 rounded px-3 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors"><LogOut size={17} /> Sign out</button>
+          <button onClick={signOut} disabled={signingOut} className="flex items-center gap-2 rounded px-3 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors disabled:opacity-50"><LogOut size={17} /> {signingOut ? 'Signing out…' : 'Sign out'}</button>
+          {logoutError && <p role="alert" className="px-3 text-sm text-red-800">{logoutError}</p>}
           <Link to="/account/profile" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2 rounded px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"><Settings size={17} /> Account settings</Link>
         </div>
       </aside>

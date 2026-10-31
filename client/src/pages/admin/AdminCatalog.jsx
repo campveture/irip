@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/Card'
 import { Badge } from '../../components/Badge';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
-import { BookOpen, Plus } from 'lucide-react';
+import { BookOpen, Plus, Pencil } from 'lucide-react';
 
 function statusVariant(v) {
   const s = String(v || '').toLowerCase();
@@ -29,6 +29,11 @@ export default function AdminCatalog() {
   const [form, setForm] = useState({ ...initialForm });
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [saved, setSaved] = useState('');
 
   useEffect(() => {
     api.get('/admin/catalog/programs')
@@ -49,7 +54,7 @@ export default function AdminCatalog() {
         domain: form.domain,
         level: form.level,
         fee: Number(form.fee) || 0,
-        capacity: Number(form.capacity) || 0,
+        capacity: form.capacity === '' ? 30 : Number(form.capacity),
         start_date: form.start_date,
         end_date: form.end_date,
       };
@@ -61,6 +66,30 @@ export default function AdminCatalog() {
       setCreateError(err.message || 'Failed to create program');
     } finally {
       setCreating(false);
+    }
+  };
+
+  const beginEdit = (program) => {
+    setEditing(program.id);
+    setEditForm({ title: program.title || '', summary: program.summary || '', domain: program.domain || '', level: program.level || '' });
+    setEditError('');
+    setSaved('');
+  };
+
+  const saveDraft = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setEditError('');
+    try {
+      await api.patch(`/admin/catalog/programs/${editing}`, editForm);
+      const refreshed = await api.get('/admin/catalog/programs');
+      setPrograms(Array.isArray(refreshed) ? refreshed : []);
+      setEditing(null);
+      setSaved('Draft saved. It is not public.');
+    } catch (err) {
+      setEditError(err.message || 'Unable to save this draft.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -84,6 +113,7 @@ export default function AdminCatalog() {
       </div>
 
       <p className="mb-5 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">New programs are saved as drafts. Academic content, price, capacity and policies need approval before publication.</p>
+      {saved && <p role="status" className="mb-4 rounded-lg border border-brand-200 bg-brand-50 p-3 text-sm text-brand-900">{saved}</p>}
       <Card className="mb-8">
         <CardHeader className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -104,6 +134,7 @@ export default function AdminCatalog() {
                   <th className="text-left pb-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Fee</th>
                   <th className="text-left pb-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Capacity</th>
                   <th className="text-left pb-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                  {canManageCatalog && <th className="text-left pb-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Action</th>}
                 </tr>
               </thead>
               <tbody>
@@ -116,15 +147,28 @@ export default function AdminCatalog() {
                     <td className="p-3 text-slate-900">BDT {Number(p.fee ?? 0).toLocaleString()}</td>
                     <td className="p-3 text-slate-900">{p.capacity}</td>
                     <td className="p-3"><Badge variant={statusVariant(p.status)}>{p.status}</Badge></td>
+                    {canManageCatalog && <td className="p-3">{p.status === 'draft' ? <button type="button" onClick={() => beginEdit(p)} className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline"><Pencil size={14} /> Edit draft</button> : <span className="text-xs text-slate-500">Approval required</span>}</td>}
                   </tr>
                 )) : (
-                  <tr><td colSpan={7} className="p-4 text-center text-slate-500">No programs found.</td></tr>
+                    <tr><td colSpan={canManageCatalog ? 8 : 7} className="p-4 text-center text-slate-500">No programs found.</td></tr>
                 )}
               </tbody>
             </table>
           </div>
         </CardContent>
       </Card>
+
+      {canManageCatalog && editing != null && editForm && <Card className="mb-8" id="edit-program">
+        <CardHeader><CardTitle>Edit draft program</CardTitle><p className="text-sm text-slate-600">Only descriptive text can be changed here. Slug, fee, capacity and published records remain locked.</p></CardHeader>
+        <CardContent>
+          {editError && <div role="alert" className="mb-4"><Alert type="error">{editError}</Alert></div>}
+          <form onSubmit={saveDraft} className="grid gap-4 sm:grid-cols-2">
+            {['title', 'domain', 'level'].map((field) => <label key={field} className="text-sm font-medium text-slate-700"><span className="mb-1 block capitalize">{field}</span><input required={field === 'title'} maxLength={field === 'title' ? 180 : 100} value={editForm[field]} onChange={(event) => setEditForm({ ...editForm, [field]: event.target.value })} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>)}
+            <label className="sm:col-span-2 text-sm font-medium text-slate-700"><span className="mb-1 block">Summary</span><textarea maxLength={2000} rows={4} value={editForm.summary} onChange={(event) => setEditForm({ ...editForm, summary: event.target.value })} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+            <div className="flex flex-wrap gap-2 sm:col-span-2"><Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save draft'}</Button><Button variant="outline" type="button" disabled={saving} onClick={() => { setEditing(null); setEditError(''); }}>Cancel</Button></div>
+          </form>
+        </CardContent>
+      </Card>}
 
       {/* Add program form */}
       {canManageCatalog && <Card id="add-program">
@@ -173,6 +217,7 @@ export default function AdminCatalog() {
               <label className="block text-xs font-medium text-slate-600 mb-1">Fee (BDT)</label>
               <input
                 type="number"
+                min="0"
                 className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
                 value={form.fee}
                 onChange={(e) => setForm({ ...form, fee: e.target.value })}
@@ -182,6 +227,8 @@ export default function AdminCatalog() {
               <label className="block text-xs font-medium text-slate-600 mb-1">Capacity</label>
               <input
                 type="number"
+                min="1"
+                max="10000"
                 className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
                 value={form.capacity}
                 onChange={(e) => setForm({ ...form, capacity: e.target.value })}

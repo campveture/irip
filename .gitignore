@@ -7,3 +7,5 @@ server/data.sqlite-*
 *.log
 .env
 .chrome-verify*/
+client/test-results/
+client/playwright-report/

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Card, CardContent } from '../../components/Card';
+import { demoImages } from '../../lib/demoImages';
 
 export default function Teach() {
   return (
@@ -8,10 +9,21 @@ export default function Teach() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Teach at Unknown Academy</h1>
-          <p className="text-slate-500 text-sm">Join as a mentor or supervisor for our research bootcamp.</p>
+          <p className="text-slate-500 text-sm">Propose a recorded deep dive, or mentor and supervise cohort learners.</p>
         </div>
         <Link to="/" className="text-sm text-slate-600 hover:text-brand-600">← Back to home</Link>
       </div>
+      <figure className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white"><img src={demoImages.study} alt="" width="1000" height="667" className="aspect-[2/1] w-full object-cover" /><figcaption className="px-4 py-2 text-xs text-slate-500">Share what you know. / Stock guidance scene</figcaption></figure>
+
+      <Card className="mb-8">
+        <CardContent className="p-6">
+          <p className="text-xs font-semibold uppercase tracking-wider text-brand-700">Independent recorded courses / Proposed model</p>
+          <h2 className="mt-3 text-2xl font-semibold text-brand-950">Teach a topic deeply. Let students return to it.</h2>
+          <p className="mt-4 text-sm leading-7 text-slate-600">Create a standalone course outline without attaching it to a bootcamp. The proposed BDT 2,000 membership would cover all approved recorded courses; monthly billing is an unconfirmed assumption. A future creator pool could allocate an approved share of net revenue by verified eligible watch time—not raw clicks.</p>
+          <p className="mt-3 text-sm leading-7 text-slate-600">Draft creation works in the instructor studio. Recording uploads, rights review, publication, subscription payments and creator payouts are not connected. No passive income is guaranteed.</p>
+          <div className="mt-5 flex flex-wrap gap-4"><Link to="/mentor/courses" className="inline-flex min-h-11 items-center rounded-full bg-brand-900 px-5 text-sm font-semibold text-white">Open course studio</Link><Link to="/courses" className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-800 underline">Explore demo courses</Link></div>
+        </CardContent>
+      </Card>
 
       <Card className="mb-8">
         <CardContent className="p-6">

@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../../lib/api';
-import { Card, CardContent, CardTitle } from '../../components/Card';
+import { Card, CardContent, CardTitle, CardHeader } from '../../components/Card';
+import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
 import { PageHeader, EmptyState, SectionHeader } from '../../components';
 import { BookOpen, Play, FileText, ArrowLeft, Clock, Layers, CheckCircle2 } from 'lucide-react';
+import { programImage } from '../../lib/demoImages';
 
 const LessonIcon = ({ kind }) => {
   if (kind === 'video') return <Play size={16} />;
@@ -54,6 +56,7 @@ export default function CourseDetail() {
         subtitle={course.summary}
         icon={BookOpen}
       />
+      <div className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-brand-50"><img src={programImage({ ...program, ...course })} alt="" width="1000" height="620" className="mx-auto aspect-[50/31] w-full max-w-3xl object-contain" /></div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card className="lg:col-span-2">

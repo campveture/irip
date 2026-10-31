@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "node --preserve-symlinks --preserve-symlinks-main dev.mjs",
-    "build": "node --preserve-symlinks --preserve-symlinks-main build.mjs",
+    "build": "npm run typecheck && node --preserve-symlinks --preserve-symlinks-main build.mjs",
+    "typecheck": "node --preserve-symlinks --preserve-symlinks-main node_modules/typescript/bin/tsc --noEmit",
+    "test": "npm run typecheck && node --import tsx --test tests/catalog.test.ts tests/navigation.test.ts tests/scholarships.test.ts tests/courses.test.ts tests/valueRoadmap.test.ts tests/growth.test.ts",
+    "test:e2e": "node --preserve-symlinks --preserve-symlinks-main node_modules/@playwright/test/cli.js test",
     "preview": "node --preserve-symlinks --preserve-symlinks-main node_modules/vite/bin/vite.js preview"
   },
   "dependencies": {
@@ -19,10 +22,16 @@
     "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
+    "@playwright/test": "1.58",
+    "@types/node": "^20.19.43",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
+    "tsx": "^4.23.15",
+    "typescript": "5.7",
     "vite": "^5.4.10"
   }
 }

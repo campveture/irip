@@ -51,6 +51,7 @@ function ItemCard({ kind, item }) {
     <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.summary}</p>
     {item.starts_at && <p className="mt-3 text-sm text-slate-700">{new Date(item.starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short', timeZone: item.timezone || 'Asia/Dhaka' })} ({item.timezone || 'Asia/Dhaka'})</p>}
     {item.deadline && <p className="mt-3 text-sm text-slate-700">Deadline: {item.deadline}</p>}
+    {kind === 'internships' && <p className="mt-3 text-sm text-slate-700">{item.compensation_status === 'paid' ? 'Paid opportunity' : 'Unpaid opportunity'} · {item.location} · {item.workload}</p>}
     <Link className="mt-5 inline-block text-sm font-semibold text-brand-700 hover:underline" to={`/${kind}/${id}`}>{definitions[kind].detailLabel} →</Link>
   </article>;
 }
@@ -79,6 +80,7 @@ export function ExpansionList({ kind }) {
     </div>
     {query && <button onClick={() => { setSearch(''); setQuery(''); }} className="mt-4 text-sm font-semibold text-brand-700 underline">Clear search</button>}
     {kind === 'ideas' && <div className="mt-8 rounded-lg bg-brand-50 p-5 text-sm text-brand-950">You can save private drafts and request moderated publication with explicit consent. <Link to="/ideas/mine" className="font-semibold underline">Manage my ideas</Link>.</div>}
+    {kind === 'internships' && <div className="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950"><strong>Board framework, not a placement promise.</strong> This local prototype starts without published opportunities or partner agreements. A listing workflow does not establish a live internship pipeline. <Link to="/student-value#internships-research" className="font-semibold underline">Read the internship & research-pathways proposal</Link>.</div>}
   </div>;
 }
 
@@ -103,6 +105,7 @@ export function ExpansionDetail({ kind }) {
         {item.speaker && <p className="mt-6 text-sm text-slate-600">Speaker: {item.speaker}</p>}
         {item.starts_at && <p className="mt-2 text-sm text-slate-600">Starts: {new Date(item.starts_at).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short', timeZone: item.timezone || 'Asia/Dhaka' })} ({item.timezone || 'Asia/Dhaka'})</p>}
         {item.eligibility && <section className="mt-6"><h2 className="font-semibold text-slate-900">Eligibility</h2><p className="mt-2 whitespace-pre-wrap text-slate-700">{item.eligibility}</p></section>}
+        {kind === 'internships' && <section className="mt-6 rounded-xl border border-slate-200 p-4"><h2 className="font-semibold text-slate-900">Role terms & safeguarding</h2><dl className="mt-3 space-y-3 text-sm">{[['Compensation', `${item.compensation_status}: ${item.pay_details}`], ['Workload', item.workload], ['Location', item.location], ['Supervisor', item.supervisor_name], ['Complaints contact', item.complaints_contact]].map(([label, value]) => <div key={label}><dt className="font-medium text-slate-900">{label}</dt><dd className="mt-1 text-slate-600">{value}</dd></div>)}</dl><p className="mt-4 text-xs leading-6 text-slate-500">No fee is required to access a role. Do not pay a host or disclose sensitive documents through this demo. Selection and placements are not guaranteed.</p></section>}
         {item.deadline && <p className="mt-4 text-sm text-slate-600">Deadline: {item.deadline}</p>}
         {kind === 'events' && <div className="mt-8 rounded-lg bg-brand-50 p-4 text-sm text-brand-950">{Date.parse(item.starts_at) > Date.now() ? <><Link to={`/events/${item.slug}/register`} className="font-semibold underline">Register for this event</Link><p className="mt-2">Registration is stored locally; no calendar invite or reminder is sent.</p></> : 'This event has already started. Registration is closed.'}</div>}
         {kind === 'internships' && <div className="mt-8 rounded-lg bg-brand-50 p-4 text-sm text-brand-950">{item.deadline >= new Date().toISOString().slice(0, 10) ? <><Link to={`/internships/${item.slug}/apply`} className="font-semibold underline">Apply for this opportunity</Link><p className="mt-2">Applications stay in the local review queue and are not shared with a partner. Selection is not guaranteed.</p></> : 'This application deadline has passed.'}</div>}

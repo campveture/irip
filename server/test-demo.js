@@ -112,6 +112,12 @@ async function main() {
   // 15. Mentors list
   r = await fetchJson(`${BASE}/api/public/mentors`);
   check('mentors list', r.status === 200 && Array.isArray(r.body), `count=${r.body.length}`);
+  if (r.body?.[0]?.id) {
+    const detail = await fetchJson(`${BASE}/api/public/mentors/${r.body[0].id}`);
+    check('mentor detail by ID', detail.status === 200 && detail.body.id === r.body[0].id);
+    const wildcard = await fetchJson(`${BASE}/api/public/mentors/%25`);
+    check('mentor wildcard does not reveal a profile', wildcard.status === 404);
+  }
 
   r = await fetchJson(`${BASE}/api/public/courses/research-literacy`);
   check('public lessons hide private media', r.status === 200 && r.body.modules.every(m => m.lessons.every(l => !('url' in l) && !('transcript' in l))));

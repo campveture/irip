@@ -6,6 +6,7 @@ import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
 import { PageHeader } from '../../components';
 import { ArrowLeft, Sparkles } from 'lucide-react';
+import { demoImages } from '../../lib/demoImages';
 
 export default function About() {
   const [page, setPage] = useState(null);
@@ -29,6 +30,7 @@ export default function About() {
         <ArrowLeft className="h-4 w-4 mr-1" /> Back to home
       </Link>
       <PageHeader title={page?.title ?? 'About'} subtitle="Who we are and what we're building" icon={Sparkles} />
+      <figure className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white"><img src={demoImages.team} alt="" width="1200" height="800" className="aspect-[2/1] w-full object-cover" /><figcaption className="px-4 py-2 text-xs text-slate-500">Collaboration in practice / Stock team, demo imagery</figcaption></figure>
       <Card>
         <CardContent className="p-6 sm:p-8">
           {(page?.body ?? '').split('\n').map((line, i) => (

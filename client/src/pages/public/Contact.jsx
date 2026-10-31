@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../lib/api';
 import { Alert } from '../../components/Alert';
+import { demoImages } from '../../lib/demoImages';
 
 export default function Contact() {
   const [name, setName] = useState('');
@@ -30,6 +31,7 @@ export default function Contact() {
       <p className="mt-3 text-slate-600">Send a question to the operations team. This local demo stores the inquiry in its sample CRM; it does not send an email or create a booking.</p>
       <p className="mt-2 text-sm text-slate-600">Already learning with us? <Link to="/app/support" className="font-semibold text-brand-700 underline">Open a support ticket</Link>.</p>
     </div>
+    <figure className="mt-8 max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white"><img src={demoImages.writing} alt="" width="1200" height="800" className="aspect-[2/1] w-full object-cover" /><figcaption className="px-4 py-2 text-xs text-slate-500">Put your question into words. / Stock photo</figcaption></figure>
     <div className="mt-8 max-w-2xl rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
       {sent ? <div role="status"><h2 className="text-xl font-semibold text-slate-900">Inquiry saved</h2><p className="mt-2 text-slate-600">Your message is now in the local demo inquiry queue.</p><button onClick={() => { setSent(false); setMessage(''); }} className="mt-4 text-sm font-semibold text-brand-700 underline">Send another question</button></div> : <>
         {error && <div className="mb-5"><Alert type="error">{error}</Alert></div>}

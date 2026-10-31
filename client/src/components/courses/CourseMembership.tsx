@@ -1,0 +1,10 @@
+import { Link } from 'react-router-dom';
+import { Surface } from '../shared/Surface';
+import { outlineClass, parseCourseCatalog } from './courseModel';
+import { useCourseResource } from './useCourseResource';
+import { PlanProposal } from './PlanProposal';
+
+export default function CourseMembership() {
+  const { state, reload } = useCourseResource('/catalog', parseCourseCatalog);
+  return <div className="mx-auto max-w-5xl space-y-6 py-5"><div><p className="text-xs font-semibold uppercase tracking-wider text-brand-700">Recorded-course membership / Proposal</p><h1 className="mt-3 text-3xl font-semibold text-brand-950">One membership. Go deeper.</h1><p className="mt-4 text-sm leading-7 text-slate-600">The proposed BDT 2,000 subscription would unlock every approved independent recorded course while active. Monthly billing is an assumption awaiting confirmation.</p></div><div className="grid gap-6 lg:grid-cols-2"><Surface className="p-6"><h2 className="text-xl font-semibold text-brand-950">No subscription has been activated</h2><p className="mt-4 text-sm leading-7 text-slate-600">Checkout, recurring billing and protected streaming are unavailable. This demo does not create a charge, saved card, renewal date, membership entitlement or cancellation request.</p><p className="mt-4 text-sm leading-7 text-slate-600">Existing one-time course and bootcamp grants remain separate in your learning and billing records. This proposed membership does not replace them, include live supervision, or promise a certificate.</p><div className="mt-5 flex flex-wrap gap-3"><Link to="/app/courses" className={outlineClass}>Explore recorded library</Link><Link to="/app/learning" className={outlineClass}>My cohort learning</Link><Link to="/app/billing" className={outlineClass}>Billing records</Link></div></Surface>{state.status === 'ready' ? <PlanProposal plan={state.data.plan} compact /> : state.status === 'error' ? <Surface className="p-5"><p role="alert">{state.message}</p><button onClick={reload} className={`${outlineClass} mt-3`}>Retry membership proposal</button></Surface> : <p role="status">Loading membership proposal…</p>}</div></div>;
+}

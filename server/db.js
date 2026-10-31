@@ -45,6 +45,101 @@ function initSchema() {
         updated_at TEXT
       );
 
+      CREATE TABLE IF NOT EXISTS scholarship_profiles (
+        user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        profile_json TEXT NOT NULL,
+        consent_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS recorded_courses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT UNIQUE NOT NULL,
+        instructor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        title TEXT NOT NULL,
+        summary TEXT NOT NULL,
+        topic TEXT NOT NULL,
+        level TEXT NOT NULL,
+        language TEXT NOT NULL,
+        outcomes_json TEXT NOT NULL,
+        lessons_json TEXT NOT NULL,
+        artwork TEXT NOT NULL DEFAULT 'causal',
+        state TEXT NOT NULL DEFAULT 'draft' CHECK(state IN ('draft', 'demo_catalog')),
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS growth_workspaces (
+        user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        goal TEXT NOT NULL,
+        language TEXT NOT NULL CHECK(language IN ('en', 'bn')),
+        weekly_minutes INTEGER NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS growth_steps (
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        step_id TEXT NOT NULL,
+        notes TEXT NOT NULL,
+        self_completed INTEGER NOT NULL DEFAULT 0,
+        updated_at TEXT NOT NULL,
+        PRIMARY KEY(user_id, step_id)
+      );
+      CREATE TABLE IF NOT EXISTS growth_artifacts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        kind TEXT NOT NULL CHECK(kind IN ('baseline', 'capstone', 'application')),
+        title TEXT NOT NULL,
+        body TEXT NOT NULL,
+        contribution TEXT NOT NULL,
+        limitations TEXT NOT NULL,
+        state TEXT NOT NULL DEFAULT 'draft' CHECK(state IN ('draft', 'submitted', 'changes_requested', 'reviewed')),
+        reviewer_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        revision INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS growth_reviews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        artifact_id INTEGER NOT NULL REFERENCES growth_artifacts(id) ON DELETE CASCADE,
+        revision INTEGER NOT NULL,
+        snapshot_json TEXT NOT NULL,
+        reviewer_id INTEGER NOT NULL REFERENCES users(id),
+        rubric_json TEXT NOT NULL,
+        feedback TEXT NOT NULL,
+        decision TEXT NOT NULL CHECK(decision IN ('changes_requested', 'reviewed')),
+        created_at TEXT NOT NULL,
+        UNIQUE(artifact_id, revision)
+      );
+      CREATE TABLE IF NOT EXISTS growth_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        kind TEXT NOT NULL,
+        message TEXT NOT NULL,
+        state TEXT NOT NULL DEFAULT 'requested' CHECK(state IN ('requested', 'closed', 'cancelled')),
+        response TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS growth_alumni (
+        user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        alias TEXT NOT NULL,
+        interest TEXT NOT NULL,
+        state TEXT NOT NULL DEFAULT 'pending' CHECK(state IN ('pending', 'approved')),
+        consent_at TEXT NOT NULL,
+        moderated_by INTEGER REFERENCES users(id),
+        updated_at TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS scholarship_applications (
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        opportunity_id TEXT NOT NULL,
+        state TEXT NOT NULL CHECK(state IN ('saved', 'researching', 'preparing', 'submitted', 'decision_received', 'withdrawn')),
+        personal_deadline TEXT,
+        notes TEXT NOT NULL DEFAULT '',
+        updated_at TEXT NOT NULL,
+        PRIMARY KEY (user_id, opportunity_id)
+      );
+
       CREATE TABLE IF NOT EXISTS mentor_profiles (
         user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
         bio TEXT,

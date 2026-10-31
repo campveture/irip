@@ -91,15 +91,15 @@ router.get('/mentors', (req, res) => {
 });
 
 router.get('/mentors/:slug', (req, res) => {
-  // slug-based mentor detail; fallback to id lookup
+  // Exact ID/name only: wildcard LIKE could return an unrelated approved profile.
   const mentor = db
     .prepare(
       `SELECT u.id, u.full_name, m.bio, m.expertise, m.status
        FROM mentor_profiles m
        JOIN users u ON u.id = m.user_id
-       WHERE u.status = 'active' AND m.status = 'approved' AND (u.id = ? OR u.full_name LIKE ?)`
+        WHERE u.status = 'active' AND m.status = 'approved' AND (u.id = ? OR u.full_name = ?)`
     )
-    .get(req.params.slug, `%${req.params.slug}%`);
+    .get(req.params.slug, req.params.slug);
   if (!mentor) return res.status(404).json({ error: 'not_found', message: 'Mentor not found.' });
   res.json(mentor);
 });

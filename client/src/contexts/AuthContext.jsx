@@ -46,7 +46,8 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    try { await api.post('/auth/logout'); } catch (_) {}
+    // Do not claim sign-out succeeded while an active server cookie may remain.
+    await api.post('/auth/logout');
     setUser(null);
     setRoles([]);
   };

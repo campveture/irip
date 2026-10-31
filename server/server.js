@@ -26,6 +26,10 @@ const app = express();
 app.use(cors({ origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], credentials: true }));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use('/api/growth', (error, req, res, next) => {
+  if (error.type !== 'entity.parse.failed' && error.type !== 'entity.too.large') return next(error);
+  res.set('Cache-Control', 'no-store').status(error.type === 'entity.too.large' ? 413 : 400).json({ message: 'Provide a valid JSON object within the request size limit.' });
+});
 
 app.use(
   session({
@@ -56,6 +60,9 @@ app.get('/api/me', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/student', studentRoutes);
+app.use('/api/scholarships', require('./routes/scholarships'));
+app.use('/api/recorded-courses', require('./routes/recorded-courses'));
+app.use('/api/growth', require('./routes/growth'));
 app.use('/api/mentor', mentorRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/crm', crmRoutes);
@@ -81,6 +88,7 @@ const userCount = db.prepare('SELECT COUNT(*) AS c FROM users').get().c;
 if (userCount === 0) {
   seed();
 }
+require('./recorded-courses').seedRecordedCourses();
 // Synthetic assignment only; restrict mentor demo records to its seeded cohort.
 db.prepare(`INSERT OR IGNORE INTO teaching_assignments(mentor_id, cohort_id)
   SELECT u.id, c.id FROM users u JOIN cohorts c ON c.name = 'Cohort November 2026'

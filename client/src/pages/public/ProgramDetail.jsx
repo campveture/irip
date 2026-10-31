@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../lib/api';
@@ -7,9 +7,10 @@ import { Card, CardContent, CardTitle } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
-import { ProgressBar, EmptyState, SectionHeader } from '../../components';
-import { easeOut, slideUp, stagger, staggerItem, tabContent, accordionContent, hoverLift } from '../../lib/motion';
-import { ArrowLeft, CalendarDays, BookOpen, Tag, Users, Clock, CheckCircle2, Sparkles, Layers, ChevronDown, ChevronRight } from 'lucide-react';
+import { EmptyState, SectionHeader } from '../../components';
+import { easeOut, stagger, staggerItem } from '../../lib/motion';
+import { ArrowLeft, CalendarDays, BookOpen, Tag, Users, Clock, Sparkles, Layers, ChevronRight } from 'lucide-react';
+import { programImage } from '../../lib/demoImages';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: Sparkles },
@@ -43,6 +44,7 @@ export default function ProgramDetail() {
   const [error, setError] = useState(null);
   const [tab, setTab] = useState('overview');
   const [openModules, setOpenModules] = useState({});
+  const tabsRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,9 +61,18 @@ export default function ProgramDetail() {
   if (!program) return <div className="container-page py-8"><Alert type="error">Program not found.</Alert></div>;
 
   const toggleModule = (key) => setOpenModules((s) => ({ ...s, [key]: !s[key] }));
+  const selectTab = (key) => {
+    // Anchor the tab row before replacing a taller panel with a shorter one.
+    // Otherwise the browser clamps scroll position and the whole page appears to jump.
+    if (tabsRef.current) {
+      const top = tabsRef.current.getBoundingClientRect().top + window.scrollY - 72;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'instant' });
+    }
+    setTab(key);
+  };
 
   return (
-    <div className="container-page py-8">
+    <div className="container-page min-w-0 w-full py-8">
       <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, ease: easeOut }}>
         <Link to="/programs" className="text-sm text-slate-600 hover:text-brand-600 inline-flex items-center mb-6 transition-colors group">
           <ArrowLeft className="h-4 w-4 mr-1 transition-transform group-hover:-translate-x-0.5" /> All programs
@@ -80,8 +91,9 @@ export default function ProgramDetail() {
           initial="hidden"
           animate="visible"
           variants={stagger(0.08)}
-          className="relative z-10"
+          className="relative z-10 grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center"
         >
+          <div>
           <motion.div variants={staggerItem} className="flex flex-wrap items-center gap-2 mb-4">
             <Badge className="bg-white/10 border-white/20 text-brand-200">{program.domain}</Badge>
             <Badge className="bg-white/10 border-white/20 text-brand-200">{program.level}</Badge>
@@ -99,23 +111,38 @@ export default function ProgramDetail() {
             <Link to="/contact" className="inline-flex items-center rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-brand-900 shadow-soft hover:bg-brand-50 transition-colors">
               Ask about this program
             </Link>
-            <button onClick={() => setTab('courses')} className="inline-flex items-center rounded-lg border border-white/40 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors">
+            <button type="button" onClick={() => selectTab('courses')} className="inline-flex items-center rounded-lg border border-white/40 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors">
               Browse courses
             </button>
           </motion.div>
+          </div>
+          <div className="overflow-hidden rounded-xl border border-white/20"><img src={programImage(program)} alt="" width="1000" height="620" className="aspect-[50/31] w-full object-cover" /></div>
         </motion.div>
       </motion.div>
 
       {/* Sticky tabs */}
-      <div className="sticky top-16 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 mb-6 bg-slate-50/80 backdrop-blur border-b border-slate-200">
-        <div className="max-w-7xl mx-auto flex flex-wrap gap-2">
-          {TABS.map((t) => (
+      <div ref={tabsRef} data-scroll-offset className="sticky top-16 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 mb-6 bg-slate-50/90 backdrop-blur border-b border-slate-200">
+        <div role="tablist" aria-label="Program details" className="max-w-7xl mx-auto flex gap-2 overflow-x-auto">
+          {TABS.map((t, index) => (
             <motion.button
               key={t.key}
-              onClick={() => setTab(t.key)}
+              type="button"
+              role="tab"
+              id={`program-tab-${t.key}`}
+              aria-selected={tab === t.key}
+              aria-controls="program-tab-panel"
+              tabIndex={tab === t.key ? 0 : -1}
+              onKeyDown={(event) => {
+                const next = event.key === 'ArrowRight' ? (index + 1) % TABS.length : event.key === 'ArrowLeft' ? (index - 1 + TABS.length) % TABS.length : null;
+                if (next === null) return;
+                event.preventDefault();
+                selectTab(TABS[next].key);
+                event.currentTarget.parentElement.querySelectorAll('[role="tab"]')[next].focus();
+              }}
+              onClick={() => selectTab(t.key)}
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.97 }}
-              className={`relative inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+              className={`relative inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                 tab === t.key ? 'bg-brand-600 text-white shadow-soft' : 'text-slate-600 hover:bg-white hover:text-brand-600'
               }`}
             >
@@ -125,14 +152,15 @@ export default function ProgramDetail() {
         </div>
       </div>
 
-      {/* Tab content with AnimatePresence */}
-      <AnimatePresence mode="wait">
+      {/* Keep a stable panel footprint so switching to a short section doesn't collapse the page. */}
+      <div className="min-h-[28rem]">
         <motion.div
           key={tab}
-          variants={tabContent}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
+          id="program-tab-panel"
+          role="tabpanel"
+          aria-labelledby={`program-tab-${tab}`}
+          initial={false}
+          animate={{ opacity: 1 }}
         >
           {tab === 'overview' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -140,7 +168,7 @@ export default function ProgramDetail() {
                 <CardContent className="p-6">
                   <h3 className="text-base font-semibold mb-3">About this program</h3>
                   <p className="text-slate-600 leading-relaxed">{program.summary}</p>
-                  <motion.div variants={stagger(0.06)} initial="hidden" animate="visible" className="mt-6 grid grid-cols-2 gap-4">
+                  <motion.div variants={stagger(0.06)} initial="hidden" animate="visible" className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {[
                       { label: 'Domain', value: program.domain, icon: Sparkles },
                       { label: 'Level', value: program.level, icon: Layers },
@@ -176,7 +204,7 @@ export default function ProgramDetail() {
 
           {tab === 'cohorts' && (
             <div>
-              <SectionHeader title="Open cohorts" subtitle="Enrollment and capacity at a glance" />
+              <SectionHeader title="Open cohorts" subtitle="Proposed dates and capacity; live enrollment is unavailable" />
               {cohorts.length === 0 ? (
                 <EmptyState icon={CalendarDays} title="No open cohorts" description="Cohorts will appear here once scheduled." />
               ) : (
@@ -196,8 +224,7 @@ export default function ProgramDetail() {
                             <span className="text-slate-600">Capacity</span>
                             <span className="font-semibold">{c.capacity ?? 0} seats</span>
                           </div>
-                          <ProgressBar value={0} max={c.capacity || 1} color="slate" size="sm" showValue={false} />
-                          <p className="mt-3 text-xs text-slate-500">Enrollment disabled in this demo.</p>
+                          <p className="mt-3 text-xs text-slate-500">Seat availability is not verified. Enrollment is disabled in this demo.</p>
                         </CardContent>
                       </Card>
                     </motion.div>
@@ -214,19 +241,13 @@ export default function ProgramDetail() {
                 <EmptyState icon={Tag} title="No published offers" description="Offers will appear here once defined." />
               ) : (
                 <motion.div variants={stagger(0.1)} initial="hidden" animate="visible" className="grid md:grid-cols-3 gap-4">
-                  {offers.map((o, i) => (
+                  {offers.map((o) => (
                     <motion.div key={o.id} variants={staggerItem} whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-                      <Card className={i === 1 ? 'ring-2 ring-brand-500' : ''}>
+                      <Card>
                         <CardContent className="p-6">
-                          {i === 1 && <Badge variant="open" className="mb-2">Recommended</Badge>}
                           <div className="text-3xl font-bold text-slate-900 mb-1">BDT {Number(o.price ?? 0).toLocaleString()}</div>
                           <div className="text-xs text-slate-500 mb-4">{o.currency ?? 'BDT'} · {o.name ?? 'Program fee'}</div>
-                          <ul className="space-y-2 text-sm text-slate-600 mb-4">
-                            <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success-500" /> Full cohort access</li>
-                            <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success-500" /> Supervised project slot</li>
-                            <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success-500" /> Certificate on completion</li>
-                          </ul>
-                          <p className="text-xs text-slate-500 mb-3">Enrollment and payment are disabled in this demo.</p>
+                          <p className="text-xs text-slate-500 mb-3">Illustrative offer. Benefits, eligibility, enrollment and payment require approval.</p>
                           <Link to={`/enroll/${o.id}`} className="block">
                             <Button variant="outline" className="w-full">View offer status</Button>
                           </Link>
@@ -267,7 +288,7 @@ export default function ProgramDetail() {
                               </div>
                             </div>
                             <div className="flex items-center gap-3 shrink-0">
-                              <Badge variant="default">{c.modules?.length || 0} modules</Badge>
+                              <span className="text-xs font-medium text-slate-500">Course overview</span>
                               <motion.div animate={{ rotate: open ? 90 : 0 }} transition={{ duration: 0.2 }}>
                                 <ChevronRight className="h-5 w-5 text-slate-400" />
                               </motion.div>
@@ -301,7 +322,7 @@ export default function ProgramDetail() {
             </div>
           )}
         </motion.div>
-      </AnimatePresence>
+      </div>
     </div>
   );
 }

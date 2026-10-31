@@ -1,8 +1,8 @@
 // Recharts theme tokens — keep chart styling consistent with the design system.
 
 export const CHART_COLORS = {
-  brand: '#2563eb',
-  brandLight: '#60a5fa',
+  brand: '#176b4b',
+  brandLight: '#a7c789',
   success: '#10b981',
   warning: '#f59e0b',
   danger: '#ef4444',
@@ -28,7 +28,7 @@ export const tooltipStyle = {
     fontSize: '12px',
     padding: '8px 12px',
   },
-  cursor: { fill: 'rgba(37, 99, 235, 0.06)' },
+  cursor: { fill: 'rgba(23, 107, 75, 0.06)' },
 };
 
 export const axisStyle = {

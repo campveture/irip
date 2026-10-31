@@ -4,6 +4,7 @@ import { Card, CardContent, CardTitle, CardHeader } from '../../components/Card'
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
 import { Banknote, Clock, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function MentorEarnings() {
   const [data, setData] = useState(null);
@@ -39,7 +40,8 @@ export default function MentorEarnings() {
   return (
     <div className="container-page py-8">
       <h1 className="text-2xl font-bold text-slate-900 mb-6">Earnings</h1>
-      <p className="text-slate-500 text-sm mb-8">Your payout summary.</p>
+      <p className="text-slate-500 text-sm mb-8">Synthetic live-teaching and supervision records, not recorded-course royalties. No live payout is available.</p>
+      <div className="mb-6 rounded-2xl border border-brand-200 bg-brand-50 p-5"><h2 className="text-lg font-semibold text-brand-950">Recorded-course creator revenue</h2><p className="mt-2 text-sm leading-6 text-slate-600">Not calculated. Verified watch time, creator-pool terms and payout settlement are not connected. The figures below do not include subscription revenue.</p><Link to="/mentor/courses" className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-brand-800 underline">Open course studio & illustrative revenue model</Link></div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card>

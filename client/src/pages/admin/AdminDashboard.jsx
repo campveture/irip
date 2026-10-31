@@ -6,10 +6,11 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/Card'
 import { Badge } from '../../components/Badge';
 import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
-import { StatCard, ProgressBar, PageHeader, SectionHeader, EmptyState } from '../../components';
+import { StatCard, ProgressBar, SectionHeader, EmptyState } from '../../components';
 import { BarChart as RBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { CHART_COLORS, CHART_PALETTE, tooltipStyle, axisStyle, gridStyle } from '../../lib/charts';
 import { Users, Banknote, Layers, AlertTriangle, Headphones, TrendingUp, ArrowRight, Building2, CalendarDays } from 'lucide-react';
+import { demoImages } from '../../lib/demoImages';
 
 function statusVariant(v) {
   const s = String(v || '').toLowerCase();
@@ -80,24 +81,25 @@ export default function AdminDashboard() {
 
   return (
     <div className="container-page py-6 animate-fade-in">
-      <PageHeader
-        title="Admin Dashboard"
-        subtitle={`Signed in as ${user?.full_name} · ${roles.join(', ')}`}
-        icon={Layers}
-        actions={
-          <Link to="/admin/learners" className="inline-flex items-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-soft hover:bg-brand-700 transition-colors">
-            Manage learners <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        }
-      />
+      <div className="relative mb-8 overflow-hidden rounded-2xl bg-brand-900 p-6 text-white sm:p-9">
+        <img src={demoImages.data} alt="" width="1200" height="800" className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-1/3 object-cover opacity-25 lg:block" />
+        <div className="relative">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[.2em] text-brand-300">Operations overview</p>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div><h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">The work at a glance.</h1><p className="mt-2 max-w-xl text-sm leading-6 text-white/75">Signed in as {user?.full_name} · {roles.join(', ')}. Local demo records only.</p></div>
+          <Link to="/admin/learners" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-brand-200 px-5 text-sm font-semibold text-brand-900 transition hover:bg-white">Manage learners <ArrowRight className="ml-2 h-4 w-4" /></Link>
+        </div>
+        <p className="mt-4 hidden text-xs text-white/60 lg:block">Stock analytics photo · Not academy metrics</p>
+        </div>
+      </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <StatCard icon={Banknote} label="Paid enrollments" value={stats?.paid_enrollments ?? 0} hint="Active enrollments" color="success" />
         <StatCard icon={TrendingUp} label="Net collected cash" value={`BDT ${Number(stats?.net_collected_cash ?? 0).toLocaleString()}`} hint="Succeeded payments" color="brand" />
         <StatCard icon={Building2} label="Total seats" value={stats?.seats ?? 0} hint="Across all cohorts" color="slate" />
-        <StatCard icon={AlertTriangle} label="At-risk learners" value={stats?.risks ?? 0} hint="Needs attention" color="warning" />
-        <StatCard icon={Headphones} label="Support queues" value={stats?.queues ?? 0} hint="Open tickets" color="danger" />
+        <StatCard icon={CalendarDays} label="Cohorts shown" value={cohorts.length} hint="Latest cohort records" color="warning" />
+        <StatCard icon={Headphones} label="Open tickets" value={stats?.queues ?? 0} hint="Support queue" color="danger" />
       </div>
 
       {/* Charts row */}
