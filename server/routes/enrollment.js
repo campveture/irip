@@ -1,9 +1,14 @@
 const express = require('express');
 const { db } = require('../db');
 const { requireAuth } = require('../middleware/auth');
-const { commercialStatus } = require('../catalog');
+const { commercialStatus, programCohorts } = require('../catalog');
 
 const router = express.Router();
+
+// Demo checkout cannot create orders, reserve seats, redirect to a provider or settle payments.
+router.post('/launch-checkout', (req, res) => {
+  res.set('Cache-Control', 'no-store').status(501).json({ error: 'demo_only', message: 'Payment collection is disabled. No order, enrollment or seat hold was created.' });
+});
 
 router.get('/offers/:id', (req, res) => {
   const offer = db.prepare(`SELECT o.id, o.program_id, o.type, o.price, o.currency, o.admission_mode,
@@ -11,10 +16,9 @@ router.get('/offers/:id', (req, res) => {
     FROM offers o JOIN programs p ON p.id = o.program_id
     WHERE o.id = ? AND o.status = 'published' AND p.status = 'published'`).get(req.params.id);
   if (!offer) return res.status(404).json({ error: 'not_found', message: 'Offer not found.' });
-  const cohorts = db.prepare(`SELECT c.id, c.name, c.start_date, c.end_date, c.capacity,
-      (SELECT COUNT(*) FROM enrollments e WHERE e.cohort_id = c.id AND e.state IN ('active','pending')) AS allocated
-    FROM cohorts c WHERE c.program_id = ? AND c.status = 'open' ORDER BY c.start_date`).all(offer.program_id);
-  res.json({ offer, cohorts, commercial_status: commercialStatus });
+  const cohorts = programCohorts(offer.program_id);
+  const nextFee = cohorts[0]?.launch?.total_fee;
+  res.json({ offer: nextFee === undefined ? offer : { ...offer, price: nextFee, standard_price: offer.price }, cohorts, commercial_status: commercialStatus });
 });
 
 router.get('/admission-offers/:id', requireAuth, (req, res) => {

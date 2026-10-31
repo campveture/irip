@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../../lib/api';
 import { Alert } from '../../components/Alert';
+import { INSTALLMENT_SUMMARY } from '../../components/pricing/installmentModel';
 
 function useRecord(path) {
   const [record, setRecord] = useState(null);
@@ -43,9 +44,12 @@ export function EnrollmentOffer() {
     {record && <>
       <h2 className="mt-5 text-xl font-semibold text-slate-900">{record.offer.program_title}</h2>
       <p className="mt-2 text-slate-600">{record.offer.summary}</p>
-      <p className="mt-4 text-sm text-slate-700">Proposed fee: {record.offer.currency} {Number(record.offer.price).toLocaleString()} · Admission path: {record.offer.admission_mode}</p>
+      <p className="mt-4 text-sm text-slate-700">Proposed total program fee: {record.offer.currency} {Number(record.offer.price).toLocaleString()} · Admission path: {record.offer.admission_mode}</p>
+      <p className="mt-3 text-sm leading-6 text-slate-600">{INSTALLMENT_SUMMARY} The first two installments are rounded down to the nearest BDT 1,000; the final installment covers the balance. See the program’s Pricing tab for the breakdown.</p>
+      <Link to={`/programs/${record.offer.program_slug}#pricing`} className="mt-3 inline-block text-sm font-semibold text-brand-700 underline">View installment breakdown</Link>
       <h3 className="mt-7 font-semibold text-slate-900">Proposed cohorts</h3>
-      {record.cohorts.length ? <ul className="mt-3 space-y-2">{record.cohorts.map((cohort) => <li key={cohort.id} className="rounded-md border border-slate-200 p-3 text-sm text-slate-700">{cohort.name} · {cohort.start_date} to {cohort.end_date} · {Math.max(0, cohort.capacity - cohort.allocated)} unallocated seats in demo data</li>)}</ul> : <p className="mt-2 text-slate-600">No cohort is open.</p>}
+      {record.cohorts.length ? <ul className="mt-3 space-y-2">{record.cohorts.map((cohort) => <li key={cohort.id} className="rounded-md border border-slate-200 p-3 text-sm text-slate-700">{cohort.name} · {cohort.start_date} to {cohort.end_date} · {cohort.seats.remaining} unallocated seats in demo data{cohort.launch && <><p className="mt-2">BDT {cohort.launch.total_fee.toLocaleString()} total · Fee applies to this intake only.</p><Link to={`/enrol/research-bootcamp/${cohort.launch.key}`} className="mt-2 inline-block font-semibold text-brand-700 underline">Enrol · Demo checkout</Link></>}</li>)}</ul> : <p className="mt-2 text-slate-600">No cohort is open.</p>}
+      <Link to={`/programs/${record.offer.program_slug}#cohorts`} className="mt-3 inline-block text-sm font-semibold text-brand-700 underline">Review weekend timetable and study workload</Link>
       <ApprovalNotice />
       <Link to="/contact" className="mt-6 inline-block text-sm font-semibold text-brand-700 underline">Ask about this program</Link>
     </>}

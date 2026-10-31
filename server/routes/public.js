@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { db } = require('../db');
 const { requireAuth, requireRoles } = require('../middleware/auth');
-const { programOffers, enrollmentOption } = require('../catalog');
+const { programOffers, enrollmentOption, programCohorts } = require('../catalog');
+const { syllabusFor } = require('../program-planning');
+const { launchProgramDisplay } = require('../launch-plan');
 
 router.post('/inquiries', (req, res) => {
   const name = String(req.body?.name || '').trim();
@@ -42,16 +44,19 @@ router.get('/programs', (req, res) => {
   }
   sql += ' GROUP BY p.id ORDER BY p.created_at DESC';
   const rows = db.prepare(sql).all(params);
-  res.json(rows.map((row) => ({ ...row, enrollment: enrollmentOption(row.id) })));
+  res.json(rows.map((row) => ({ ...launchProgramDisplay(row), enrollment: enrollmentOption(row.id) })));
 });
 
 router.get('/programs/:slug', (req, res) => {
   const program = db.prepare('SELECT * FROM programs WHERE slug = ? AND status = ?').get(req.params.slug, 'published');
   if (!program) return res.status(404).json({ error: 'not_found', message: 'Program not found.' });
-  const cohorts = db.prepare('SELECT * FROM cohorts WHERE program_id = ? AND status = ? ORDER BY start_date').all(program.id, 'open');
+  const cohorts = programCohorts(program.id);
   const offers = programOffers(program.id);
   const courses = db.prepare('SELECT * FROM courses WHERE program_id = ? AND status = ? ORDER BY id ASC').all(program.id, 'published');
-  res.json({ program, cohorts, offers, courses, enrollment: enrollmentOption(program.id) });
+  const assessmentCount = db.prepare(`SELECT COUNT(*) AS count FROM assessments a JOIN modules m ON m.id = a.module_id
+    JOIN courses c ON c.id = m.course_id WHERE c.program_id = ? AND c.status = 'published'`).get(program.id).count;
+  res.json({ program: launchProgramDisplay(program), cohorts, offers, courses: courses.map(course => ({ ...course, syllabus: syllabusFor(course.slug) })),
+    assessment_count: assessmentCount, enrollment: enrollmentOption(program.id) });
 });
 
 router.get('/courses', (req, res) => {
@@ -73,7 +78,7 @@ router.get('/courses/:slug', (req, res) => {
     const lessons = db.prepare('SELECT id, module_id, title, kind, duration_min, release_window FROM lessons WHERE module_id = ? ORDER BY id').all(m.id);
     return { ...m, lessons };
   });
-  res.json({ course, program, modules: modulesWithLessons,
+  res.json({ course, program, modules: modulesWithLessons, syllabus: syllabusFor(course.slug),
     enrollment: program ? enrollmentOption(program.id) : null });
 });
 
@@ -160,7 +165,7 @@ router.get('/pages/:key', (req, res) => {
     },
     faq: {
       title: 'Frequently Asked Questions',
-      body: 'Q: Can I enroll without prior research experience?\nA: Yes. The bootcamp starts with research literacy and builds up to a supervised project.\n\nQ: How long is a cohort?\nA: Typically three months, with weekly sessions and a final project.\n\nQ: Is a certificate guaranteed?\nA: No. Certificates are issued only when all completion requirements, including the final project, are met.\n\nQ: Can I learn at my own pace?\nA: Sessions are scheduled, but assignments and materials remain available for review within your cohort window.\n\nQ: How are supervisors assigned?\nA: Supervisor matching considers capacity, expertise, and project fit. You can see supervisor profiles before applying to a project.\n\nQ: Is payment available now?\nA: No. This is a local demonstration. Payment, refund, and enrollment settlement are disabled until policies and providers are approved.\n\nQ: Is my data real?\nA: No. This demo uses synthetic people and transactions. Do not enter real personal information.',
+      body: 'Q: Can I enroll without prior research experience?\nA: Yes. The bootcamp starts with research literacy and builds up to a supervised project.\n\nQ: How long is a cohort?\nA: Typically three months, with weekly sessions and a final project.\n\nQ: Is a certificate guaranteed?\nA: No. Certificates are issued only when all completion requirements, including the final project, are met.\n\nQ: Can I learn at my own pace?\nA: Sessions are scheduled, but assignments and materials remain available for review within your cohort window.\n\nQ: How are supervisors assigned?\nA: Supervisor matching considers capacity, expertise, and project fit. You can see supervisor profiles before applying to a project.\n\nQ: How will program installments work?\nA: The proposed total program fee is divided into three installments: first at enrollment, second when classes start, and third one calendar month after classes start. The first two are rounded down to the nearest BDT 1,000 and the final installment covers the balance. For a BDT 25,000 program, that is BDT 8,000 + BDT 8,000 + BDT 9,000. See the program Pricing tab for the breakdown. These are installments of one program fee, not a recurring subscription. The independent recorded-course membership remains separate. Confirmed cohort dates and financial approval are required before collecting payments.\n\nQ: Is payment available now?\nA: No. This is a local demonstration. Payment, refund, and enrollment settlement are disabled until policies and providers are approved.\n\nQ: Is my data real?\nA: No. This demo uses synthetic people and transactions. Do not enter real personal information.',
     },
     contact: {
       title: 'Contact Us',

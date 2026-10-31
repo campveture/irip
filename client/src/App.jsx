@@ -48,6 +48,7 @@ import { ExpansionList, ExpansionDetail, PartnerPage } from './pages/expansion/E
 import ExpansionCuration from './pages/expansion/ExpansionCuration';
 import { EventRegistration, IdeaWorkspace, InternshipApplication } from './pages/expansion/ExpansionActions';
 import StudentSubscription from './pages/student/StudentSubscription';
+import DemoCheckout from './components/pricing/DemoCheckout';
 
 // Student pages
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -139,6 +140,7 @@ function RouterApp() {
       <Route path="/ideas/mine" element={<IdeaWorkspace />} />
       <Route path="/internships/:slug/apply" element={<InternshipApplication />} />
       <Route path="/enroll/:offerId" element={<EnrollmentOffer />} />
+      <Route path="/enrol/:slug/:intake" element={<DemoCheckout />} />
       <Route path="/enroll/offers/:id" element={<AdmissionOfferResponse />} />
       <Route path="/checkout/:orderId" element={<Checkout />} />
       <Route path="/orders/:id/status" element={<OrderStatus />} />

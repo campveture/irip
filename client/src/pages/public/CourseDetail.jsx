@@ -9,6 +9,7 @@ import { Spinner } from '../../components/Spinner';
 import { PageHeader, EmptyState, SectionHeader } from '../../components';
 import { BookOpen, Play, FileText, ArrowLeft, Clock, Layers, CheckCircle2 } from 'lucide-react';
 import { programImage } from '../../lib/demoImages';
+import { CourseLearningPlan } from '../../components/programs/ProgramCurriculum';
 
 const LessonIcon = ({ kind }) => {
   if (kind === 'video') return <Play size={16} />;
@@ -73,9 +74,9 @@ export default function CourseDetail() {
             <p className="text-slate-600 leading-relaxed">{course.summary}</p>
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
               {[
-                { label: 'Modules', value: modules.length, icon: Layers },
-                { label: 'Lessons', value: totalLessons, icon: BookOpen },
-                { label: 'Est. minutes', value: totalMinutes || '—', icon: Clock },
+                { label: 'Demo modules', value: modules.length, icon: Layers },
+                { label: 'Lesson samples', value: totalLessons, icon: BookOpen },
+                { label: 'Sample minutes', value: totalMinutes || '—', icon: Clock },
               ].map((m) => (
                 <div key={m.label} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
                   <m.icon className="h-5 w-5 text-brand-600 shrink-0" />
@@ -104,7 +105,8 @@ export default function CourseDetail() {
         </Card>
       </div>
 
-      <SectionHeader title="Modules & lessons" subtitle="Published curriculum for this course" />
+      <CourseLearningPlan syllabus={data.syllabus} />
+      <SectionHeader title="Demo modules & lesson samples" subtitle="Existing sample records only, not the complete proposed teaching plan. Playback is not connected." />
       {modules.length === 0 ? (
         <EmptyState icon={BookOpen} title="No modules published yet" description="Modules will appear here once published." />
       ) : (

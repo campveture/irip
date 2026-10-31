@@ -244,6 +244,7 @@ function initSchema() {
         capacity INTEGER DEFAULT 30,
         start_date TEXT NOT NULL,
         end_date TEXT NOT NULL,
+        enrollment_deadline TEXT,
         status TEXT DEFAULT 'open',
         created_at TEXT NOT NULL
       );
@@ -557,6 +558,10 @@ function initSchema() {
         updated_at TEXT NOT NULL
       );
     `);
+    // Additive migration: existing cohort records keep an unset deadline until approved.
+    if (!db.prepare('PRAGMA table_info(cohorts)').all().some(column => column.name === 'enrollment_deadline')) {
+      db.exec('ALTER TABLE cohorts ADD COLUMN enrollment_deadline TEXT');
+    }
     db.prepare("UPDATE audit_events SET meta = '{\"redacted\":true}' WHERE action IN ('login', 'signup') AND meta LIKE '%password%'").run();
   });
   stmt();
@@ -816,16 +821,16 @@ function seed() {
     const addAnnouncement = db.prepare(
       'INSERT OR IGNORE INTO announcements(cohort_id, title, body, published_at, created_at) VALUES (?, ?, ?, ?, ?)'
     );
-    addAnnouncement.run(cohortBootcamp, 'Welcome to Cohort November 2026', 'Your bootcamp begins on 2 November 2026. Check your calendar for the first teaching session.', ts, ts);
-    addAnnouncement.run(cohortBootcamp, 'First Clinic Scheduled', 'Supervised clinic 1 is on 6 November 2026, 7:00 PM BDT.', ts, ts);
+    addAnnouncement.run(cohortBootcamp, 'Welcome to Cohort November 2026', 'The proposed cohort window begins on 2 November 2026. The first demo teaching session is Friday 6 November at 8:30 PM Bangladesh time. Dates require approval.', ts, ts);
+    addAnnouncement.run(cohortBootcamp, 'First Clinic Scheduled', 'The proposed first demo clinic is Saturday 7 November 2026, 8:30 PM Bangladesh time. This is not a live booking.', ts, ts);
 
     // ---------- Sessions ----------
     const addSession = db.prepare(
       'INSERT OR IGNORE INTO sessions(cohort_id, title, kind, starts_at, ends_at, timezone, meeting_link, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
     );
-    const wk1 = new Date('2026-11-02T19:00:00+06:00').toISOString();
-    addSession.run(cohortBootcamp, 'Teaching Session 1: Research Literacy', 'teaching', wk1, new Date(new Date(wk1).getTime() + 90 * 60000).toISOString(), 'Asia/Dhaka', null, ts);
-    addSession.run(cohortBootcamp, 'Supervised Clinic 1', 'clinic', new Date('2026-11-06T19:00:00+06:00').toISOString(), new Date('2026-11-06T20:00:00+06:00').toISOString(), 'Asia/Dhaka', null, ts);
+    const wk1 = new Date('2026-11-06T20:30:00+06:00').toISOString();
+    addSession.run(cohortBootcamp, 'Teaching Session 1: Research Literacy', 'teaching', wk1, new Date(new Date(wk1).getTime() + 120 * 60000).toISOString(), 'Asia/Dhaka', null, ts);
+    addSession.run(cohortBootcamp, 'Supervised Clinic 1', 'clinic', new Date('2026-11-07T20:30:00+06:00').toISOString(), new Date('2026-11-07T22:30:00+06:00').toISOString(), 'Asia/Dhaka', null, ts);
 
     // ---------- Projects ----------
     const addProject = db.prepare(

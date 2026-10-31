@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { api } from '../../lib/api';
 import { Button } from '../../components/Button';
 import { Card, CardContent, CardTitle } from '../../components/Card';
@@ -9,8 +9,12 @@ import { Alert } from '../../components/Alert';
 import { Spinner } from '../../components/Spinner';
 import { EmptyState, SectionHeader } from '../../components';
 import { easeOut, stagger, staggerItem } from '../../lib/motion';
-import { ArrowLeft, CalendarDays, BookOpen, Tag, Users, Clock, Sparkles, Layers, ChevronRight } from 'lucide-react';
+import { ArrowLeft, CalendarDays, BookOpen, Tag, Users, Sparkles, Layers } from 'lucide-react';
 import { programImage } from '../../lib/demoImages';
+import { ProgramInstallments } from '../../components/pricing/ProgramInstallments';
+import { ProgramCohorts } from '../../components/programs/ProgramCohorts';
+import { ProgramCurriculum } from '../../components/programs/ProgramCurriculum';
+import { LaunchPricing } from '../../components/pricing/LaunchPricing';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: Sparkles },
@@ -18,6 +22,12 @@ const TABS = [
   { key: 'pricing', label: 'Pricing', icon: Tag },
   { key: 'courses', label: 'Courses', icon: BookOpen },
 ];
+
+function tabFromHash(hash) {
+  if (hash === '#curriculum') return 'courses';
+  const key = hash.slice(1);
+  return TABS.some(tab => tab.key === key) ? key : null;
+}
 
 function CountUp({ value, duration = 900 }) {
   const [val, setVal] = useState(0);
@@ -39,12 +49,17 @@ function CountUp({ value, duration = 900 }) {
 
 export default function ProgramDetail() {
   const { slug } = useParams();
+  const { hash } = useLocation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [tab, setTab] = useState('overview');
-  const [openModules, setOpenModules] = useState({});
+  const [tab, setTab] = useState(tabFromHash(hash) ?? 'overview');
   const tabsRef = useRef(null);
+
+  useEffect(() => {
+    const next = tabFromHash(hash);
+    if (next) setTab(next);
+  }, [hash]);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,7 +75,6 @@ export default function ProgramDetail() {
   const { program, cohorts = [], offers = [], courses = [] } = data || {};
   if (!program) return <div className="container-page py-8"><Alert type="error">Program not found.</Alert></div>;
 
-  const toggleModule = (key) => setOpenModules((s) => ({ ...s, [key]: !s[key] }));
   const selectTab = (key) => {
     // Anchor the tab row before replacing a taller panel with a shorter one.
     // Otherwise the browser clamps scroll position and the whole page appears to jump.
@@ -102,7 +116,7 @@ export default function ProgramDetail() {
           <motion.h1 variants={staggerItem} className="text-3xl sm:text-4xl font-bold mb-3">{program.title}</motion.h1>
           <motion.p variants={staggerItem} className="text-brand-100 leading-relaxed max-w-3xl mb-6">{program.summary}</motion.p>
           <motion.div variants={staggerItem} className="flex flex-wrap items-center gap-6 text-sm text-brand-200 mb-6">
-            <span className="flex items-center gap-1.5"><Tag className="h-4 w-4" /> BDT {Number(program.fee ?? 0).toLocaleString()}</span>
+            <span className="flex items-center gap-1.5"><Tag className="h-4 w-4" /> {program.slug === 'research-bootcamp' ? 'Next intake: ' : ''}BDT {Number(program.fee ?? 0).toLocaleString()}</span>
             <span className="flex items-center gap-1.5"><Users className="h-4 w-4" /> {program.capacity ?? 0} seats</span>
             <span className="flex items-center gap-1.5"><Layers className="h-4 w-4" /> {courses.length} courses</span>
             <span className="flex items-center gap-1.5"><CalendarDays className="h-4 w-4" /> {cohorts.length} open cohorts</span>
@@ -172,7 +186,7 @@ export default function ProgramDetail() {
                     {[
                       { label: 'Domain', value: program.domain, icon: Sparkles },
                       { label: 'Level', value: program.level, icon: Layers },
-                      { label: 'Fee (proposed)', value: `BDT ${Number(program.fee ?? 0).toLocaleString()}`, icon: Tag },
+                      { label: program.slug === 'research-bootcamp' ? 'Next intake total (planned)' : 'Total fee (proposed)', value: `${program.currency ?? 'BDT'} ${Number(program.fee ?? 0).toLocaleString()}`, icon: Tag },
                       { label: 'Capacity', value: `${program.capacity ?? 0} seats`, icon: Users },
                     ].map((m) => (
                       <motion.div key={m.label} variants={staggerItem} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100 transition-colors hover:border-brand-200">
@@ -203,123 +217,42 @@ export default function ProgramDetail() {
           )}
 
           {tab === 'cohorts' && (
-            <div>
-              <SectionHeader title="Open cohorts" subtitle="Proposed dates and capacity; live enrollment is unavailable" />
-              {cohorts.length === 0 ? (
-                <EmptyState icon={CalendarDays} title="No open cohorts" description="Cohorts will appear here once scheduled." />
-              ) : (
-                <motion.div variants={stagger(0.08)} initial="hidden" animate="visible" className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {cohorts.map((c) => (
-                    <motion.div key={c.id} variants={staggerItem}>
-                      <Card className="hover:shadow-card transition-shadow">
-                        <CardContent className="p-5">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="font-semibold text-slate-900">{c.name}</div>
-                            <Badge variant={c.status === 'open' ? 'active' : 'default'}>{c.status}</Badge>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
-                            <Clock className="h-3.5 w-3.5" /> {c.start_date} → {c.end_date}
-                          </div>
-                          <div className="flex items-center justify-between text-sm mb-2">
-                            <span className="text-slate-600">Capacity</span>
-                            <span className="font-semibold">{c.capacity ?? 0} seats</span>
-                          </div>
-                          <p className="mt-3 text-xs text-slate-500">Seat availability is not verified. Enrollment is disabled in this demo.</p>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </div>
+            <ProgramCohorts cohorts={cohorts} assessmentCount={data.assessment_count} programSlug={program.slug} onShowCourses={() => selectTab('courses')} />
           )}
 
           {tab === 'pricing' && (
-            <div>
-              <SectionHeader title="Proposed pricing — not approved" subtitle="Illustrative offers only" />
+            <div id="pricing">
+              {program.slug === 'research-bootcamp' ? <LaunchPricing cohorts={cohorts} /> : <>
+              <SectionHeader title="Proposed pricing — not approved" subtitle="Three installments: at enrollment, when classes start, and one calendar month after classes start." />
               {offers.length === 0 ? (
                 <EmptyState icon={Tag} title="No published offers" description="Offers will appear here once defined." />
               ) : (
-                <motion.div variants={stagger(0.1)} initial="hidden" animate="visible" className="grid md:grid-cols-3 gap-4">
+                <motion.div variants={stagger(0.1)} initial="hidden" animate="visible" className="space-y-8">
                   {offers.map((o) => (
-                    <motion.div key={o.id} variants={staggerItem} whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-                      <Card>
-                        <CardContent className="p-6">
-                          <div className="text-3xl font-bold text-slate-900 mb-1">BDT {Number(o.price ?? 0).toLocaleString()}</div>
-                          <div className="text-xs text-slate-500 mb-4">{o.currency ?? 'BDT'} · {o.name ?? 'Program fee'}</div>
-                          <p className="text-xs text-slate-500 mb-3">Illustrative offer. Benefits, eligibility, enrollment and payment require approval.</p>
+                    <motion.div key={o.id} variants={staggerItem} className="grid items-start gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-10">
+                      <div className="rounded-3xl bg-brand-900 p-7 text-white sm:p-9">
+                          <p className="text-xs font-semibold uppercase tracking-widest text-brand-200">Your program investment</p>
+                          <div className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">{o.currency ?? 'BDT'} {Number(o.price ?? 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                          <p className="mt-3 text-sm text-brand-100">Proposed total program fee · {o.name ?? 'Program fee'}</p>
+                          <div className="my-7 h-px bg-white/15" />
+                          <h3 className="text-xl font-semibold">One fee. Three milestones.</h3>
+                          <p className="mt-3 text-sm leading-7 text-brand-100">Spread the total across enrollment, the start of classes, and the following month. Each payment is part of the same program fee.</p>
+                          <p className="mt-6 text-xs leading-6 text-brand-200">Illustrative offer only. Benefits, eligibility and financial terms require approval. Enrollment and payment are not live.</p>
                           <Link to={`/enroll/${o.id}`} className="block">
-                            <Button variant="outline" className="w-full">View offer status</Button>
+                            <Button variant="outline" className="mt-6 w-full border-white/30 text-white hover:bg-white/10 hover:text-white">View offer status</Button>
                           </Link>
-                        </CardContent>
-                      </Card>
+                      </div>
+                      <ProgramInstallments total={o.price} currency={o.currency ?? 'BDT'} />
                     </motion.div>
                   ))}
                 </motion.div>
               )}
+              </>}
             </div>
           )}
 
           {tab === 'courses' && (
-            <div>
-              <SectionHeader title="Courses in this program" subtitle="Published curriculum" />
-              {courses.length === 0 ? (
-                <EmptyState icon={BookOpen} title="No published courses yet" description="Courses will appear here once published." />
-              ) : (
-                <motion.div variants={stagger(0.06)} initial="hidden" animate="visible" className="space-y-3">
-                  {courses.map((c, idx) => {
-                    const key = c.id ?? idx;
-                    const open = !!openModules[key];
-                    return (
-                      <motion.div key={key} variants={staggerItem} layout>
-                        <Card className="overflow-hidden">
-                          <motion.button
-                            onClick={() => toggleModule(key)}
-                            whileTap={{ scale: 0.995 }}
-                            className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50 transition-colors"
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
-                                <BookOpen className="h-4 w-4" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-semibold text-slate-900 truncate">{c.title}</div>
-                                <div className="text-xs text-slate-500 line-clamp-1">{c.summary}</div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 shrink-0">
-                              <span className="text-xs font-medium text-slate-500">Course overview</span>
-                              <motion.div animate={{ rotate: open ? 90 : 0 }} transition={{ duration: 0.2 }}>
-                                <ChevronRight className="h-5 w-5 text-slate-400" />
-                              </motion.div>
-                            </div>
-                          </motion.button>
-                          <AnimatePresence initial={false}>
-                            {open && (
-                              <motion.div
-                                key="content"
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3, ease: easeOut }}
-                                className="overflow-hidden"
-                              >
-                                <div className="px-5 pb-5 pt-0 border-t border-slate-100">
-                                  <p className="text-sm text-slate-600 mb-3 mt-3">{c.summary}</p>
-                                  <Link to={`/courses/${c.slug}`} className="inline-flex items-center text-sm font-medium text-brand-600 hover:underline">
-                                    View course <ArrowLeft className="h-3.5 w-3.5 ml-1 rotate-180" />
-                                  </Link>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </Card>
-                      </motion.div>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </div>
+            <ProgramCurriculum courses={courses} />
           )}
         </motion.div>
       </div>

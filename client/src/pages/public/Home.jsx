@@ -14,6 +14,7 @@ const steps = [
 const questions = [
   { question: 'Do I need research experience?', answer: 'No. The proposed bootcamp starts with research literacy and builds toward a supervised project.' },
   { question: 'Can I enroll right now?', answer: 'Not yet. This is a local demonstration. Admissions, pricing and payment require approval before a real launch.' },
+  { question: 'How will program installments work?', answer: 'The proposed total program fee is divided into three installments: first at enrollment, second when classes start, and third one calendar month after classes start. The first two are rounded down to the nearest BDT 1,000 and the final installment covers the balance. For a BDT 25,000 program, that is BDT 8,000 + BDT 8,000 + BDT 9,000. See the program’s Pricing tab for the breakdown. This is not a recurring subscription. Enrollment and payments are not live.' },
   { question: 'Is a certificate guaranteed?', answer: 'No. Certificates depend on approved completion requirements and verified work.' },
 ];
 
