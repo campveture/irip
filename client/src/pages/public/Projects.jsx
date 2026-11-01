@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight, Compass, Microscope, Search, Users, X } from 'lucide-react';
+import { ArrowUpRight, Compass, Microscope, Search, Users, X } from 'lucide-react';
 import { api } from '../../lib/api';
 import { Alert } from '../../components/Alert';
 import { projectImage } from '../../lib/demoImages';
-import { PublicHero } from '../../components/shared/PublicHero';
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
@@ -27,12 +26,11 @@ export default function Projects() {
   }, [projects, query]);
 
   return <main className="bg-canvas">
-    <PublicHero eyebrow="Projects" title={<>From a question<br /><em>to a project.</em></>} description="Explore proposed projects and supervision in the demo directory." artwork="orbits" shortcuts={[{ to: '#projects-heading', detail: 'Explore the work', label: 'Project directory' }, { to: '/mentors', detail: 'Find guidance', label: 'Meet mentors' }, { to: '/programs/research-bootcamp#curriculum', detail: 'Build your skills', label: 'Bootcamp curriculum' }]} actions={<Link to="/programs" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold hover:underline">Explore programs <ArrowRight size={17} aria-hidden="true" /></Link>} />
-
-    <section className="container-page py-14 sm:py-20" aria-labelledby="projects-heading">
-      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+    <section className="container-page py-8 sm:py-10" aria-labelledby="projects-heading">
+      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
-          <h2 id="projects-heading" className="mt-3 text-3xl font-semibold tracking-tight text-brand-900 sm:text-4xl">Explore the work.</h2>
+          <h1 id="projects-heading" className="text-2xl font-semibold tracking-tight text-brand-900 sm:text-3xl">Projects</h1>
+          <p className="mt-1 text-sm leading-6 text-slate-600">Proposed projects and supervision in the demo.</p>
         </div>
         <label className="relative block w-full md:max-w-xs"><span className="sr-only">Search projects by topic or supervisor</span><Search size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" /><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search topic or supervisor" className="min-h-12 w-full rounded-full border border-slate-300 bg-white pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-500 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-200" /></label>
       </div>
@@ -48,6 +46,15 @@ export default function Projects() {
           </div>
         </Link>)}
       </div> : !error && <div className="rounded-2xl border border-slate-200 bg-white p-9 text-center"><Microscope size={30} className="mx-auto text-brand-700" /><h3 className="mt-4 text-lg font-semibold">{query.trim() ? 'No matching projects' : 'No open projects yet'}</h3><p className="mt-2 text-sm text-slate-600">{query.trim() ? 'Try another topic or supervisor.' : 'Published demo projects will appear here when available.'}</p>{query.trim() && <button type="button" onClick={() => setQuery('')} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline"><X size={15} /> Clear search</button>}</div>}
+    </section>
+    <section className="container-page pb-12 sm:pb-16" aria-labelledby="project-inquiry-heading">
+      <div className="flex flex-col gap-4 border-t border-stone pt-7 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 id="project-inquiry-heading" className="text-lg font-semibold text-brand-900">Have a research question of your own?</h2>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">Send a project inquiry or suggest a direction. Supervision, capacity and approvals are confirmed separately.</p>
+        </div>
+        <Link to="/contact" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-brand-900 px-5 text-sm font-semibold text-white hover:bg-brand-800">Request a project</Link>
+      </div>
     </section>
   </main>;
 }

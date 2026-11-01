@@ -1,8 +1,8 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { DemoCallout } from '../shared/DemoNotice';
 import { FilterBar } from '../shared/FilterBar';
-import { PublicHero } from '../shared/PublicHero';
 import { Sheet } from '../shared/Sheet';
 import { Surface } from '../shared/Surface';
 import { ActiveFilters } from './ActiveFilters';
@@ -17,8 +17,8 @@ export function ProgramsCatalog() {
   const count = catalog.visible.length;
 
   return <main>
-    <PublicHero eyebrow="Programs" title={<>Find your<br /><em>direction.</em></>} description="Explore proposed research programs by topic, level and schedule." artwork="paths" shortcuts={[{ to: '/programs/research-bootcamp', detail: 'Build foundations', label: 'Research bootcamp' }, { to: '/programs/research-bootcamp#cohorts', detail: 'Check the dates', label: 'Upcoming intakes' }, { to: '/programs/research-bootcamp#pricing', detail: 'Plan your budget', label: 'Fees & installments' }]} />
-    <section className="container-page w-full space-y-6 py-8 sm:py-12" aria-label="Program catalog">
+    <section className="container-page w-full space-y-6 py-8 sm:py-10" aria-labelledby="programs-heading">
+      <h1 id="programs-heading" className="text-2xl font-semibold tracking-tight text-brand-900 sm:text-3xl">Programs</h1>
       <DemoCallout />
       <FilterBar label="Catalog search and filters">
         <label className="relative block min-w-0 flex-1 basis-60"><span className="sr-only">Search programs</span><Search size={18} aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" /><input type="search" maxLength={200} value={catalog.filters.search} onChange={event => catalog.search(event.target.value)} placeholder="Search programs, topics, skills…" className="min-h-12 w-full rounded-full border border-slate-300 bg-surface pl-11 pr-4 text-sm text-slate-900" /></label>
@@ -34,6 +34,15 @@ export function ProgramsCatalog() {
           {catalog.state.status === 'error' && <Surface className="p-6"><p role="alert" className="text-sm text-red-800">{catalog.state.message}</p><button type="button" onClick={catalog.retry} className="mt-5 min-h-11 rounded-full border border-brand-300 px-5 text-sm font-semibold text-brand-800">Retry catalog</button></Surface>}
           {catalog.state.status === 'ready' && (count ? <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{catalog.visible.map(program => <ProgramCard key={program.id} program={program} />)}</div> : <Surface className="p-8 text-center"><Search size={28} aria-hidden="true" className="mx-auto text-brand-600" /><h3 className="mt-4 text-lg font-semibold text-brand-900">{catalog.state.programs.length ? 'No matching programs' : 'No published programs yet'}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{catalog.state.programs.length ? 'Try a different search or remove a filter.' : 'Approved demo catalog records will appear here when published.'}</p>{catalog.activeCount > 0 && <button type="button" onClick={catalog.clear} className="mt-5 min-h-11 rounded-full bg-brand-900 px-5 text-sm font-semibold text-white">Clear filters</button>}</Surface>)}
         </div>
+      </div>
+    </section>
+    <section className="container-page pb-12 sm:pb-16" aria-labelledby="program-help-heading">
+      <div className="flex flex-col gap-4 border-t border-stone pt-7 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 id="program-help-heading" className="text-lg font-semibold text-brand-900">Not sure which program fits?</h2>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">Ask about content, cohorts or fees before you decide. Enrollment is not open yet.</p>
+        </div>
+        <Link to="/contact" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-brand-900 px-5 text-sm font-semibold text-white hover:bg-brand-800">Ask about a program</Link>
       </div>
     </section>
     <Sheet open={filtersOpen} title="Catalog filters" onClose={() => setFiltersOpen(false)}>

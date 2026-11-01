@@ -1,10 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator } from '@playwright/test';
 
 test('editorial heroes pair concise copy and abstract artwork with useful shortcuts', async ({ page }, info) => {
   test.setTimeout(90000);
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ['/', '/programs', '/courses', '/projects', '/mentors', '/about', '/teach']) {
+    for (const path of ['/', '/courses', '/about', '/teach']) {
       await page.goto(path);
       const hero = page.locator('[data-public-hero]');
       await expect(hero).toBeVisible();
@@ -29,8 +29,6 @@ test('hero shortcuts open actual intake details and on-page destinations', async
   for (const [path, label, target] of [
     ['/courses', 'Browse syllabi', '#recorded-catalog-heading'],
     ['/courses', 'Membership proposal', '#membership-proposal'],
-    ['/projects', 'Project directory', '#projects-heading'],
-    ['/mentors', 'Mentor directory', '#mentors-heading'],
     ['/teach', 'Mentor & supervise', '#mentor-role-heading'],
     ['/teach', 'Create a course', '#course-role-heading'],
   ]) {
@@ -39,6 +37,56 @@ test('hero shortcuts open actual intake details and on-page destinations', async
     await expect(page.locator(target!)).toBeInViewport();
     await expect.poll(() => page.locator(target!).evaluate(element => Math.round(element.getBoundingClientRect().top))).toBeGreaterThanOrEqual(80);
   }
+});
+
+test('directory pages skip the hero so programs, projects and mentors are searchable on arrival', async ({ page }, info) => {
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const [path, heading, search] of [
+      ['/programs', 'Programs', 'Search programs, topics, skills…'],
+      ['/projects', 'Projects', 'Search topic or supervisor'],
+      ['/mentors', 'Mentors', 'Search name or expertise'],
+    ] as const) {
+      await page.goto(path);
+      await expect(page.locator('[data-public-hero]')).toHaveCount(0);
+      await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+      const field = page.getByPlaceholder(search);
+      await expect(field).toBeInViewport();
+      expect(await field.evaluate(element => Math.round(element.getBoundingClientRect().top))).toBeLessThan(420);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+      if (width === 1440) await page.screenshot({ path: info.outputPath(`directory-${heading.toLowerCase()}-1440.png`) });
+    }
+  }
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/programs');
+  await expect(page.locator('a[href="/programs/research-bootcamp"]').first()).toBeVisible();
+  await page.goto('/mentors');
+  await expect(page.locator('a[href^="/mentors/"]').first()).toBeVisible();
+  await page.goto('/projects');
+  await expect(page.locator('a[href^="/projects/"]').first()).toBeVisible();
+});
+
+test('directory pages keep their next-step actions below the listing', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const depth = (locator: Locator) => locator.evaluate(element => Math.round(element.getBoundingClientRect().top + window.scrollY));
+
+  await page.goto('/programs');
+  const programAction = page.getByRole('main').getByRole('link', { name: 'Ask about a program', exact: true });
+  expect(await depth(page.locator('a[href="/programs/research-bootcamp"]').first())).toBeLessThan(await depth(programAction));
+  await programAction.click();
+  await expect(page).toHaveURL(/\/contact$/);
+
+  await page.goto('/projects');
+  const projectAction = page.getByRole('main').getByRole('link', { name: 'Request a project', exact: true });
+  expect(await depth(page.locator('a[href^="/projects/"]').first())).toBeLessThan(await depth(projectAction));
+  await projectAction.click();
+  await expect(page).toHaveURL(/\/contact$/);
+
+  await page.goto('/mentors');
+  const mentorAction = page.getByRole('main').getByRole('link', { name: 'Apply as a mentor', exact: true });
+  expect(await depth(page.locator('a[href^="/mentors/"]').first())).toBeLessThan(await depth(mentorAction));
+  await mentorAction.click();
+  await expect(page).toHaveURL(/\/teach\/apply$/);
 });
 
 test('minimal home preserves catalog access and keeps detailed answers closed until requested', async ({ page }) => {

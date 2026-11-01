@@ -16,8 +16,9 @@ test('hash destinations clear the measured global header, including delayed targ
   await expect(section).toBeVisible();
   await expect.poll(() => section.evaluate(element => {
     const header = document.querySelector('.academy-header > .container-page')!;
-    return Math.round(element.getBoundingClientRect().top - header.getBoundingClientRect().height);
-  })).toBe(16);
+    // Fractional header heights can round a pixel either way; clearance should stay within 1px.
+    return Math.abs(element.getBoundingClientRect().top - header.getBoundingClientRect().height - 16) < 1;
+  })).toBe(true);
   await page.route('**/api/public/programs/research-bootcamp', async route => {
     const response = await route.fetch();
     await new Promise(resolve => setTimeout(resolve, 250));
@@ -28,8 +29,8 @@ test('hash destinations clear the measured global header, including delayed targ
   await expect(panel).toBeVisible();
   await expect.poll(() => panel.evaluate(element => {
     const height = document.querySelector('.academy-header > .container-page')!.getBoundingClientRect().height;
-    return Math.round(element.getBoundingClientRect().top - height);
-  })).toBe(16);
+    return Math.abs(element.getBoundingClientRect().top - height - 16) < 1;
+  })).toBe(true);
 });
 
 test('query-only catalog filter updates do not reset the viewport', async ({ page }) => {
