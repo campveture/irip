@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('Fieldwork palette reaches the shared theme, hero, navigation, diagram and demo logo', async ({ page, request }, info) => {
+test('Fieldwork palette reaches the shared theme, minimal hero, navigation and demo logo', async ({ page, request }, info) => {
   await page.goto('/');
   const palette = await page.evaluate(() => {
     const style = getComputedStyle(document.documentElement);
@@ -9,7 +9,7 @@ test('Fieldwork palette reaches the shared theme, hero, navigation, diagram and 
   expect(palette).toEqual({ brass: '#c5a46d', stone: '#dedcd3', paper: '#f5f3ed', linen: '#eae8df', sage: '#a7c2b2', evergreen: '#245448', midnight: '#122b39', ink: '#24323a' });
   expect(await page.locator('[data-header-surface]').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(18, 43, 57)');
   expect(await page.locator('[data-header-surface] a[href="/programs"]').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(197, 164, 109)');
-  expect(await page.getByRole('figure', { name: 'The false-alarm factory.', exact: true }).evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(245, 243, 237)');
+  expect(await page.locator('#route-content .bg-canvas').first().evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(245, 243, 237)');
   const mark = await (await request.get('/images/academy-mark.svg')).text();
   expect(mark).toContain('#C5A46D');
   expect(mark).toContain('#245448');

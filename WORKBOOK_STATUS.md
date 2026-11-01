@@ -31,10 +31,10 @@ Source: `website_skull.xlsx` (28 sheets, 81 page/screen entries, 24 acceptance s
 - Reviewed and installed pinned, Markdown-only Vercel React guidance plus locally authored secure-fullstack/code-organization skills under `.opencode/skills/`; provenance and compatibility limits are in `docs/development-skills.md`. These are instructions, not installed runtime services or security guarantees.
 - Implementation, APIs, permissions, review steps and production gaps: `docs/account-profile-slice.md`. Public application data is held separately in additive `mentor_intake`/`mentor_intake_decisions` tables. Duplicate submissions return the same generic acknowledgement without overwriting existing applications or revealing their status. Review/audit changes are transactional and version-checked; an unverified email never authorizes an account link. Automated verification covers all API suites, runtime contracts, mathematical hero examples, full-app browser flows and read-only preview gates. Later production work still requires durable identity/sessions/storage, staff MFA, dependency remediation, privacy/security/backup acceptance and hosting approval.
 
-## Research-nerd hero illustrations
+## Research-nerd hero illustrations — superseded
 
 - Replaced stock hero photos on **Home**, **Projects** and **Teach** with original, interactive field-note illustrations, now recoloured in the Fieldwork palette described below. Home explores the probability of at least one false rejection across 1/20/100 independent true-null tests at α=.05; Projects reveals an invented Simpson’s-paradox example; Teach uses an original overfitting meme with hidden/unseen data points.
-- Mathematical assumptions and illustrative status are visible. Examples are not academy results, model evaluations or causal evidence. SVG diagrams have accessible descriptions, buttons are keyboard-operable, and mobile overflow and interactions are browser-tested. Pure explanatory maths live in `researchPuzzles.ts` with numerical regression tests; no third-party meme/image downloads or tracking are used.
+- These explanatory hero cards were subsequently rejected and removed from the rendered pages. The standalone mathematical helpers/tests remain historical source; the current heroes use the editorial treatment below.
 
 ## Academy header and route motion — 1 November 2026
 
@@ -60,6 +60,14 @@ Source: `website_skull.xlsx` (28 sheets, 81 page/screen entries, 24 acceptance s
 - The page shell stays usable during story fetching; failed or malformed content shows a retry rather than fabricated content. Existing cancellation protection remains. Mobile layouts preserve the shared gutters; the approach anchor clears the floating header.
 - **User canceled the new skeleton-loading rollout.** All additions from that rollout were removed, including the pre-JavaScript shell, stylesheet, shared component and integrations. About uses a plain loading message, not skeleton placeholders. Pre-existing loaders elsewhere remain unchanged.
 - Browser coverage: `client/tests/e2e/about.spec.ts` checks 1440/390/320px layouts, diagram label fit, links/anchor placement, held loading without skeletons and retry after failed/malformed responses. Normal and read-only builds pass; all 10 focused About/layout browser scenarios pass. The user authorized publishing this follow-up to the existing read-only Vercel demo; no live account, submission or payment services are enabled.
+
+## Editorial public heroes — latest design correction
+
+- User rejected both the bulky explanatory cards and the subsequent plain-text-only treatment. Home, Programs, Courses, Projects, Mentors, About and Teach now use `PublicHero.tsx`: large sans/serif typography, a restrained navy/evergreen background, original gold line artwork (pages, orbits or paths), concise copy and three page-specific navigation shortcuts. The artwork has no explanatory text or animation, is hidden from assistive technology and becomes a faint background detail on mobile. No new image assets, font downloads or packages.
+- Shortcuts open real destinations: cohort/pricing/curriculum tabs, catalog sections, membership information, mentor/project directories and teaching roles. They are keyboard-accessible links with visible focus; hash navigation retains measured header clearance. This is useful navigation, not a simulated dashboard or fabricated activity.
+- Removed `ResearchHero.tsx` and `AboutFieldNotes.tsx`. Home drops duplicate interest/promotional sections and two unused requests; FAQs start collapsed. About keeps its API-backed story with optional expanded detail; teaching commitments are expandable. Catalog artwork and essential syllabus, pricing, approval and demo boundaries remain. No skeleton rollout.
+- Browser coverage now lives in `publicHeroes.spec.ts` plus updated About/palette tests: desktop/390/320px layouts, compact copy, no explanatory cards, real shortcut navigation, deferred API content and retry. This design supersedes the earlier hero descriptions above.
+- Release verification: normal/typechecked and read-only builds pass, **39 unit tests**, **68 full-app browser tests**, and **4 read-only preview tests** pass. Desktop/mobile hero screenshots were inspected; footer disclosures and read-only restrictions remain. The existing large-bundle warning remains, with the preview JS reduced by roughly 26 kB versus the prior About release.
 
 ## Program pricing — three-installment model
 

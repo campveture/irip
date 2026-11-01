@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Search, SlidersHorizontal } from 'lucide-react';
-import { demoImages } from '../../lib/demoImages';
 import { DemoCallout } from '../shared/DemoNotice';
 import { FilterBar } from '../shared/FilterBar';
-import { PageHeading } from '../shared/PageHeading';
+import { PublicHero } from '../shared/PublicHero';
 import { Sheet } from '../shared/Sheet';
 import { Surface } from '../shared/Surface';
 import { ActiveFilters } from './ActiveFilters';
@@ -18,12 +17,7 @@ export function ProgramsCatalog() {
   const count = catalog.visible.length;
 
   return <main>
-    <section data-header-surface="forest" className="overflow-hidden bg-brand-900 text-white">
-      <div className="container-page grid grid-cols-1 items-center gap-8 py-12 sm:py-16 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <PageHeading inverse eyebrow="Research learning / Demo catalog" title="Find your next research direction." description="Explore proposed programs, compare topics, and see where your curiosity could take you. Choose a domain, a level, or a question to begin." />
-        <figure className="overflow-hidden rounded-2xl border border-white/20 bg-brand-800"><img src={demoImages.writing} alt="" width="1200" height="800" className="aspect-[4/3] w-full object-cover" /><figcaption className="px-4 py-3 text-xs text-white/75">Make space for your next idea. / Stock photo</figcaption></figure>
-      </div>
-    </section>
+    <PublicHero eyebrow="Programs" title={<>Find your<br /><em>direction.</em></>} description="Explore proposed research programs by topic, level and schedule." artwork="paths" shortcuts={[{ to: '/programs/research-bootcamp', detail: 'Build foundations', label: 'Research bootcamp' }, { to: '/programs/research-bootcamp#cohorts', detail: 'Check the dates', label: 'Upcoming intakes' }, { to: '/programs/research-bootcamp#pricing', detail: 'Plan your budget', label: 'Fees & installments' }]} />
     <section className="container-page w-full space-y-6 py-8 sm:py-12" aria-label="Program catalog">
       <DemoCallout />
       <FilterBar label="Catalog search and filters">

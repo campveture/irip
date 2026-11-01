@@ -4,7 +4,7 @@ import { ArrowRight, ArrowUpRight, Compass, Microscope, Search, Users, X } from 
 import { api } from '../../lib/api';
 import { Alert } from '../../components/Alert';
 import { projectImage } from '../../lib/demoImages';
-import { ResearchHero } from '../../components/shared/ResearchHero';
+import { PublicHero } from '../../components/shared/PublicHero';
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
@@ -27,25 +27,12 @@ export default function Projects() {
   }, [projects, query]);
 
   return <main className="bg-canvas">
-    <section data-header-surface="forest" className="relative overflow-hidden bg-midnight text-white">
-      <div aria-hidden="true" className="absolute -right-24 -top-44 h-[32rem] w-[32rem] rounded-full border border-white/10" />
-      <div className="container-page relative grid gap-8 py-16 sm:py-20 lg:grid-cols-[1fr_.65fr] lg:items-end">
-        <div className="max-w-3xl">
-          <p className="eyebrow !text-brand-50">Research / In practice</p>
-          <h1 className="mt-5 text-4xl font-semibold tracking-[-.04em] sm:text-6xl">Ideas deserve <span className="text-brand-300">a place to grow.</span></h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-white/90">Explore proposed supervised projects in the local demo. Discover the question, see the assigned supervisor, and find a direction worth pursuing.</p>
-          <Link to="/programs" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-brand-50 hover:text-white">See the learning programs <ArrowRight size={17} /></Link>
-        </div>
-        <ResearchHero variant="simpson" />
-      </div>
-    </section>
+    <PublicHero eyebrow="Projects" title={<>From a question<br /><em>to a project.</em></>} description="Explore proposed projects and supervision in the demo directory." artwork="orbits" shortcuts={[{ to: '#projects-heading', detail: 'Explore the work', label: 'Project directory' }, { to: '/mentors', detail: 'Find guidance', label: 'Meet mentors' }, { to: '/programs/research-bootcamp#curriculum', detail: 'Build your skills', label: 'Bootcamp curriculum' }]} actions={<Link to="/programs" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold hover:underline">Explore programs <ArrowRight size={17} aria-hidden="true" /></Link>} />
 
     <section className="container-page py-14 sm:py-20" aria-labelledby="projects-heading">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="eyebrow">The project directory</p>
           <h2 id="projects-heading" className="mt-3 text-3xl font-semibold tracking-tight text-brand-900 sm:text-4xl">Explore the work.</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">Only projects marked open in the demo database appear here.</p>
         </div>
         <label className="relative block w-full md:max-w-xs"><span className="sr-only">Search projects by topic or supervisor</span><Search size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" /><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search topic or supervisor" className="min-h-12 w-full rounded-full border border-slate-300 bg-white pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-500 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-200" /></label>
       </div>

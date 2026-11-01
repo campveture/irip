@@ -5,6 +5,7 @@ import { api } from '../../lib/api';
 import { Alert } from '../../components/Alert';
 import { demoImages } from '../../lib/demoImages';
 import { READ_ONLY_PREVIEW } from '../../lib/readOnlyPreview';
+import { PublicHero } from '../../components/shared/PublicHero';
 
 export default function Mentors() {
   const [mentors, setMentors] = useState([]);
@@ -27,13 +28,7 @@ export default function Mentors() {
   }, [mentors, query]);
 
   return <main className="bg-canvas">
-    <section data-header-surface="forest" className="relative overflow-hidden bg-brand-900 text-white">
-      <div aria-hidden="true" className="absolute -right-24 -top-44 h-[32rem] w-[32rem] rounded-full border border-white/10" />
-      <div className="container-page relative grid gap-8 py-16 sm:py-20 lg:grid-cols-[1fr_.65fr] lg:items-end">
-        <div className="max-w-3xl"><p className="eyebrow !text-brand-300">People / Guidance</p><h1 className="mt-5 text-4xl font-semibold tracking-[-.04em] sm:text-6xl">Good questions grow <span className="text-brand-300">with good guidance.</span></h1><p className="mt-5 max-w-2xl text-base leading-7 text-white/75">Meet the approved profiles in this synthetic demo directory and learn what each mentor works on. Credentials and agreements still need verification for a real launch.</p><Link to={READ_ONLY_PREVIEW ? '/teach' : '/teach/apply'} className="mt-8 inline-flex min-h-12 items-center gap-2 rounded-full bg-brand-100 px-6 text-sm font-semibold text-brand-950 hover:bg-white">{READ_ONLY_PREVIEW ? 'Mentor application info' : 'Apply as a mentor'} <ArrowRight size={17} /></Link><p className="mt-3 text-xs text-brand-200">Application first. No signup or password required.</p></div>
-        <figure className="overflow-hidden rounded-2xl border border-white/20 bg-brand-800"><img src={demoImages.study} alt="" width="1000" height="667" className="aspect-[4/3] w-full object-cover" /><figcaption className="px-4 py-3 text-xs text-white/75">A fresh perspective helps. / Stock guidance scene</figcaption></figure>
-      </div>
-    </section>
+    <PublicHero eyebrow="Mentors" title={<>A fresh perspective.<br /><em>A clearer next step.</em></>} description="Browse demo mentor profiles. Credentials require verification before launch." artwork="paths" shortcuts={[{ to: '#mentors-heading', detail: 'Search expertise', label: 'Mentor directory' }, { to: '/projects', detail: 'See the work', label: 'Research projects' }, { to: '/teach', detail: 'Understand the role', label: 'Teaching & supervision' }]} actions={<Link to={READ_ONLY_PREVIEW ? '/teach' : '/teach/apply'} className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand-100 px-6 text-sm font-semibold text-brand-950 hover:bg-white">{READ_ONLY_PREVIEW ? 'Mentor application info' : 'Apply as a mentor'} <ArrowRight size={17} aria-hidden="true" /></Link>} />
 
     <section className="container-page py-14 sm:py-20" aria-labelledby="mentors-heading">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between"><div><p className="eyebrow">The mentor directory</p><h2 id="mentors-heading" className="mt-3 text-3xl font-semibold tracking-tight text-brand-900 sm:text-4xl">Meet the people.</h2><p className="mt-2 text-sm leading-6 text-slate-600">Profiles marked approved in the local demo database.</p></div><label className="relative block w-full md:max-w-xs"><span className="sr-only">Search mentors by name or expertise</span><Search size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" /><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search name or expertise" className="min-h-12 w-full rounded-full border border-slate-300 bg-white pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-500 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-200" /></label></div>

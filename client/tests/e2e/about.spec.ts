@@ -1,20 +1,17 @@
 import { test, expect } from '@playwright/test';
 
-test('About explains the proposed academy with original artwork and responsive navigation', async ({ page }, info) => {
+test('About keeps the academy story concise, without decorative cards', async ({ page }, info) => {
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/about');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Good research starts with an honest question.');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Curiosity, withsomewhere to go.');
     await expect(page.getByRole('heading', { name: 'About Unknown Academy', exact: true })).toBeVisible();
-    await expect(page.getByRole('img', { name: /A research notebook:/ })).toBeVisible();
-    expect(await page.getByRole('img', { name: /A research notebook:/ }).evaluate(element => {
-      const boxes = [...element.querySelectorAll<SVGRectElement>('g > rect')];
-      return [...element.querySelectorAll<SVGTextElement>('text[font-weight]')].every((text, index) => {
-        const label = text.getBBox(), box = boxes[index]!.getBBox();
-        return label.x >= box.x && label.x + label.width <= box.x + box.width;
-      });
-    })).toBe(true);
-    await expect(page.getByRole('region', { name: 'Learn it. Try it. Make it better.' }).getByRole('listitem')).toHaveCount(3);
+    await expect(page.locator('[data-public-hero] figure, [data-public-hero] img')).toHaveCount(0);
+    await expect(page.getByRole('region', { name: 'Our proposed approach' }).getByRole('listitem')).toHaveCount(3);
+    await expect(page.locator('#our-approach details')).not.toHaveAttribute('open');
+    await page.getByText('More about the academy', { exact: true }).click();
+    await expect(page.locator('#our-approach details')).toHaveAttribute('open', '');
+    await page.getByText('More about the academy', { exact: true }).click();
     await expect(page.getByRole('complementary', { name: 'What is available today' })).toContainText('No guaranteed publication, qualification, internship or job is promised.');
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
     await expect(page.locator('#route-content .skeleton')).toHaveCount(0);
@@ -26,7 +23,7 @@ test('About explains the proposed academy with original artwork and responsive n
       return Math.round(element.getBoundingClientRect().top - header.getBoundingClientRect().height);
     })).toBe(16);
   }
-  await page.getByRole('link', { name: 'Explore teaching', exact: true }).click();
+  await page.getByRole('link', { name: 'Explore teaching', exact: true }).last().click();
   await expect(page).toHaveURL(/\/teach$/);
 });
 

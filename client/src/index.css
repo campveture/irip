@@ -97,6 +97,36 @@
 }
 
 @layer components {
+  .academy-editorial-hero { position: relative; overflow: hidden; background-image: radial-gradient(ellipse at 95% 25%, rgb(36 84 72 / .55), transparent 58%); }
+  .academy-hero-composition { position: relative; display: grid; align-items: center; gap: 32px; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); padding-block: 64px 48px; }
+  .academy-hero-copy { position: relative; z-index: 1; min-width: 0; }
+  .academy-hero-eyebrow { display: flex; align-items: center; gap: 12px; color: var(--palette-sage); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .18em; }
+  .academy-hero-eyebrow::before { content: ''; width: 26px; height: 1px; background: var(--palette-brass); }
+  .academy-hero-title { max-width: 760px; margin-top: 24px; font-size: clamp(2.5rem, 4.7vw, 4.5rem); font-weight: 500; line-height: 1.08; letter-spacing: -.045em; text-wrap: balance; }
+  .academy-hero-title em { color: var(--palette-brass); font-family: Georgia, serif; font-weight: 400; }
+  .academy-hero-art { color: var(--palette-brass); pointer-events: none; }
+  .academy-hero-art svg { display: block; width: 100%; max-height: 370px; }
+  .academy-hero-shortcuts { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgb(255 255 255 / .2); }
+  .academy-hero-shortcut { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 92px; padding: 18px 24px; border-right: 1px solid rgb(255 255 255 / .15); transition: background-color 180ms ease; }
+  .academy-hero-shortcut:first-child { padding-left: 0; }
+  .academy-hero-shortcut:last-child { border-right: 0; }
+  .academy-hero-shortcut:hover { background: rgb(255 255 255 / .06); }
+  .academy-hero-shortcut svg { color: var(--palette-brass); flex-shrink: 0; transition: transform 180ms ease; }
+  .academy-hero-shortcut:hover svg { transform: translate(2px, -2px); }
+  .academy-editorial-hero :where(a, button):focus-visible { outline-color: var(--palette-brass); outline-offset: -3px; }
+  @media (max-width: 767px) {
+    .academy-hero-composition { grid-template-columns: minmax(0, 1fr); padding-block: 48px 36px; }
+    .academy-hero-copy { max-width: 580px; }
+    .academy-hero-art { position: absolute; width: 280px; right: -150px; top: -15px; opacity: .15; }
+    .academy-hero-shortcuts { grid-template-columns: minmax(0, 1fr); }
+    .academy-hero-shortcut, .academy-hero-shortcut:first-child { min-height: 64px; padding: 12px 0; border-right: 0; border-bottom: 1px solid rgb(255 255 255 / .12); }
+    .academy-hero-shortcut:last-child { border-bottom: 0; }
+    .academy-hero-shortcut > span { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+    .academy-hero-shortcut > span > span:first-child { min-width: 86px; }
+    .academy-hero-shortcut > span > span:last-child { margin-top: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .academy-hero-shortcut, .academy-hero-shortcut svg { transition: none; } }
+  @media (forced-colors: active) { .academy-hero-art { display: none; } .academy-hero-shortcuts, .academy-hero-shortcut { border-color: CanvasText; } }
   /* Only the capsule is opaque. Its zero-height sticky wrapper lets the actual
      page scroll behind it, instead of painting a full-width canvas/green band. */
   .academy-header { height: 0; isolation: isolate; background: transparent; pointer-events: none; }
