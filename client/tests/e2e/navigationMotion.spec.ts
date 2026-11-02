@@ -12,7 +12,7 @@ async function recordRouteAnimations(page: Page) {
   });
 }
 
-test('academy header keeps its segmented hierarchy, active state and compact mobile controls', async ({ page }, info) => {
+test('IRIP header keeps its segmented hierarchy, active state and compact mobile controls', async ({ page }, info) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/programs');
   const header = page.getByRole('banner');
@@ -22,17 +22,17 @@ test('academy header keeps its segmented hierarchy, active state and compact mob
   await expect(header.getByRole('button', { name: 'Open navigation' })).not.toBeVisible();
   const controls = await navigation.getByRole('link').evaluateAll(links => links.map(link => link.getBoundingClientRect().height));
   expect(controls.every(height => height >= 44)).toBe(true);
-  await page.screenshot({ path: info.outputPath('academy-header-desktop.png') });
+  await page.screenshot({ path: info.outputPath('irip-header-desktop.png') });
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 844 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await expect(header.getByRole('link', { name: 'Unknown Academy home' })).toBeVisible();
+    await expect(header.getByRole('link', { name: 'IRIP home' })).toBeVisible();
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await header.getByRole('button', { name: 'Open navigation' }).click();
   const sheet = page.getByRole('dialog', { name: 'Site navigation' });
   await expect(sheet).toBeVisible();
-  await page.screenshot({ path: info.outputPath('academy-menu-mobile.png') });
+  await page.screenshot({ path: info.outputPath('irip-menu-mobile.png') });
   await page.keyboard.press('Escape');
   await expect(sheet).not.toBeVisible();
   await expect(header.getByRole('button', { name: 'Open navigation' })).toBeFocused();

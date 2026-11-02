@@ -82,7 +82,7 @@ router.post('/logout', requireAuth, (req, res) => {
   const userId = req.session.userId;
   req.session.destroy((error) => {
     if (error) return res.status(500).json({ message: 'Sign out could not be completed. Please retry.' });
-    res.clearCookie('ua.sid');
+    res.clearCookie('irip.sid');
     auditLog({ actorId: userId, action: 'logout', target: 'users' });
     res.json({ ok: true });
   });

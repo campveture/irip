@@ -12,11 +12,11 @@ const { rateLimit } = require('./middleware/security');
 const port = 5055, base = `http://127.0.0.1:${port}`;
 let child;
 async function request(route, cookie = '', method = 'GET', body, headers = {}) {
-  const response = await fetch(base + '/api' + route, { method, headers: { 'Content-Type': 'application/json', 'X-UA-Request': '1', Origin: base, ...(cookie ? { Cookie: cookie } : {}), ...headers }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+  const response = await fetch(base + '/api' + route, { method, headers: { 'Content-Type': 'application/json', 'X-IRIP-Request': '1', Origin: base, ...(cookie ? { Cookie: cookie } : {}), ...headers }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
   return { status: response.status, headers: response.headers, body: await response.json() };
 }
 async function login(email) {
-  const response = await request('/auth/login', '', 'POST', { email: `${email}@unknown.academy`, password: 'demo1234' });
+  const response = await request('/auth/login', '', 'POST', { email: `${email}@irip.ac`, password: 'demo1234' });
   assert.equal(response.status, 200); return { cookie: response.headers.get('set-cookie').split(';')[0], id: response.body.user.id };
 }
 const draft = { public_name: 'Synthetic Pilot Mentor', bio: 'Synthetic research teaching and supervision biography for a local review workflow.', expertise: 'Research methods', experience: 'Private synthetic evidence summary for manual staff review only.', availability: 'Two hours per week, subject to assignment.', language: 'both', public_consent: false };
@@ -53,13 +53,13 @@ async function main() {
   const profile = (await request('/accounts/profile', learner.cookie)).body.profile;
   const payload = { ...profile, full_name: 'Synthetic Learner Updated', phone: '+880 0000 000000', goals: 'Private learner goals for academic support.', interests: 'Research and evidence', study_plan: 'Synthetic weekly study plan.' };
   delete payload.email; delete payload.email_verified;
-  for (const headers of [{ 'X-UA-Request': '' }, { 'X-UA-Request': 'wrong' }, { Origin: '' }, { Origin: 'null' }, { Origin: 'https://evil.example' }, { Origin: base + '.evil.example' }, { 'Sec-Fetch-Site': 'cross-site' }]) {
+  for (const headers of [{ 'X-IRIP-Request': '' }, { 'X-IRIP-Request': 'wrong' }, { Origin: '' }, { Origin: 'null' }, { Origin: 'https://evil.example' }, { Origin: base + '.evil.example' }, { 'Sec-Fetch-Site': 'cross-site' }]) {
     assert.equal((await request('/accounts/profile', learner.cookie, 'PATCH', payload, headers)).status, 403);
   }
-  const missing = await fetch(base + '/api/accounts/profile', { method: 'PATCH', headers: { Cookie: learner.cookie, 'Content-Type': 'application/json', 'X-UA-Request': '1' }, body: JSON.stringify(payload) });
+  const missing = await fetch(base + '/api/accounts/profile', { method: 'PATCH', headers: { Cookie: learner.cookie, 'Content-Type': 'application/json', 'X-IRIP-Request': '1' }, body: JSON.stringify(payload) });
   assert.equal(missing.status, 403, 'Missing Origin is rejected');
   assert.equal((await request('/accounts/profile', learner.cookie, 'PATCH', payload, { 'Content-Type': 'text/plain' })).status, 415);
-  const preflight = await fetch(base + '/api/accounts/profile', { method: 'OPTIONS', headers: { Origin: 'https://evil.example', 'Access-Control-Request-Method': 'PATCH', 'Access-Control-Request-Headers': 'X-UA-Request' } });
+  const preflight = await fetch(base + '/api/accounts/profile', { method: 'OPTIONS', headers: { Origin: 'https://evil.example', 'Access-Control-Request-Method': 'PATCH', 'Access-Control-Request-Headers': 'X-IRIP-Request' } });
   assert.equal(preflight.headers.get('access-control-allow-origin'), null);
   assert.equal((await request('/accounts/profile', learner.cookie, 'PATCH', { ...payload, user_id: other.id })).status, 400);
   assert.equal((await request('/accounts/profile', learner.cookie, 'PATCH', { ...payload, role: 'admin' })).status, 400);

@@ -15,16 +15,16 @@ interface PublicHeroProps {
 /** Editorial composition with lightweight artwork and real navigation, not cards. */
 export function PublicHero({ eyebrow, title, description, actions, inset = false, artwork = 'pages', shortcuts = [] }: PublicHeroProps) {
   const heading = useId();
-  return <section data-header-surface="forest" data-public-hero aria-labelledby={heading} className={`academy-editorial-hero bg-midnight text-white ${inset ? 'rounded-2xl' : ''}`}>
+  return <section data-header-surface="forest" data-public-hero aria-labelledby={heading} className={`irip-editorial-hero bg-midnight text-white ${inset ? 'rounded-2xl' : ''}`}>
     <div className={inset ? 'px-6 sm:px-9' : 'container-page'}>
-      <div className="academy-hero-composition">
-        <div className="academy-hero-copy">
-          <p className="academy-hero-eyebrow">{eyebrow}</p>
-          <h1 id={heading} className="academy-hero-title">{title}</h1>
+      <div className="irip-hero-composition">
+        <div className="irip-hero-copy">
+          <p className="irip-hero-eyebrow">{eyebrow}</p>
+          <h1 id={heading} className="irip-hero-title">{title}</h1>
           <p className="mt-6 max-w-lg text-base leading-7 text-white/90">{description}</p>
           {actions && <div className="mt-8 flex flex-wrap items-center gap-4">{actions}</div>}
         </div>
-        <div className="academy-hero-art" aria-hidden="true">
+        <div className="irip-hero-art" aria-hidden="true">
           <svg viewBox="0 0 420 380" fill="none" focusable="false">
             <circle cx="210" cy="190" r="151" stroke="currentColor" strokeOpacity=".14" />
             <path d="M22 190H398M210 14V366" stroke="currentColor" strokeOpacity=".12" strokeDasharray="2 8" />
@@ -34,8 +34,8 @@ export function PublicHero({ eyebrow, title, description, actions, inset = false
           </svg>
         </div>
       </div>
-      {shortcuts.length > 0 && <nav aria-label={`${eyebrow} shortcuts`} className="academy-hero-shortcuts">
-        {shortcuts.map(shortcut => <Link key={shortcut.to} to={shortcut.to} className="academy-hero-shortcut"><span><span className="block text-xs text-brand-100">{shortcut.detail}</span><span className="mt-1 block text-sm font-semibold">{shortcut.label}</span></span><ArrowUpRight size={19} aria-hidden="true" /></Link>)}
+      {shortcuts.length > 0 && <nav aria-label={`${eyebrow} shortcuts`} className="irip-hero-shortcuts">
+        {shortcuts.map(shortcut => <Link key={shortcut.to} to={shortcut.to} className="irip-hero-shortcut"><span><span className="block text-xs text-brand-100">{shortcut.detail}</span><span className="mt-1 block text-sm font-semibold">{shortcut.label}</span></span><ArrowUpRight size={19} aria-hidden="true" /></Link>)}
       </nav>}
     </div>
   </section>;

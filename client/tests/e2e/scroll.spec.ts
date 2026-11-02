@@ -15,7 +15,7 @@ test('hash destinations clear the measured global header, including delayed targ
   const section = page.locator('#how-it-works');
   await expect(section).toBeVisible();
   await expect.poll(() => section.evaluate(element => {
-    const header = document.querySelector('.academy-header > .container-page')!;
+    const header = document.querySelector('.irip-header > .container-page')!;
     // Fractional header heights can round a pixel either way; clearance should stay within 1px.
     return Math.abs(element.getBoundingClientRect().top - header.getBoundingClientRect().height - 16) < 1;
   })).toBe(true);
@@ -28,7 +28,7 @@ test('hash destinations clear the measured global header, including delayed targ
   const panel = page.locator('#program-tab-panel');
   await expect(panel).toBeVisible();
   await expect.poll(() => panel.evaluate(element => {
-    const height = document.querySelector('.academy-header > .container-page')!.getBoundingClientRect().height;
+    const height = document.querySelector('.irip-header > .container-page')!.getBoundingClientRect().height;
     return Math.abs(element.getBoundingClientRect().top - height - 16) < 1;
   })).toBe(true);
 });

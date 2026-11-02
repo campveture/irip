@@ -11,7 +11,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const content = useRef<HTMLDivElement>(null);
   useRouteMotion(content);
   const inPortal = !READ_ONLY_PREVIEW && /^\/(app|mentor|admin)(\/|$)/.test(pathname);
-  return <div className="academy-shell flex min-h-dvh flex-col bg-canvas text-slate-900">
+  return <div className="irip-shell flex min-h-dvh flex-col bg-canvas text-slate-900">
     <RouteScroll />
     <a href="#route-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:p-4 focus:text-brand-900">Skip to content</a>
     {!inPortal && <Navbar />}

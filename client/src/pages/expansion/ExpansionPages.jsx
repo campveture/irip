@@ -122,7 +122,7 @@ export function PartnerPage({ kind }) {
   return <div className="container-page py-12">
     <div className="max-w-3xl"><p className="text-sm font-semibold uppercase tracking-wide text-brand-700">Collaboration</p>
       <h1 className="mt-2 text-3xl font-bold text-slate-900">{isLab ? 'Research labs' : 'Institutions'}</h1>
-      <p className="mt-3 text-slate-600">{isLab ? 'Explore verified lab partnerships and their agreed research scope.' : 'Discuss teaching, research, and learner development with the academy.'}</p></div>
+      <p className="mt-3 text-slate-600">{isLab ? 'Explore verified lab partnerships and their agreed research scope.' : 'Discuss teaching, research, and learner development with IRIP.'}</p></div>
     <div className="mt-8"><Feedback loading={loading} error={error} empty={!loading && !error && rows.length === 0 ? (isLab ? 'No lab partnerships have been approved for publication.' : 'No institutional partnerships have been approved for publication.') : ''} />
       {!loading && !error && rows.length > 0 && <div className="grid gap-5 md:grid-cols-2">{rows.map((partner) => <article key={partner.name} className="rounded-xl border border-slate-200 bg-white p-6"><h2 className="text-lg font-semibold text-slate-900">{partner.name}</h2><p className="mt-2 text-sm text-slate-600">{partner.summary}</p></article>)}</div>}
     </div>

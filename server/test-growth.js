@@ -25,7 +25,7 @@ async function main() {
   initSchema(); seed();
   child = spawn(process.execPath, ['--preserve-symlinks', '--preserve-symlinks-main', 'server.js'], { cwd: __dirname, env: { ...process.env, PORT: String(port) }, stdio: ['ignore', 'pipe', 'pipe'] });
   await new Promise((resolve, reject) => { const timer = setTimeout(() => reject(new Error('Growth test server startup timed out')), 10000); child.stdout.on('data', c => { if (String(c).includes('running on')) { clearTimeout(timer); resolve(); } }); child.stderr.on('data', c => process.stderr.write(c)); child.on('exit', code => { clearTimeout(timer); reject(new Error(`Server exited: ${code}`)); }); });
-  const learner = await login('learner@unknown.academy'); const graduate = await login('student2@unknown.academy'); const mentor = await login('mentor@unknown.academy'); const owner = await login('admin@unknown.academy'); const finance = await login('finance@unknown.academy'); const academic = await login('academic@unknown.academy');
+  const learner = await login('learner@irip.ac'); const graduate = await login('student2@irip.ac'); const mentor = await login('mentor@irip.ac'); const owner = await login('admin@irip.ac'); const finance = await login('finance@irip.ac'); const academic = await login('academic@irip.ac');
   assert.equal((await request('/growth/workspace')).status, 401);
   assert.equal((await request('/growth/workspace')).headers.get('cache-control'), 'no-store');
   assert.equal((await request('/growth/workspace', finance.cookie)).status, 403);

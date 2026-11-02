@@ -3,7 +3,7 @@ import { apiHeaders } from './http';
 import { DEMO_DISCLAIMER } from '../../src/components/shared/compliance';
 
 async function login(page: Page, account = 'learner') {
-  const result = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: `${account}@unknown.academy`, password: 'demo1234' } });
+  const result = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: `${account}@irip.ac`, password: 'demo1234' } });
   expect(result.ok()).toBe(true);
 }
 async function createArtifact(page: Page, title: string) {

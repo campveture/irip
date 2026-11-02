@@ -65,7 +65,7 @@ New access grants additionally require admin/owner. Finance/support/ordinary men
 
 Every local API mutation, including login/logout, requires:
 
-- Exact `X-UA-Request: 1` custom header. It is a browser-CSRF marker, **not a secret or authentication credential**.
+- Exact `X-IRIP-Request: 1` custom header. It is a browser-CSRF marker, **not a secret or authentication credential**.
 - Explicit allowed `Origin` matching scheme, host and port. Missing, `null`, foreign and misleading suffix origins are rejected. Cross-site Fetch Metadata is rejected too.
 - JSON content type for non-DELETE mutations. Credentialed CORS only permits the explicit loopback allowlist and required headers.
 

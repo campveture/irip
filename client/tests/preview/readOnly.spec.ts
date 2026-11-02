@@ -59,7 +59,7 @@ test('accounts, all portals and submission routes are blocked with no forms or a
     await expect(page.getByRole('heading', { name: 'This demo is read-only.', exact: true })).toBeVisible();
     await expect(page.locator('input,textarea,form')).toHaveCount(0);
   }
-  expect((await page.context().cookies()).some(cookie => cookie.name === 'ua.sid')).toBe(false);
+  expect((await page.context().cookies()).some(cookie => cookie.name === 'irip.sid')).toBe(false);
   await expect(page.getByRole('button', { name: 'Portal unavailable', exact: true })).toBeDisabled();
 });
 

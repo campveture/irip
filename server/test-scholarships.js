@@ -67,10 +67,10 @@ async function main() {
     child.stderr.on('data', chunk => process.stderr.write(chunk));
     child.on('exit', code => { clearTimeout(timer); reject(new Error(`Planner server exited: ${code}`)); });
   });
-  const learner = await login('learner@unknown.academy');
-  const owner = await login('admin@unknown.academy');
-  const mentor = await login('mentor@unknown.academy');
-  const finance = await login('finance@unknown.academy');
+  const learner = await login('learner@irip.ac');
+  const owner = await login('admin@irip.ac');
+  const mentor = await login('mentor@irip.ac');
+  const finance = await login('finance@irip.ac');
   for (const [path, method, payload] of [['/scholarships', 'GET', undefined], ['/scholarships/profile', 'POST', profile], ['/scholarships/applications/chevening', 'POST', application], ['/scholarships/data', 'DELETE', undefined]]) {
     assert.equal((await request(path, '', method, payload)).status, 401);
     assert.equal((await request(path, mentor, method, payload)).status, 403);

@@ -10,7 +10,7 @@ test('Fieldwork palette reaches the shared theme, minimal hero, navigation and d
   expect(await page.locator('[data-header-surface]').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(18, 43, 57)');
   expect(await page.locator('[data-header-surface] a[href="/programs"]').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(197, 164, 109)');
   expect(await page.locator('#route-content .bg-canvas').first().evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(245, 243, 237)');
-  const mark = await (await request.get('/images/academy-mark.svg')).text();
+  const mark = await (await request.get('/images/irip-mark.svg')).text();
   expect(mark).toContain('#C5A46D');
   expect(mark).toContain('#245448');
   expect(mark).not.toContain('#F7CBCA');

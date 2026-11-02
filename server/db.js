@@ -563,6 +563,13 @@ function initSchema() {
       db.exec('ALTER TABLE cohorts ADD COLUMN enrollment_deadline TEXT');
     }
     require('./profiles/schema').initProfiles(db);
+    // Additive rebrand migration: keep existing synthetic demo records usable after the rename.
+    for (const table of ['users', 'persons', 'mentor_intake']) {
+      if (db.prepare('PRAGMA table_info(' + table + ')').all().some(column => column.name === 'email')) {
+        db.prepare("UPDATE " + table + " SET email = replace(email, '@unknown.academy', '@irip.ac') WHERE email LIKE '%@unknown.academy'").run();
+      }
+    }
+    db.prepare("UPDATE settings SET value = 'IRIP' WHERE key = 'site_name' AND value = 'Unknown Academy'").run();
     db.prepare("UPDATE audit_events SET meta = '{\"redacted\":true}' WHERE action IN ('login', 'signup') AND meta LIKE '%password%'").run();
   });
   stmt();
@@ -580,7 +587,7 @@ function seed() {
   const insert = db.transaction(() => {
     const settings = db.prepare('INSERT OR IGNORE INTO settings(key, value, updated_at) VALUES (?, ?, ?)');
     const ts = now();
-    settings.run('site_name', 'Unknown Academy', ts);
+    settings.run('site_name', 'IRIP', ts);
     settings.run('refund_policy', 'Refunds are processed per the published refund policy. Contact support.', ts);
     settings.run('currency', 'BDT', ts);
     settings.run('timezone', 'Asia/Dhaka', ts);
@@ -601,35 +608,35 @@ function seed() {
     const pw = hashPassword('demo1234');
 
     // Admin
-    const admin = addUser.run('admin@unknown.academy', pw, 'Demo Administrator', 'admin', 'active', ts);
+    const admin = addUser.run('admin@irip.ac', pw, 'Demo Administrator', 'admin', 'active', ts);
     grant.run(1, 'admin', 'global', ts);
 
     // Finance
-    const finance = addUser.run('finance@unknown.academy', pw, 'Finance Officer', 'finance', 'active', ts);
+    const finance = addUser.run('finance@irip.ac', pw, 'Finance Officer', 'finance', 'active', ts);
     grant.run(2, 'finance', 'global', ts);
 
     // Academic ops
-    const academic = addUser.run('academic@unknown.academy', pw, 'Academic Operations', 'academic_ops', 'active', ts);
+    const academic = addUser.run('academic@irip.ac', pw, 'Academic Operations', 'academic_ops', 'active', ts);
     grant.run(3, 'academic_ops', 'global', ts);
 
     // Support
-    const support = addUser.run('support@unknown.academy', pw, 'Support Lead', 'support', 'active', ts);
+    const support = addUser.run('support@irip.ac', pw, 'Support Lead', 'support', 'active', ts);
     grant.run(4, 'support', 'global', ts);
 
     // Mentor
-    const mentor = addUser.run('mentor@unknown.academy', pw, 'Dr. Ayesha Rahman', 'mentor', 'active', ts);
+    const mentor = addUser.run('mentor@irip.ac', pw, 'Dr. Ayesha Rahman', 'mentor', 'active', ts);
     grant.run(5, 'mentor', 'global', ts);
     grant.run(5, 'supervisor', 'global', ts);
     upsertMentor.run(5, 'Senior research methods instructor with 10+ years supervising undergraduate and postgraduate research.', 'Research methods, statistics, academic writing', 5000, 'approved', ts);
     db.prepare('UPDATE mentor_profiles SET public_name = ? WHERE user_id = ?').run('Dr. Ayesha Rahman', 5);
 
     // Learner
-    const learner = addUser.run('learner@unknown.academy', pw, 'Rakib Hasan', 'learner', 'active', ts);
+    const learner = addUser.run('learner@irip.ac', pw, 'Rakib Hasan', 'learner', 'active', ts);
     grant.run(6, 'learner', 'global', ts);
     upsertProfile.run(6, '+880 1700 000000', 'Complete the research bootcamp and publish a paper.', JSON.stringify({ goal: 'Research publication', plan: [] }), ts);
 
     // Second learner
-    const learner2 = addUser.run('student2@unknown.academy', pw, 'Nusrat Jahan', 'learner', 'active', ts);
+    const learner2 = addUser.run('student2@irip.ac', pw, 'Nusrat Jahan', 'learner', 'active', ts);
     grant.run(7, 'learner', 'global', ts);
     upsertProfile.run(7, '+880 1800 000000', 'Build research competence for postgraduate study.', JSON.stringify({ goal: 'Postgraduate readiness', plan: [] }), ts);
 
@@ -846,10 +853,10 @@ function seed() {
     const addPerson = db.prepare(
       'INSERT OR IGNORE INTO persons(name, email, phone, source, created_at) VALUES (?, ?, ?, ?, ?)'
     );
-    addPerson.run('Prospective Learner', 'prospect@unknown.academy', '+880 1900 000000', 'website', ts);
+    addPerson.run('Prospective Learner', 'prospect@irip.ac', '+880 1900 000000', 'website', ts);
     addPerson.run('University Partner', 'partner@university.edu.bd', '+880 2 0000000', 'outreach', ts);
 
-    const person1 = db.prepare("SELECT id FROM persons WHERE email = 'prospect@unknown.academy'").get().id;
+    const person1 = db.prepare("SELECT id FROM persons WHERE email = 'prospect@irip.ac'").get().id;
     const person2 = db.prepare("SELECT id FROM persons WHERE email = 'partner@university.edu.bd'").get().id;
 
     const addOpportunity = db.prepare(

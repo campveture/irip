@@ -11,8 +11,8 @@ try {
 }
 if (existingResponse) {
   const health = await existingResponse.json().catch(() => null);
-  if (existingResponse.ok && health?.service === 'unknown-academy-server') {
-    console.log(`Unknown Academy is already running on http://localhost:${port}`);
+  if (existingResponse.ok && health?.service === 'irip-server') {
+    console.log(`IRIP is already running on http://localhost:${port}`);
     process.exit(0);
   }
   throw new Error(`Port ${port} is occupied by another service. Set PORT to a free port.`);

@@ -31,7 +31,7 @@ export default function About() {
 
   return (
     <main>
-      <PublicHero eyebrow="About Unknown Academy" title={<>Curiosity, with<br /><em>somewhere to go.</em></>} description="We’re building a place for learners in Bangladesh to turn curiosity into research." shortcuts={[{ to: '#our-approach', detail: 'The idea', label: 'Why we’re building this' }, { to: '/student-value', detail: 'The direction', label: 'Learner roadmap' }, { to: '/teach', detail: 'Get involved', label: 'Explore teaching' }]} actions={<>
+      <PublicHero eyebrow="About IRIP" title={<>Curiosity, with<br /><em>somewhere to go.</em></>} description="The Institute of Research, Innovation and Practice is building a place for learners in Bangladesh to turn curiosity into research." shortcuts={[{ to: '#our-approach', detail: 'The idea', label: 'Why we’re building this' }, { to: '/student-value', detail: 'The direction', label: 'Learner roadmap' }, { to: '/teach', detail: 'Get involved', label: 'Explore teaching' }]} actions={<>
               <Link to="/programs" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brass px-6 text-sm font-semibold text-slate-950 hover:bg-white">Explore programs <ArrowUpRight size={17} aria-hidden="true" /></Link>
               <a href="#our-approach" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/30 px-6 text-sm font-semibold hover:bg-white/10">Our approach</a>
       </>} />
@@ -45,7 +45,7 @@ export default function About() {
           {loading ? <p role="status" className="py-6 text-sm text-slate-600">Loading our story…</p> : error ? <div><p role="alert" className="text-sm leading-7 text-red-800">{error}</p><button type="button" onClick={() => setAttempt(value => value + 1)} className="mt-5 min-h-11 rounded-full border border-brand-300 px-5 text-sm font-semibold text-brand-800">Retry about content</button></div> : <article>
             <h3 className="text-xl font-semibold text-slate-900">{page?.title}</h3>
             <p className="mt-4 text-sm leading-7 text-slate-600">{(page?.body ?? '').split(/\n\s*\n/)[0]}</p>
-            <details className="mt-4 border-b border-stone pb-4"><summary className="min-h-11 cursor-pointer py-3 text-sm font-semibold text-brand-800">More about the academy</summary><div className="mt-3 space-y-4">{(page?.body ?? '').split(/\n\s*\n/).filter(Boolean).slice(1).map((paragraph, index) => <p key={index} className="text-sm leading-7 text-slate-600">{paragraph}</p>)}</div></details>
+            <details className="mt-4 border-b border-stone pb-4"><summary className="min-h-11 cursor-pointer py-3 text-sm font-semibold text-brand-800">More about IRIP</summary><div className="mt-3 space-y-4">{(page?.body ?? '').split(/\n\s*\n/).filter(Boolean).slice(1).map((paragraph, index) => <p key={index} className="text-sm leading-7 text-slate-600">{paragraph}</p>)}</div></details>
           </article>}
         </div>
       </section>

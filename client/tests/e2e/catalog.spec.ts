@@ -101,7 +101,7 @@ test('header uses bounded frosted glass with a clear surround; sheets and catalo
       return { background: style.backgroundColor, backdrop: style.backdropFilter };
     });
     expect(headerStyle).toEqual({ background: 'rgba(0, 0, 0, 0)', backdrop: 'none' });
-    expect(await page.locator('.academy-header-frame').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgba(245, 243, 237, 0.92)');
+    expect(await page.locator('.irip-header-frame').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgba(245, 243, 237, 0.92)');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.locator('img').evaluateAll(images => Promise.all(images.map(image => {
       if (!(image instanceof HTMLImageElement)) throw new Error('Expected an image element.');

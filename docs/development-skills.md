@@ -1,6 +1,6 @@
 # Project-local development skills
 
-Installed for Unknown Academy on 2026-10-31. These are Markdown guidance,
+Installed for IRIP on 2026-10-31. These are Markdown guidance,
 not executable tools, enforced security controls, or evidence of production readiness.
 No application source, package/config files, secrets, or deployment were changed
 as part of this skill installation.
@@ -10,13 +10,13 @@ as part of this skill installation.
 | Skill ID / directory under `.opencode/skills/` | Origin | Purpose |
 | --- | --- | --- |
 | `vercel-react-best-practices` | Downloaded from official `vercel-labs/agent-skills` | Selective React performance reference |
-| `academy-secure-fullstack` | **Locally authored, not downloaded** | Incremental React/API/SQLite work, central admin portal, immutable profile approvals, security acceptance |
-| `academy-code-organization` | **Locally authored, not downloaded** | Small typed modules, contracts, policy boundaries, tests, behavior-preserving refactors |
+| `irip-secure-fullstack` | **Locally authored, not downloaded** | Incremental React/API/SQLite work, central admin portal, immutable profile approvals, security acceptance |
+| `irip-code-organization` | **Locally authored, not downloaded** | Small typed modules, contracts, policy boundaries, tests, behavior-preserving refactors |
 
 Each directory contains `SKILL.md` with a unique ID and trigger description.
 [OpenCode V2 discovery](https://opencode.ai/v2/docs/skills) supports this location
-without configuration edits. Explicitly request `@academy-secure-fullstack`,
-`@academy-code-organization`, or `@vercel-react-best-practices` when useful.
+without configuration edits. Explicitly request `@irip-secure-fullstack`,
+`@irip-code-organization`, or `@vercel-react-best-practices` when useful.
 Actual loading remains subject to session discovery and skill permissions.
 
 ## Upstream provenance and installation scope

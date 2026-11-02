@@ -89,7 +89,7 @@ export default function AdminDashboard() {
           <div><h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">The work at a glance.</h1><p className="mt-2 max-w-xl text-sm leading-6 text-white/75">Signed in as {user?.full_name} · {roles.join(', ')}. Local demo records only.</p></div>
           <Link to="/admin/learners" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-brand-200 px-5 text-sm font-semibold text-brand-900 transition hover:bg-white">Manage learners <ArrowRight className="ml-2 h-4 w-4" /></Link>
         </div>
-        <p className="mt-4 hidden text-xs text-white/60 lg:block">Stock analytics photo · Not academy metrics</p>
+        <p className="mt-4 hidden text-xs text-white/60 lg:block">Stock analytics photo · Not IRIP metrics</p>
         </div>
       </div>
 

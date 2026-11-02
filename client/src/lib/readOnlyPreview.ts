@@ -13,7 +13,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 export async function appFetch(path: string, init: RequestInit = {}): Promise<Response> {
   if (!READ_ONLY_PREVIEW) {
     const headers = new Headers(init.headers);
-    if (path.startsWith('/api/') && !['GET','HEAD','OPTIONS'].includes((init.method ?? 'GET').toUpperCase())) headers.set('X-UA-Request', '1');
+    if (path.startsWith('/api/') && !['GET','HEAD','OPTIONS'].includes((init.method ?? 'GET').toUpperCase())) headers.set('X-IRIP-Request', '1');
     return fetch(path, { ...init, headers });
   }
   if (init.signal?.aborted) throw new DOMException('Request aborted.', 'AbortError');

@@ -54,7 +54,7 @@ export default function Home() {
 
   return (
     <div className="bg-canvas text-slate-900">
-      <PublicHero eyebrow="Unknown Academy" title={<>Start with a question.<br /><em>Build the answer.</em></>} description="Research learning, guided practice and proposed projects for Bangladesh." shortcuts={[{ to: '/programs/research-bootcamp#cohorts', detail: 'Plan your start', label: 'Bootcamp intakes' }, { to: '/courses', detail: 'Find your focus', label: 'Explore courses' }, { to: '/projects', detail: 'See the practice', label: 'Research projects' }]} actions={<>
+      <PublicHero eyebrow="IRIP" title={<>Start with a question.<br /><em>Build the answer.</em></>} description="Research learning, guided practice and proposed projects for Bangladesh." shortcuts={[{ to: '/programs/research-bootcamp#cohorts', detail: 'Plan your start', label: 'Bootcamp intakes' }, { to: '/courses', detail: 'Find your focus', label: 'Explore courses' }, { to: '/projects', detail: 'See the practice', label: 'Research projects' }]} actions={<>
               <Link to="/programs" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brass px-6 font-semibold text-slate-950 transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                 Explore programs <ArrowUpRight size={18} />
               </Link>

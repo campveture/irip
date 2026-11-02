@@ -37,8 +37,8 @@ async function main() {
     child.stderr.on('data', chunk => process.stderr.write(chunk));
     child.on('exit', code => { clearTimeout(timer); reject(new Error(`Server exited: ${code}`)); });
   });
-  const mentor = await login('mentor@unknown.academy'); const learner = await login('learner@unknown.academy');
-  const owner = await login('admin@unknown.academy'); const finance = await login('finance@unknown.academy');
+  const mentor = await login('mentor@irip.ac'); const learner = await login('learner@irip.ac');
+  const owner = await login('admin@irip.ac'); const finance = await login('finance@irip.ac');
   const catalog = await request('/recorded-courses/catalog');
   assert.equal(catalog.status, 200); assert.equal(catalog.body.courses.length, 4);
   const { plan, courses } = catalog.body;

@@ -7,9 +7,9 @@ test('header has no notice bar and reserves only the navigation height', async (
     await page.goto('/');
     await expect(page.locator('header').getByRole('complementary')).toHaveCount(0);
     await expect(page.locator('footer').getByRole('complementary', { name: 'Local demonstration disclaimer' })).toHaveText(DEMO_DISCLAIMER);
-    const geometry = await page.locator('.academy-header-frame').evaluate(element => {
+    const geometry = await page.locator('.irip-header-frame').evaluate(element => {
       const frame = element.getBoundingClientRect();
-      const navigation = element.querySelector('.academy-header-navigation')!.getBoundingClientRect();
+      const navigation = element.querySelector('.irip-header-navigation')!.getBoundingClientRect();
       const content = document.querySelector('#route-content')!;
       const contentStart = content.getBoundingClientRect().top + parseFloat(getComputedStyle(content).paddingTop);
       return { top: frame.top, inset: frame.left > 0, compact: frame.height - navigation.height <= 18, reserved: contentStart >= frame.bottom, overflow: document.documentElement.scrollWidth > innerWidth };
@@ -26,7 +26,7 @@ async function scrollDown(page: Page) {
     for (let step = 0; step < 8; step++) {
       window.scrollBy({ top: 55, behavior: 'instant' });
       await new Promise(resolve => window.setTimeout(resolve, 60));
-      travel.push({ y: scrollY, hidden: document.querySelector('header')?.getAttribute('data-hidden'), bottom: document.querySelector('.academy-header-frame')!.getBoundingClientRect().bottom });
+      travel.push({ y: scrollY, hidden: document.querySelector('header')?.getAttribute('data-hidden'), bottom: document.querySelector('.irip-header-frame')!.getBoundingClientRect().bottom });
     }
     return travel;
   });
@@ -37,7 +37,7 @@ test('header slides away during downward scroll and docks from above after the s
   await page.goto('/');
   await expect(page.locator('a[href="/programs/research-bootcamp"]').first()).toBeVisible();
   const header = page.locator('header');
-  const surface = page.locator('.academy-header-frame');
+  const surface = page.locator('.irip-header-frame');
   const originalHeight = await page.evaluate(() => document.documentElement.scrollHeight);
   const travelling = await scrollDown(page);
   // Observe the movement in the browser during travel, not after cross-process
@@ -55,8 +55,8 @@ test('program tabs share the rounded design but scroll with the page instead of 
     await page.goto('/programs/research-bootcamp');
     const tabs = page.getByRole('tablist', { name: 'Program details' });
     await expect(tabs).toBeVisible();
-    const design = await page.locator('.academy-program-dock').evaluate(element => {
-      const header = document.querySelector('.academy-header-frame')!;
+    const design = await page.locator('.irip-program-dock').evaluate(element => {
+      const header = document.querySelector('.irip-header-frame')!;
       const frame = header.getBoundingClientRect(), dock = element.getBoundingClientRect();
       return { aligned: Math.abs(frame.left - dock.left) < 1, bounded: dock.width <= frame.width, matchingRadius: getComputedStyle(header).borderRadius === getComputedStyle(element).borderRadius, inFlow: getComputedStyle(element.parentElement!).position === 'static', transparentSurround: getComputedStyle(element.parentElement!).backgroundColor === 'rgba(0, 0, 0, 0)', controlsFit: [...element.querySelectorAll('[role="tab"]')].every(tab => tab.getBoundingClientRect().height >= 44 && tab.scrollWidth <= tab.clientWidth), overflow: document.documentElement.scrollWidth > innerWidth };
     });

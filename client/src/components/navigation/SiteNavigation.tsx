@@ -7,7 +7,7 @@ import { NavigationDropdown } from './NavigationDropdown';
 import { NavigationLinks } from './NavigationLinks';
 import { primaryLinks, secondaryLinks, workspacesFor, type NavigationSession } from './navigationModel';
 import { READ_ONLY_PREVIEW } from '../../lib/readOnlyPreview';
-import { AcademyMark } from '../shared/AcademyMark';
+import { IripMark } from '../shared/IripMark';
 import { useHeaderDock } from './useHeaderDock';
 
 export function SiteNavigation({ session }: { session: NavigationSession }) {
@@ -27,29 +27,29 @@ export function SiteNavigation({ session }: { session: NavigationSession }) {
     catch { setSignOutError('Sign out failed. Please retry.'); }
     finally { setSigningOut(false); }
   }
-  const authLinks = <div className="flex flex-wrap items-center gap-2"><Link to="/login" onClick={() => setMobileOpen(false)} className="academy-control">Sign in</Link><Link to="/signup" onClick={() => setMobileOpen(false)} className="academy-control academy-control--primary">Try demo</Link></div>;
-  const signOutButton = <button type="button" disabled={signingOut} onClick={() => { void signOut(); }} className="academy-control text-slate-600 disabled:opacity-50">{signingOut ? 'Signing out…' : 'Sign out'}</button>;
+  const authLinks = <div className="flex flex-wrap items-center gap-2"><Link to="/login" onClick={() => setMobileOpen(false)} className="irip-control">Sign in</Link><Link to="/signup" onClick={() => setMobileOpen(false)} className="irip-control irip-control--primary">Try demo</Link></div>;
+  const signOutButton = <button type="button" disabled={signingOut} onClick={() => { void signOut(); }} className="irip-control text-slate-600 disabled:opacity-50">{signingOut ? 'Signing out…' : 'Sign out'}</button>;
 
-  return <header ref={header} data-hidden={hidden} data-scrolled={scrolled} className="academy-header sticky top-0 z-20">
-    <div className="container-page"><div className="academy-header-frame">
-      <div className="academy-header-navigation">
-      <Link to="/" aria-label="Unknown Academy home" className="academy-wordmark">
-        <AcademyMark className="academy-symbol" />
-        <span className="min-w-0"><span className="block truncate text-sm font-semibold tracking-tight sm:text-base">Unknown<span className="font-normal text-brand-600">Academy</span></span><span className="academy-wordmark-note">ASK · TEST · UNDERSTAND</span></span>
+  return <header ref={header} data-hidden={hidden} data-scrolled={scrolled} className="irip-header sticky top-0 z-20">
+    <div className="container-page"><div className="irip-header-frame">
+      <div className="irip-header-navigation">
+      <Link to="/" aria-label="IRIP home" title="Institute of Research, Innovation and Practice" className="irip-wordmark">
+        <IripMark className="irip-symbol" />
+        <span className="min-w-0"><span className="block truncate text-sm font-semibold tracking-tight sm:text-base">IRIP</span><span className="irip-wordmark-note">ASK · TEST · UNDERSTAND</span></span>
       </Link>
       <div className="flex min-w-0 shrink-0 items-center gap-2">
-        <nav aria-label="Main navigation" className="academy-segments hidden items-center xl:flex"><NavigationLinks links={primaryLinks} segmented /><NavigationDropdown label="More"><NavigationLinks links={moreLinks} /></NavigationDropdown></nav>
-        {READ_ONLY_PREVIEW && <button disabled title="Portals are unavailable in this read-only preview" className="academy-control hidden text-slate-500 sm:inline-flex">Portal unavailable</button>}
+        <nav aria-label="Main navigation" className="irip-segments hidden items-center xl:flex"><NavigationLinks links={primaryLinks} segmented /><NavigationDropdown label="More"><NavigationLinks links={moreLinks} /></NavigationDropdown></nav>
+        {READ_ONLY_PREVIEW && <button disabled title="Portals are unavailable in this read-only preview" className="irip-control hidden text-slate-500 sm:inline-flex">Portal unavailable</button>}
         {!READ_ONLY_PREVIEW && !session.loading && (session.isAuthenticated ? <>
           <NavigationDropdown label="Portal" prominent>{workspaces.length ? workspaces.map(item => <Link key={item.to} to={item.to} className="block rounded-xl px-3 py-3 hover:bg-brand-50"><span className="block text-sm font-semibold text-brand-900">{item.label}</span><span className="block text-xs text-slate-500">{item.description}</span></Link>) : <><Link to="/account/mentor-application" className="block rounded-xl px-3 py-3 text-sm text-brand-900">Mentor application</Link><Link to="/account/profile" className="block rounded-xl px-3 py-3 text-sm text-brand-900">Account profile</Link></>}</NavigationDropdown>
           <div className="hidden xl:block">{signOutButton}</div>
         </> : <div className="hidden xl:block">{authLinks}</div>)}
-        <button type="button" aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={mobileOpen} onClick={() => setMobileOpen(true)} className="academy-control academy-menu-trigger xl:hidden"><Menu size={20} aria-hidden="true" /></button>
+        <button type="button" aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={mobileOpen} onClick={() => setMobileOpen(true)} className="irip-control irip-menu-trigger xl:hidden"><Menu size={20} aria-hidden="true" /></button>
       </div>
       </div>
     </div></div>
     {signOutError && <p role="alert" className="container-page pb-3 text-sm text-red-800">{signOutError}</p>}
-    <Sheet open={mobileOpen} title="Site navigation" onClose={() => setMobileOpen(false)} className="academy-navigation-sheet">
+    <Sheet open={mobileOpen} title="Site navigation" onClose={() => setMobileOpen(false)} className="irip-navigation-sheet">
       <Link to={mentorHref} onClick={() => setMobileOpen(false)} className="flex min-h-12 items-center justify-center rounded-xl bg-brand-900 px-4 text-sm font-semibold text-white">{mentorLabel}</Link>
       <DemoCallout>Synthetic local demo. No live enrollment or payment.</DemoCallout>
       <nav aria-label="Mobile navigation"><NavigationLinks links={[...primaryLinks, ...moreLinks.filter(link => link.to !== mentorHref)]} onNavigate={() => setMobileOpen(false)} /></nav>

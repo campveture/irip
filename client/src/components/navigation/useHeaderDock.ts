@@ -12,13 +12,13 @@ export function useHeaderDock(ref: RefObject<HTMLElement>, locked: boolean) {
   // anchor offsets never sit underneath the floating capsule.
   useLayoutEffect(() => {
     const container = ref.current?.querySelector<HTMLElement>(':scope > .container-page');
-    const shell = ref.current?.closest<HTMLElement>('.academy-shell');
+    const shell = ref.current?.closest<HTMLElement>('.irip-shell');
     if (!container || !shell) return;
-    const measure = () => shell.style.setProperty('--academy-header-height', `${container.offsetHeight}px`);
+    const measure = () => shell.style.setProperty('--irip-header-height', `${container.offsetHeight}px`);
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(container);
-    return () => { observer.disconnect(); shell.style.removeProperty('--academy-header-height'); };
+    return () => { observer.disconnect(); shell.style.removeProperty('--irip-header-height'); };
   }, [ref]);
   useEffect(() => {
     const header = ref.current;

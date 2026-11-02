@@ -1,4 +1,4 @@
-// Explanatory mathematics, not academy outcome data.
+// Explanatory mathematics, not IRIP outcome data.
 export function falseAlarmProbability(tests: number, alpha = 0.05): number {
   if (!Number.isSafeInteger(tests) || tests < 1 || tests > 10000 || !Number.isFinite(alpha) || alpha < 0 || alpha > 1) throw new Error('Invalid independent-testing scenario.');
   return 1 - (1 - alpha) ** tests;

@@ -13,7 +13,7 @@ async function signup(page: Page, tag: string) {
   return identity.user.id as number;
 }
 async function login(page: Page, account: string) {
-  const response = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: `${account}@unknown.academy`, password: 'demo1234' } });
+  const response = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: `${account}@irip.ac`, password: 'demo1234' } });
   expect(response.status()).toBe(200);
 }
 async function fillApplication(page: Page, name: string) {

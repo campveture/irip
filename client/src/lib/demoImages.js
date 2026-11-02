@@ -1,4 +1,4 @@
-// Locally hosted design assets. Stock people are explicitly labelled models, not real academy members.
+// Locally hosted design assets. Stock people are explicitly labelled models, not real IRIP members.
 export const demoImages = {
   study: '/images/digital-learning.jpg',
   mentoring: '/images/team-workshop.jpg',

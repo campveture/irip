@@ -1,6 +1,6 @@
 # Illustrative demo images
 
-These locally hosted assets are visual placeholders, not evidence of Unknown Academy people, premises, courses or project results. Stock portraits are used only on synthetic demo profiles with a visible **Stock model / Demo portrait** label. Replace them with approved portraits before launch.
+These locally hosted assets are visual placeholders, not evidence of IRIP people, premises, courses or project results. Stock portraits are used only on synthetic demo profiles with a visible **Stock model / Demo portrait** label. Replace them with approved portraits before launch.
 
 ## Original program artwork
 
@@ -8,7 +8,7 @@ These locally hosted assets are visual placeholders, not evidence of Unknown Aca
 
 ## Current stock photography
 
-Locally resized images from Unsplash; see the [Unsplash license](https://unsplash.com/license). No endorsement or academy affiliation is implied.
+Locally resized images from Unsplash; see the [Unsplash license](https://unsplash.com/license). No endorsement or institutional affiliation is implied.
 
 | File | Source image | Purpose |
 | --- | --- | --- |

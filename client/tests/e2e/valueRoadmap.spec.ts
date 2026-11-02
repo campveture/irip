@@ -47,7 +47,7 @@ test('mobile alumni deep link, keyboard access and internship-board boundary rem
 });
 
 test('learner can open the proposal roadmap from the dashboard without joining an alumni scheme or submitting an application', async ({ page }) => {
-  const login = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: 'learner@unknown.academy', password: 'demo1234' } });
+  const login = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: 'learner@irip.ac', password: 'demo1234' } });
   expect(login.ok()).toBe(true);
   await page.goto('/app');
   await page.getByRole('link', { name: 'Student value & opportunity proposals', exact: true }).click();

@@ -15,7 +15,7 @@ async function mentoring(page: Page) {
   await page.getByLabel('Weekly availability and timezone', { exact: true }).fill('Two hours each Friday, Asia/Dhaka.');
   await page.getByLabel('Why mentor here, and how would you guide a struggling learner?', { exact: true }).fill('I would help a learner clarify the question and check the assumptions behind their chosen method.');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByLabel(/I consent to authorized academy staff/).check();
+  await page.getByLabel(/I consent to authorized IRIP staff/).check();
   await page.getByLabel(/I confirm this local-demo application/).check();
 }
 
@@ -30,11 +30,11 @@ test('guest applies without an account and staff reviews the private application
   await page.screenshot({ path: info.outputPath('mentor-application-review.png'), fullPage: true });
   await page.getByRole('button', { name: 'Submit mentor application', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Thank you for applying', exact: true })).toBeVisible();
-  expect((await page.context().cookies()).some(cookie => cookie.name === 'ua.sid')).toBe(false);
+  expect((await page.context().cookies()).some(cookie => cookie.name === 'irip.sid')).toBe(false);
   expect((await page.request.get('/api/auth/me')).status()).toBe(401);
   const admin = await browser.newPage();
   try {
-    expect((await admin.request.post('/api/auth/login', { headers: apiHeaders, data: { email: 'admin@unknown.academy', password: 'demo1234' } })).status()).toBe(200);
+    expect((await admin.request.post('/api/auth/login', { headers: apiHeaders, data: { email: 'admin@irip.ac', password: 'demo1234' } })).status()).toBe(200);
     await admin.goto('/admin/approvals');
     await admin.getByRole('link', { name: 'Review application from Synthetic Guest Pilot', exact: true }).click();
     await expect(admin.getByRole('heading', { name: 'Application from Synthetic Guest Pilot', exact: true })).toBeVisible();

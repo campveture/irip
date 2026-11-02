@@ -1,10 +1,10 @@
 # Vercel read-only preview
 
-This repository is configured to deploy a **synthetic read-only public demo**, not the SQLite-backed academy system.
+This repository is configured to deploy a **synthetic read-only public demo**, not the SQLite-backed IRIP system.
 
 ## GitHub integration
 
-Import `campveture/unknown_academy` into a Vercel account/team that can create projects and access the repository through the Vercel GitHub app. Use the repository root, production branch `main`, and Node.js **22.x**. The committed `vercel.json` supplies the settings:
+Import `campveture/irip` into a Vercel account/team that can create projects and access the repository through the Vercel GitHub app. Use the repository root, production branch `main`, and Node.js **22.x**. The committed `vercel.json` supplies the settings:
 
 - Framework: Other (`null`), not Express.
 - Install: `npm --prefix client ci --include=dev && npm --prefix server ci`.

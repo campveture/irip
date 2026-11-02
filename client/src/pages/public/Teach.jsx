@@ -4,7 +4,7 @@ import { PublicHero } from '../../components/shared/PublicHero';
 export default function Teach() {
   return (
     <main>
-      <PublicHero eyebrow="Teach at Unknown Academy" title={<>Your experience.<br /><em>Someone’s next step.</em></>} description="Propose a focused course, or help learners develop their research." artwork="paths" shortcuts={[{ to: '#mentor-role-heading', detail: 'Guide research', label: 'Mentor & supervise' }, { to: '#course-role-heading', detail: 'Teach your topic', label: 'Create a course' }, { to: '/courses', detail: 'See the format', label: 'Explore demo syllabi' }]} actions={<Link to="/teach/apply" className="inline-flex min-h-12 items-center rounded-full bg-brass px-6 text-sm font-semibold text-slate-950 hover:bg-white">Apply as a mentor</Link>} />
+      <PublicHero eyebrow="Teach at IRIP" title={<>Your experience.<br /><em>Someone’s next step.</em></>} description="Propose a focused course, or help learners develop their research." artwork="paths" shortcuts={[{ to: '#mentor-role-heading', detail: 'Guide research', label: 'Mentor & supervise' }, { to: '#course-role-heading', detail: 'Teach your topic', label: 'Create a course' }, { to: '/courses', detail: 'See the format', label: 'Explore demo syllabi' }]} actions={<Link to="/teach/apply" className="inline-flex min-h-12 items-center rounded-full bg-brass px-6 text-sm font-semibold text-slate-950 hover:bg-white">Apply as a mentor</Link>} />
       <div className="container-page py-14 sm:py-20">
         <div className="grid gap-10 md:grid-cols-2">
           <section aria-labelledby="mentor-role-heading" className="border-t border-stone pt-6">

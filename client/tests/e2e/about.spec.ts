@@ -1,17 +1,17 @@
 import { test, expect } from '@playwright/test';
 
-test('About keeps the academy story concise, without decorative cards', async ({ page }, info) => {
+test('About keeps the IRIP story concise, without decorative cards', async ({ page }, info) => {
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/about');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Curiosity, withsomewhere to go.');
-    await expect(page.getByRole('heading', { name: 'About Unknown Academy', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'About IRIP', exact: true })).toBeVisible();
     await expect(page.locator('[data-public-hero] figure, [data-public-hero] img')).toHaveCount(0);
     await expect(page.getByRole('region', { name: 'Our proposed approach' }).getByRole('listitem')).toHaveCount(3);
     await expect(page.locator('#our-approach details')).not.toHaveAttribute('open');
-    await page.getByText('More about the academy', { exact: true }).click();
+    await page.getByText('More about IRIP', { exact: true }).click();
     await expect(page.locator('#our-approach details')).toHaveAttribute('open', '');
-    await page.getByText('More about the academy', { exact: true }).click();
+    await page.getByText('More about IRIP', { exact: true }).click();
     await expect(page.getByRole('complementary', { name: 'What is available today' })).toContainText('No guaranteed publication, qualification, internship or job is promised.');
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
     await expect(page.locator('#route-content .skeleton')).toHaveCount(0);
@@ -19,7 +19,7 @@ test('About keeps the academy story concise, without decorative cards', async ({
     await page.getByRole('link', { name: 'Our approach', exact: true }).click();
     await expect(page).toHaveURL(/#our-approach$/);
     await expect.poll(() => page.locator('#our-approach').evaluate(element => {
-      const header = document.querySelector('.academy-header > .container-page')!;
+      const header = document.querySelector('.irip-header > .container-page')!;
       return Math.round(element.getBoundingClientRect().top - header.getBoundingClientRect().height);
     })).toBe(16);
   }
@@ -44,7 +44,7 @@ test('About stays readable while its story loads, with no skeleton placeholders'
   } finally {
     release();
   }
-  await expect(page.getByRole('heading', { name: 'About Unknown Academy', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'About IRIP', exact: true })).toBeVisible();
   await expect(page.getByRole('status').filter({ hasText: 'Loading our story…' })).toHaveCount(0);
 });
 
@@ -60,7 +60,7 @@ for (const malformed of [false, true]) {
     await expect(page.locator('#our-approach article')).toHaveCount(0);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await page.getByRole('button', { name: 'Retry about content', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'About Unknown Academy', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'About IRIP', exact: true })).toBeVisible();
     await expect(page.getByRole('alert')).toHaveCount(0);
   });
 }

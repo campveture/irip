@@ -15,7 +15,7 @@ async function request(route, cookie = '', method = 'GET', body, headers = {}) {
 }
 const form = { full_name: 'Synthetic Guest Mentor', email: 'guest-mentor@example.test', professional_title: 'Research methods instructor', qualification: 'Synthetic postgraduate research and teaching qualification.', experience_years: 5, expertise: 'Research methods and statistics', experience: 'Synthetic experience teaching research methods and guiding bounded student research projects.', profile_url: 'https://example.test/research', availability: 'Two hours on Fridays, Asia/Dhaka.', language: 'both', motivation: 'I would help a learner clarify their question, identify assumptions and justify their chosen method.', consent: true, accuracy: true };
 async function login(account) {
-  const result = await request('/auth/login', '', 'POST', { email: `${account}@unknown.academy`, password: 'demo1234' });
+  const result = await request('/auth/login', '', 'POST', { email: `${account}@irip.ac`, password: 'demo1234' });
   assert.equal(result.status, 200); return result.cookie;
 }
 const counts = () => ['users','role_grants','mentor_profiles'].map(table => db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get().n);
@@ -31,7 +31,7 @@ async function main() {
   const before = counts(), submit = body => request('/mentor-applications', '', 'POST', body);
   assert.equal((await request('/auth/signup', '', 'POST', { email: form.email, full_name: form.full_name, password: 'demo1234', account_type: 'mentor' })).status, 410);
   for (const body of [{ ...form, role: 'mentor' }, { ...form, consent: false }, { ...form, experience_years: -1 }, { ...form, profile_url: 'javascript:alert(1)' }, { ...form, profile_url: 'https://user:secret@example.test/path' }, { ...form, motivation: 'Too short' }]) assert.equal((await submit(body)).status, 400);
-  assert.equal((await request('/mentor-applications', '', 'POST', form, { 'X-UA-Request': '' })).status, 403);
+  assert.equal((await request('/mentor-applications', '', 'POST', form, { 'X-IRIP-Request': '' })).status, 403);
   assert.equal((await request('/mentor-applications', '', 'POST', form, { Origin: 'https://evil.example' })).status, 403);
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM mentor_intake').get().n, 0);
   const received = await submit(form); assert.equal(received.status, 202); assert.equal(received.cookie, ''); assert.equal(received.headers.get('cache-control'), 'no-store');
@@ -64,8 +64,8 @@ async function main() {
   assert.equal((await submit(form)).status, 202); assert.equal(db.prepare('SELECT COUNT(*) AS n FROM mentor_intake').get().n, 1);
   assert.equal((await request('/auth/login', '', 'POST', { email: form.email, password: 'demo1234' })).status, 401);
   assert.ok(!JSON.stringify((await request('/public/mentors')).body).includes(form.email));
-  await submit({ ...form, email: 'admin@unknown.academy' });
-  const self = db.prepare('SELECT id FROM mentor_intake WHERE email=?').get('admin@unknown.academy');
+  await submit({ ...form, email: 'admin@irip.ac' });
+  const self = db.prepare('SELECT id FROM mentor_intake WHERE email=?').get('admin@irip.ac');
   assert.equal((await request(ops + '/' + self.id + '/decision', admin, 'POST', decision)).status, 403);
   const clarification = await request(ops + '/' + self.id + '/decision', academic, 'POST', { ...decision, decision: 'changes_requested', verification_note: '' });
   assert.equal(clarification.status, 200); assert.equal(clarification.body.application.state, 'changes_requested');

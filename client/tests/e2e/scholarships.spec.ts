@@ -3,7 +3,7 @@ import { apiHeaders } from './http';
 import { DEMO_DISCLAIMER } from '../../src/components/shared/compliance';
 
 async function signIn(page: Page) {
-  const response = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: 'learner@unknown.academy', password: 'demo1234' } });
+  const response = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: 'learner@irip.ac', password: 'demo1234' } });
   expect(response.ok()).toBe(true);
   expect((await page.request.delete('/api/scholarships/data', { headers: apiHeaders })).ok()).toBe(true);
 }

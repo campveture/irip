@@ -1,14 +1,14 @@
 ---
-name: academy-code-organization
-description: Organize or refactor Unknown Academy React/Vite and Express/SQLite code incrementally. Use when adding modules, splitting large components/routes, defining frontend/API contracts, untangling imports, or placing tests; preserve behavior, authorization, private data boundaries, and existing work.
+name: irip-code-organization
+description: Organize or refactor IRIP React/Vite and Express/SQLite code incrementally. Use when adding modules, splitting large components/routes, defining frontend/API contracts, untangling imports, or placing tests; preserve behavior, authorization, private data boundaries, and existing work.
 metadata:
-  author: unknown-academy-local
+  author: irip-local
   provenance: locally-authored-not-downloaded
 ---
 
-# Academy code organization
+# IRIP code organization
 
-Locally authored for Unknown Academy; not a downloaded upstream skill.
+Locally authored for IRIP; not a downloaded upstream skill.
 These conventions support reviewability; they do not guarantee secure behavior.
 
 ## Start with the actual repository

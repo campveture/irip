@@ -1,14 +1,14 @@
 ---
-name: academy-secure-fullstack
-description: Build or review Unknown Academy features connecting its React/Vite frontend to the local Express/SQLite API. Use for authentication, single-admin authorization, profile submissions and approvals, migrations, API contracts, CSRF protections, or backend integration; deliver small tested slices without deployment.
+name: irip-secure-fullstack
+description: Build or review IRIP features connecting its React/Vite frontend to the local Express/SQLite API. Use for authentication, single-admin authorization, profile submissions and approvals, migrations, API contracts, CSRF protections, or backend integration; deliver small tested slices without deployment.
 metadata:
-  author: unknown-academy-local
+  author: irip-local
   provenance: locally-authored-not-downloaded
 ---
 
-# Academy secure full-stack development
+# IRIP secure full-stack development
 
-Locally authored for Unknown Academy; not downloaded or endorsed by Vercel.
+Locally authored for IRIP; not downloaded or endorsed by Vercel.
 This is development guidance, not a security guarantee or production certification.
 
 ## Establish the boundary
@@ -50,7 +50,7 @@ This is development guidance, not a security guarantee or production certificati
 ## CSRF and request origin
 
 - Guard every state-changing endpoint, including login, logout, and review decisions.
-- Require a project-specific custom header, e.g. `X-Academy-Request: 1`, on mutations.
+- Require a project-specific custom header, e.g. `X-IRIP-Request: 1`, on mutations.
 - Check its exact value server-side before mutation; this marker is not a secret.
 - Also require an exact allowed Origin: scheme, host, and port; no suffix matching.
 - Reject missing, `null`, or unapproved Origin on browser mutation routes.

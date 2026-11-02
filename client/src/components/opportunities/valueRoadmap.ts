@@ -71,7 +71,7 @@ export const valueProposals: readonly ValueProposal[] = [
     outcome: 'A student can present their own work clearly and understand what still needs checking before applying.',
     scope: ['Limited-scope CV, portfolio and research-statement review, plus interview or proposal-presentation practice.', 'Use the scholarship planner as a starting point, then check current provider-specific requirements manually.', 'Give feedback on the student’s own application; preserve academic integrity and personal agency.'],
     launchGates: ['Qualified reviewers, defined review limits, transparent capacity and approved service pricing or inclusion.', 'Privacy, retention and explicit consent rules for any application materials.', 'Current official-source checks and an escalation route for questions outside reviewer expertise.'],
-    measures: ['Rubric-based improvement in application clarity and completeness.', 'Learner-reported usefulness; any later admissions outcomes must be voluntary, contextualised and not attributed solely to the academy.'],
+    measures: ['Rubric-based improvement in application clarity and completeness.', 'Learner-reported usefulness; any later admissions outcomes must be voluntary, contextualised and not attributed solely to IRIP.'],
     boundary: 'No ghostwritten applications, fabricated achievements, visa advice, admission guarantee or scholarship guarantee.',
   },
   {
@@ -86,7 +86,7 @@ export const valueProposals: readonly ValueProposal[] = [
   {
     id: 'outcomes-evidence', title: 'Evidence of value, including what did not work', status: 'proposal', stage: 'foundation', owner: 'Academic quality lead',
     problem: 'A long feature list and selective success stories can hide weak learning, dropouts or an offer students would not choose again.',
-    outcome: 'Students and academy leaders can judge the offer using transparent evidence rather than promotional claims.',
+    outcome: 'Students and IRIP leaders can judge the offer using transparent evidence rather than promotional claims.',
     scope: ['A small supervised pilot of one focused path before adding more products or scaling paid membership.', 'Track learning, completion, support quality, costs, accessibility and reasons for disengagement.', 'Publish aggregate findings and limitations; use optional, separately consented stories without implying accreditation.'],
     launchGates: ['An evaluation plan, baseline tasks and denominators agreed before recruiting a pilot.', 'Privacy review, meaningful consent and enough aggregation to avoid identifying individuals.', 'A decision owner willing to revise content, support or pricing if the pilot does not deliver.'],
     measures: ['Before/after skill evidence, all-started completion and support turnaround, with missing data disclosed.', 'Voluntary willingness-to-pay or renew feedback and cost-to-serve; no fabricated ROI or placement rate.'],

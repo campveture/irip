@@ -18,7 +18,7 @@ export function NavigationDropdown({ label, prominent = false, children }: { lab
     return () => { document.removeEventListener('pointerdown', pointer); document.removeEventListener('keydown', keyboard); };
   }, [open]);
   return <div ref={ref} className="relative shrink-0" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false); }}>
-    <button ref={button} type="button" aria-expanded={open} aria-controls={id} onClick={() => setOpen(value => !value)} className={`academy-control ${prominent ? 'academy-control--primary' : ''}`}>{label}<ChevronDown size={14} aria-hidden="true" className="academy-chevron" /></button>
-    {open && <nav id={id} aria-label={`${label} navigation`} className="academy-dropdown absolute right-0 z-30 mt-3 w-72 max-w-[calc(100vw-2rem)]" onClick={event => { if ((event.target as Element).closest('a')) setOpen(false); }}>{children}</nav>}
+    <button ref={button} type="button" aria-expanded={open} aria-controls={id} onClick={() => setOpen(value => !value)} className={`irip-control ${prominent ? 'irip-control--primary' : ''}`}>{label}<ChevronDown size={14} aria-hidden="true" className="irip-chevron" /></button>
+    {open && <nav id={id} aria-label={`${label} navigation`} className="irip-dropdown absolute right-0 z-30 mt-3 w-72 max-w-[calc(100vw-2rem)]" onClick={event => { if ((event.target as Element).closest('a')) setOpen(false); }}>{children}</nav>}
   </div>;
 }

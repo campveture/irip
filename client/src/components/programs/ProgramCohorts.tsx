@@ -41,7 +41,7 @@ function CohortDetails({ cohort, assessmentCount }: { cohort: CohortPlan; assess
           <div className="rounded-2xl border border-brand-100 bg-brand-50 p-5 sm:p-6">
             <dt className="flex items-center gap-2 text-sm font-medium text-brand-800"><CalendarDays size={18} aria-hidden="true" />Last enrollment date</dt>
             <dd className="mt-4 text-2xl font-semibold tracking-tight text-brand-900">{deadline ? <time dateTime={cohort.enrollment_deadline!}>{deadline.date}</time> : 'To be announced'}</dd>
-            <p className="mt-3 text-xs leading-5 text-slate-600">{deadline ? `${deadline.time} Bangladesh time · Proposed deadline${deadlinePassed ? ' has passed.' : ', pending approval.'}` : 'The academy has not set an enrollment deadline yet.'}</p>
+            <p className="mt-3 text-xs leading-5 text-slate-600">{deadline ? `${deadline.time} Bangladesh time · Proposed deadline${deadlinePassed ? ' has passed.' : ', pending approval.'}` : 'IRIP has not set an enrollment deadline yet.'}</p>
           </div>
         </dl>
         <p className="mt-4 text-xs leading-5 text-slate-500">Synthetic preview only. Enrollment is paused; seat counts are a demo snapshot, not live availability.</p>

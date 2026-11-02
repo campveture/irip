@@ -31,7 +31,7 @@ test('floating header surround stays transparent over heroes and scrolled light 
   for (const path of ['/', '/programs', '/projects', '/mentors', '/courses', '/teach', '/about']) {
     await page.goto(path);
     await expect.poll(() => page.locator('header').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
-    expect(await page.locator('.academy-header-frame').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgba(245, 243, 237, 0.92)');
+    expect(await page.locator('.irip-header-frame').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgba(245, 243, 237, 0.92)');
   }
   // No colored bar may reappear after scrolling or client-side navigation.
   await page.goto('/programs');
@@ -48,7 +48,7 @@ test('frosted glass stays inside the capsule with no full-width haze at any scro
   for (const depth of [0, 240, 960]) {
     await page.evaluate(top => window.scrollTo({ top, behavior: 'instant' }), depth);
     await expect(header).toHaveAttribute('data-scrolled', String(depth > 12));
-    const glass = await page.locator('.academy-header-frame').evaluate(element => {
+    const glass = await page.locator('.irip-header-frame').evaluate(element => {
       const style = getComputedStyle(element);
       const surround = getComputedStyle(element.closest('header')!, '::before');
       return { backdrop: style.backdropFilter, mask: style.maskImage, opacity: style.opacity, outsideLayer: surround.content };
@@ -69,7 +69,7 @@ test('frosted glass stays inside the capsule with no full-width haze at any scro
 test('increased contrast uses an opaque surface instead of glass', async ({ page }) => {
   await page.emulateMedia({ contrast: 'more' });
   await page.goto('/programs');
-  const material = await page.locator('.academy-header-frame').evaluate(element => {
+  const material = await page.locator('.irip-header-frame').evaluate(element => {
     const style = getComputedStyle(element);
     return { background: style.backgroundColor, backdrop: style.backdropFilter };
   });
@@ -78,7 +78,7 @@ test('increased contrast uses an opaque surface instead of glass', async ({ page
 
 test('portal dashboards and newer tools use one content boundary without double gutters', async ({ page }, info) => {
   test.setTimeout(60000);
-  const response = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: 'admin@unknown.academy', password: 'demo1234' } });
+  const response = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: 'admin@irip.ac', password: 'demo1234' } });
   expect(response.status()).toBe(200);
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
@@ -106,7 +106,7 @@ test('portal dashboards and newer tools use one content boundary without double 
 
 test('desktop portal sidebar stays pinned and its long menu scrolls independently', async ({ page }, info) => {
   await page.setViewportSize({ width: 1440, height: 720 });
-  const response = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: 'admin@unknown.academy', password: 'demo1234' } });
+  const response = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: 'admin@irip.ac', password: 'demo1234' } });
   expect(response.status()).toBe(200);
   await page.goto('/admin');
   const sidebar = page.getByRole('complementary', { name: 'Workspace sidebar' });

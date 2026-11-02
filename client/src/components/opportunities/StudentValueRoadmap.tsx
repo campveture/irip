@@ -10,7 +10,7 @@ export default function StudentValueRoadmap({ portal = false }: { portal?: boole
     <section className="rounded-2xl bg-brand-950 p-6 text-white sm:p-10">
       <p className="text-xs font-semibold uppercase tracking-[.18em] text-brand-200">Student value / Proposal roadmap</p>
       <h1 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight sm:text-5xl">Learn something useful.<br />Have the work to show it.</h1>
-      <p className="mt-5 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">The academy should help students understand, practise, improve and find credible next steps. More pages are not proof of more value. These are proposed ways to make that promise testable.</p>
+      <p className="mt-5 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">IRIP should help students understand, practise, improve and find credible next steps. More pages are not proof of more value. These are proposed ways to make that promise testable.</p>
       <div className="mt-6 flex flex-wrap gap-2">{valueStages.map(stage => <a key={stage.id} href={`#stage-${stage.id}`} className="inline-flex min-h-11 items-center rounded-full border border-white/25 px-4 py-2 text-xs font-medium text-white hover:bg-white/10">{stage.id === 'foundation' ? 'Learning foundations' : stage.id === 'pilot' ? 'Opportunity pilots' : 'Alumni proposal'}</a>)}</div>
     </section>
 

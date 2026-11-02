@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 import { READ_ONLY_PREVIEW } from '../lib/readOnlyPreview';
-import { AcademyMark } from './shared/AcademyMark';
+import { IripMark } from './shared/IripMark';
 import { DemoDisclosure } from './shared/DemoNotice';
 import { ReadOnlyPreviewNotice } from './shared/ReadOnlyPreview';
 
@@ -12,9 +12,10 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-8">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
-              <AcademyMark className="h-9 w-9 shrink-0" />
-              <span className="text-sm font-semibold text-white">Unknown<span className="text-brand-300">Academy</span></span>
+              <IripMark className="h-9 w-9 shrink-0" />
+              <span className="text-sm font-semibold text-white">IRIP</span>
             </div>
+            <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.12em] text-brand-300">Institute of Research, Innovation and Practice</p>
             <p className="text-sm text-slate-400 max-w-xs">
               Structured theory courses with supervised practical research projects for learners in Bangladesh.
             </p>
@@ -59,7 +60,7 @@ export function Footer() {
         </div>
         <div className="mb-6 max-w-4xl space-y-2 text-brand-100"><DemoDisclosure />{READ_ONLY_PREVIEW && <ReadOnlyPreviewNotice />}</div>
         <div className="border-t border-white/15 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/75">
-          <span>Unknown Academy. Local prototype guided by the 28-sheet workbook.</span>
+          <span>IRIP — Institute of Research, Innovation and Practice. Local prototype guided by the 28-sheet workbook.</span>
           <span>P0 launch essentials · No unverified commercial claims.</span>
         </div>
       </div>

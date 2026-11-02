@@ -59,7 +59,7 @@ async function main() {
   // 5. Login learner
   r = await fetchJson(`${BASE}/api/auth/login`, {
     method: 'POST',
-    body: JSON.stringify({ email: 'learner@unknown.academy', password: 'demo1234' }),
+    body: JSON.stringify({ email: 'learner@irip.ac', password: 'demo1234' }),
   });
   const learnerCookie = r.headers.get('set-cookie');
   check('login learner', r.status === 200 && !!r.body.user, r.body.user ? r.body.user.full_name : JSON.stringify(r.body));
@@ -79,7 +79,7 @@ async function main() {
   // 9. Login mentor
   r = await fetchJson(`${BASE}/api/auth/login`, {
     method: 'POST',
-    body: JSON.stringify({ email: 'mentor@unknown.academy', password: 'demo1234' }),
+    body: JSON.stringify({ email: 'mentor@irip.ac', password: 'demo1234' }),
   });
   const mentorCookie = r.headers.get('set-cookie');
   check('login mentor', r.status === 200, r.body.user ? r.body.user.full_name : 'fail');
@@ -91,7 +91,7 @@ async function main() {
   // 11. Login admin
   r = await fetchJson(`${BASE}/api/auth/login`, {
     method: 'POST',
-    body: JSON.stringify({ email: 'admin@unknown.academy', password: 'demo1234' }),
+    body: JSON.stringify({ email: 'admin@irip.ac', password: 'demo1234' }),
   });
   const adminCookie = r.headers.get('set-cookie');
   check('login admin', r.status === 200, r.body.user ? r.body.user.full_name : 'fail');

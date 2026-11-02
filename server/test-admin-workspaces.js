@@ -33,10 +33,10 @@ async function main() {
     child.stderr.on('data', (chunk) => process.stderr.write(chunk));
     child.on('exit', (code) => { clearTimeout(timer); reject(new Error(`Server exited: ${code}`)); });
   });
-  const learner = await login('learner@unknown.academy');
-  const academic = await login('academic@unknown.academy');
-  const owner = await login('admin@unknown.academy');
-  const finance = await login('finance@unknown.academy');
+  const learner = await login('learner@irip.ac');
+  const academic = await login('academic@irip.ac');
+  const owner = await login('admin@irip.ac');
+  const finance = await login('finance@irip.ac');
   assert.equal((await request('/academics', learner)).status, 403);
   const academics = await request('/academics', academic);
   assert.equal(academics.status, 200);

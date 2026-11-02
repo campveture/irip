@@ -33,7 +33,7 @@ function Frame({ title, loading, error, children }) {
 
 function ApprovalNotice() {
   return <div role="status" className="mt-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-    Enrollment and payment are paused. The academy must approve prices, admissions rules, policies, capacity and a verified payment provider before accepting purchases.
+    Enrollment and payment are paused. IRIP must approve prices, admissions rules, policies, capacity and a verified payment provider before accepting purchases.
   </div>;
 }
 

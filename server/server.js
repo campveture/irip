@@ -27,7 +27,7 @@ const app = express();
 app.disable('x-powered-by');
 const origins = localOrigins(PORT);
 app.use(cors({ origin: (origin, done) => done(null, !origin || origins.has(origin)), credentials: true,
-  allowedHeaders: ['Content-Type', 'X-UA-Request'], methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'] }));
+  allowedHeaders: ['Content-Type', 'X-IRIP-Request'], methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'] }));
 app.use('/api', apiSafety(origins));
 app.use('/api/auth/login', rateLimit({ limit: 60, windowMs: 60000 }));
 app.use('/api/auth/signup', rateLimit({ limit: 15, windowMs: 60000 }));
@@ -40,7 +40,7 @@ app.use('/api/growth', (error, req, res, next) => {
 
 app.use(
   session({
-    name: 'ua.sid',
+    name: 'irip.sid',
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
@@ -56,7 +56,7 @@ app.use(
 app.use(attachUser);
 
 app.get('/api/health', (req, res) => {
-  res.json({ ok: true, service: 'unknown-academy-server', time: new Date().toISOString() });
+  res.json({ ok: true, service: 'irip-server', time: new Date().toISOString() });
 });
 
 app.get('/api/me', (req, res) => {
@@ -107,10 +107,10 @@ require('./recorded-courses').seedRecordedCourses();
 db.prepare(`INSERT OR IGNORE INTO teaching_assignments(mentor_id, cohort_id)
   SELECT u.id, c.id FROM users u JOIN cohorts c ON c.name = 'Cohort November 2026'
   JOIN programs p ON p.id = c.program_id AND p.slug = 'research-bootcamp'
-  WHERE u.email = 'mentor@unknown.academy'`).run();
+  WHERE u.email = 'mentor@irip.ac'`).run();
 
 app.listen(PORT, '127.0.0.1', () => {
-  console.log(`Unknown Academy server running on http://localhost:${PORT}`);
+  console.log(`IRIP server running on http://localhost:${PORT}`);
 });
 
 module.exports = app;

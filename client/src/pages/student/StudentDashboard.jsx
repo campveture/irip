@@ -233,7 +233,7 @@ export default function StudentDashboard() {
         <CardHeader className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 text-base"><Bell className="h-5 w-5" /> Notifications</CardTitle>
-            <p className="text-sm text-slate-500">Recent updates from your academy</p>
+            <p className="text-sm text-slate-500">Recent updates from your IRIP</p>
           </div>
           <Link to="/app/notifications" className="text-sm text-brand-600 hover:underline">View all</Link>
         </CardHeader>

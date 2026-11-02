@@ -39,7 +39,7 @@ const journeys = [
 ];
 
 const gates = [
-  'Academy identity, faculty and curriculum approval',
+  'IRIP identity, faculty and curriculum approval',
   'Pricing, admission and completion rules',
   'Payment/refund provider and verified settlement',
   'Email verification, recovery and MFA',
@@ -77,7 +77,7 @@ export default function DemoGuide() {
     <div className="mt-8 grid gap-5 lg:grid-cols-2">
       {journeys.map((group) => <section key={group.id} className="rounded-2xl border border-slate-200 bg-white p-6" aria-labelledby={`guide-${group.id}`}>
         <h2 id={`guide-${group.id}`} className="text-xl font-semibold tracking-tight text-brand-900">{group.title}</h2>
-        {group.account ? <p className="mt-2 text-sm text-slate-600">Sign in as <code>{group.account}@unknown.academy</code> with the local demo password. Switch accounts by signing out first.</p> : <p className="mt-2 text-sm text-slate-600">No account needed.</p>}
+        {group.account ? <p className="mt-2 text-sm text-slate-600">Sign in as <code>{group.account}@irip.ac</code> with the local demo password. Switch accounts by signing out first.</p> : <p className="mt-2 text-sm text-slate-600">No account needed.</p>}
         {group.account && <Link to={`/login?demo=${group.account}`} className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:underline">Choose this demo account <ArrowRight size={15} /></Link>}
         <ul className="mt-5 space-y-3">{group.tasks.map((task, i) => {
           const key = `${group.id}-${i}`;

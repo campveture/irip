@@ -21,7 +21,7 @@ export default function Signup() {
   return <main className="container-page flex justify-center py-10">
     <section className="w-full max-w-lg rounded-2xl border border-brand-100 bg-white p-6 sm:p-8">
       <h1 className="text-2xl font-semibold text-brand-950">Create account</h1>
-      <p className="mt-3 text-sm leading-6 text-slate-600">Join Unknown Academy as a learner. Set up your private profile and learning goals.</p>
+      <p className="mt-3 text-sm leading-6 text-slate-600">Join IRIP as a learner. Set up your private profile and learning goals.</p>
       <p className="mt-4 rounded-xl bg-brand-50 p-4 text-sm leading-6 text-brand-900">Interested in teaching or supervision? <Link to="/teach/apply" className="font-semibold underline">Apply as a mentor</Link> instead. No signup required.</p>
       {isAuthenticated ? <p className="mt-6 text-sm leading-6 text-slate-600">You are already signed in. <Link to="/account/profile" className="font-semibold text-brand-800 underline">Open your profile</Link>. You do not need a second account.</p> : <>
         {error && <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-900">{error}</p>}

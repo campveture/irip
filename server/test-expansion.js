@@ -35,7 +35,7 @@ async function main() {
 
   const learnerLogin = await fetch(`http://127.0.0.1:${port}/api/auth/login`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'learner@unknown.academy', password: 'demo1234' }),
+    body: JSON.stringify({ email: 'learner@irip.ac', password: 'demo1234' }),
   });
   assert.equal(learnerLogin.status, 200);
   const learnerCookie = learnerLogin.headers.get('set-cookie').split(';')[0];
@@ -43,7 +43,7 @@ async function main() {
 
   const loginResponse = await fetch(`http://127.0.0.1:${port}/api/auth/login`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'academic@unknown.academy', password: 'demo1234' }),
+    body: JSON.stringify({ email: 'academic@irip.ac', password: 'demo1234' }),
   });
   assert.equal(loginResponse.status, 200);
   const cookie = loginResponse.headers.get('set-cookie').split(';')[0];
@@ -114,7 +114,7 @@ async function main() {
   const ideaId = result.body.id;
   const secondLogin = await fetch(`http://127.0.0.1:${port}/api/auth/login`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'student2@unknown.academy', password: 'demo1234' }),
+    body: JSON.stringify({ email: 'student2@irip.ac', password: 'demo1234' }),
   });
   assert.equal(secondLogin.status, 200);
   const secondCookie = secondLogin.headers.get('set-cookie').split(';')[0];

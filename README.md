@@ -1,4 +1,4 @@
-# Unknown Academy — local platform demo
+# IRIP — Institute of Research, Innovation and Practice
 
 This is a **synthetic, local-only prototype** based on [`website_skull.xlsx`](website_skull.xlsx). The workbook has 28 sheets covering the platform map, 81 screens, flows, decisions, and acceptance scenarios. It is a proposed specification; its commercial and academic decisions have not been approved.
 
@@ -19,13 +19,13 @@ Demo accounts (password for each: `demo1234`):
 
 | Workspace | Email |
 |---|---|
-| Learner | `learner@unknown.academy` |
-| Second learner | `student2@unknown.academy` |
-| Mentor | `mentor@unknown.academy` |
-| Operations | `admin@unknown.academy` |
-| Academic ops | `academic@unknown.academy` |
-| Finance | `finance@unknown.academy` |
-| Support | `support@unknown.academy` |
+| Learner | `learner@irip.ac` |
+| Second learner | `student2@irip.ac` |
+| Mentor | `mentor@irip.ac` |
+| Operations | `admin@irip.ac` |
+| Academic ops | `academic@irip.ac` |
+| Finance | `finance@irip.ac` |
+| Support | `support@irip.ac` |
 
 Visit `/app`, `/mentor` and `/admin` after choosing an appropriate account. From the repository root, `npm test` runs API smoke and access-control checks and `npm run build` checks the frontend bundle.
 
@@ -44,6 +44,6 @@ Do not deploy this app, import real learners/financial data, or treat seeded `pa
 
 ## Production decision gates (from the specification)
 
-Founder and academic/finance leads must approve the academy name/identity, first discipline, fees/discounts/capacity, intake dates/timetable, admissions criteria, completion rules, payment provider, refunds/transfers/access duration, faculty qualifications/agreements, data/ethics/IP/authorship, subscription scope, and brand/translations. Then implement and test the specification's A01–A24 acceptance scenarios using sandbox accounts and provider callbacks, including recovery and accessibility, **before** any public sale.
+Founder and academic/finance leads must approve IRIP's name/identity, first discipline, fees/discounts/capacity, intake dates/timetable, admissions criteria, completion rules, payment provider, refunds/transfers/access duration, faculty qualifications/agreements, data/ethics/IP/authorship, subscription scope, and brand/translations. Then implement and test the specification's A01–A24 acceptance scenarios using sandbox accounts and provider callbacks, including recovery and accessibility, **before** any public sale.
 
 This demo is a navigation and data-model prototype, not evidence that the 27-point handoff has been fully implemented.

@@ -158,8 +158,8 @@ router.get('/certificates/:token/verify', (req, res) => {
 router.get('/pages/:key', (req, res) => {
   const pages = {
     about: {
-      title: 'About Unknown Academy',
-      body: 'Unknown Academy is a research-focused learning platform built for learners in Bangladesh who want to move from curiosity to a finished, supervised research project.\n\nWe combine structured theory courses with hands-on, supervisor-guided practical projects. A typical cohort runs for three months and includes weekly teaching sessions, research clinics, assignments with feedback, and a final assessed project.\n\nOur mentors teach theory and research literacy. Our approved supervisors guide practical work, review milestones, and assess final submissions. Completion is earned, not assumed — certificates are issued only when all completion rules are met.\n\nThis platform is currently a local prototype built from a 28-sheet specification workbook. Academy identity, faculty, pricing, and policies are pending approval before any live enrollment or payment.',
+      title: 'About IRIP',
+      body: 'The Institute of Research, Innovation and Practice (IRIP) is a research-focused learning platform built for learners in Bangladesh who want to move from curiosity to a finished, supervised research project.\n\nWe combine structured theory courses with hands-on, supervisor-guided practical projects. A typical cohort runs for three months and includes weekly teaching sessions, research clinics, assignments with feedback, and a final assessed project.\n\nOur mentors teach theory and research literacy. Our approved supervisors guide practical work, review milestones, and assess final submissions. Completion is earned, not assumed — certificates are issued only when all completion rules are met.\n\nThis platform is currently a local prototype built from a 28-sheet specification workbook. IRIP identity, faculty, pricing, and policies are pending approval before any live enrollment or payment.',
     },
     'how-it-works': {
       title: 'How It Works',
@@ -171,7 +171,7 @@ router.get('/pages/:key', (req, res) => {
     },
     contact: {
       title: 'Contact Us',
-      body: 'Email: support@unknown.academy\nPhone: +880 2 0000000\nAddress: Dhaka, Bangladesh\n\nSend a question using the form below. This local demo stores your inquiry in its sample CRM; it does not send an email or create a booking. If you are already learning with us, open a support ticket from your student portal instead.',
+      body: 'Email: support@irip.ac\nPhone: +880 2 0000000\nAddress: Dhaka, Bangladesh\n\nSend a question using the form below. This local demo stores your inquiry in its sample CRM; it does not send an email or create a booking. If you are already learning with us, open a support ticket from your student portal instead.',
     },
     policies: {
       title: 'Policies',
@@ -180,12 +180,12 @@ router.get('/pages/:key', (req, res) => {
     },
     terms: {
       title: 'Terms of Service — Draft',
-      body: 'The academy has not published binding terms of service. Enrollment and payment are unavailable in this local demonstration.',
+      body: 'IRIP has not published binding terms of service. Enrollment and payment are unavailable in this local demonstration.',
       status: 'draft',
     },
     privacy: {
       title: 'Privacy Notice — Draft',
-      body: 'The academy has not published a privacy notice. This local demonstration uses synthetic data; do not enter real personal information.',
+      body: 'IRIP has not published a privacy notice. This local demonstration uses synthetic data; do not enter real personal information.',
       status: 'draft',
     },
     refund: {

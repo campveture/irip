@@ -18,7 +18,7 @@ function apiSafety(origins) {
     if (SAFE.has(req.method)) return next();
     // Non-safelisted header + JSON + strict Origin/Fetch Metadata rejection:
     // cross-site HTML forms cannot produce an authorized browser request.
-    if (req.get('X-UA-Request') !== '1' || req.get('Sec-Fetch-Site') === 'cross-site'
+    if (req.get('X-IRIP-Request') !== '1' || req.get('Sec-Fetch-Site') === 'cross-site'
       || !origins.has(req.get('Origin'))) {
       return res.status(403).json({ error: 'csrf', message: 'Request origin or browser protection header was not accepted. Reload and retry.' });
     }

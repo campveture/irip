@@ -14,7 +14,7 @@ export default function Login() {
   const location = useLocation();
   const [params] = useSearchParams();
   const demo = params.get('demo');
-  const [email, setEmail] = useState(`${demoRoles.includes(demo) ? demo : 'learner'}@unknown.academy`);
+  const [email, setEmail] = useState(`${demoRoles.includes(demo) ? demo : 'learner'}@irip.ac`);
   const [password, setPassword] = useState('demo1234');
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -50,13 +50,13 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Welcome back</CardTitle>
-          <p className="text-slate-500 text-sm">Sign in to your Unknown Academy account</p>
+          <p className="text-slate-500 text-sm">Sign in to your IRIP account</p>
         </CardHeader>
         <CardContent className="p-6">
           {error && <Alert type="error">{error}</Alert>}
           <div className="mb-5">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Choose a synthetic demo account</p>
-            <div className="flex flex-wrap gap-2">{demoRoles.map(role => <button key={role} type="button" onClick={() => setEmail(`${role}@unknown.academy`)} aria-pressed={email === `${role}@unknown.academy`} className={`rounded-full border px-3 py-1.5 text-xs font-medium capitalize transition ${email === `${role}@unknown.academy` ? 'border-brand-700 bg-brand-50 text-brand-800' : 'border-slate-200 text-slate-600 hover:border-brand-300'}`}>{role}</button>)}</div>
+            <div className="flex flex-wrap gap-2">{demoRoles.map(role => <button key={role} type="button" onClick={() => setEmail(`${role}@irip.ac`)} aria-pressed={email === `${role}@irip.ac`} className={`rounded-full border px-3 py-1.5 text-xs font-medium capitalize transition ${email === `${role}@irip.ac` ? 'border-brand-700 bg-brand-50 text-brand-800' : 'border-slate-200 text-slate-600 hover:border-brand-300'}`}>{role}</button>)}</div>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -96,8 +96,8 @@ export default function Login() {
               {submitting ? 'Signing in...' : 'Sign in'}
             </Button>
             <p className="text-xs text-slate-500 text-center">
-              Demo accounts: <code className="text-brand-600">learner@unknown.academy</code> /{' '}
-              <code className="text-brand-600">admin@unknown.academy</code> · password{' '}
+              Demo accounts: <code className="text-brand-600">learner@irip.ac</code> /{' '}
+              <code className="text-brand-600">admin@irip.ac</code> · password{' '}
               <code className="text-brand-600">demo1234</code>
             </p>
           </form>

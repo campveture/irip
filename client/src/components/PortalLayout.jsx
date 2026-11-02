@@ -2,7 +2,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { BookOpen, CalendarDays, LayoutDashboard, Users, Banknote, Award, Headphones, LogOut, GraduationCap, ClipboardCheck, Settings, Bell, Menu, X } from 'lucide-react';
 import { useState } from 'react';
-import { AcademyMark } from './shared/AcademyMark';
+import { IripMark } from './shared/IripMark';
 import { DemoDisclosure } from './shared/DemoNotice';
 
 const menus = {
@@ -73,7 +73,7 @@ export function PortalLayout() {
       {/* Mobile top bar */}
       <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:hidden">
         <Link to="/" className="flex items-center gap-2 font-semibold text-brand-900">
-          <AcademyMark className="h-8 w-8 shrink-0" /> Unknown Academy
+          <IripMark className="h-8 w-8 shrink-0" /> IRIP
         </Link>
         <button
           onClick={() => setSidebarOpen((v) => !v)}
@@ -93,7 +93,7 @@ export function PortalLayout() {
         } w-full shrink-0 border-b border-slate-200 bg-white md:sticky md:top-0 md:block md:h-dvh md:w-60 md:self-start md:overflow-y-auto md:border-b-0 md:border-r`}
       >
         <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 p-4">
-          <Link to="/" className="flex min-w-0 items-center gap-2 text-sm font-semibold text-brand-900"><AcademyMark className="h-8 w-8 shrink-0" /><span>Unknown Academy</span></Link>
+          <Link to="/" className="flex min-w-0 items-center gap-2 text-sm font-semibold text-brand-900"><IripMark className="h-8 w-8 shrink-0" /><span>IRIP</span></Link>
           <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">DEMO</span>
         </div>
         <div className="border-b border-slate-200 p-3 text-sm">

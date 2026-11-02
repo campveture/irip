@@ -47,7 +47,7 @@ function publicCourses() {
     WHERE c.state = 'demo_catalog' AND u.status = 'active' AND m.status='approved' AND m.public_visible=1 AND m.public_name IS NOT NULL ORDER BY c.id`).all().map(serialize);
 }
 function seedRecordedCourses() {
-  const instructor = db.prepare("SELECT id FROM users WHERE email = 'mentor@unknown.academy' AND status = 'active'").get();
+  const instructor = db.prepare("SELECT id FROM users WHERE email = 'mentor@irip.ac' AND status = 'active'").get();
   if (!instructor) return;
   const entries = [
     { slug: 'causal-diagrams', title: 'Causal diagrams: from assumptions to adjustment', topic: 'Causal inference', artwork: 'causal', level: 'Advanced', language: 'Bangla & English',
