@@ -12,7 +12,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-8">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
-              <IripMark className="h-9 w-9 shrink-0" />
+              <IripMark className="h-12 w-12 shrink-0" />
               <span className="text-sm font-semibold text-white">IRIP</span>
             </div>
             <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.12em] text-brand-300">Institute of Research, Innovation and Practice</p>
