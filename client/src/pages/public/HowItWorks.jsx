@@ -53,7 +53,7 @@ export default function HowItWorks() {
       <Link to="/" className="text-sm text-slate-600 hover:text-brand-600 inline-block mb-6">
         <ArrowLeft className="h-4 w-4 mr-1" /> Back to home
       </Link>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">{page?.title ?? 'How It Works'}</h1>
+      <h1 className="irip-page-title text-slate-900 mb-6">{page?.title ?? 'How It Works'}</h1>
       <figure className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white"><img src={demoImages.study} alt="" width="1000" height="667" className="aspect-[2/1] w-full object-cover" /><figcaption className="px-4 py-2 text-xs text-slate-500">Learn, discuss, put it into practice. / Stock demo scene</figcaption></figure>
       <Card>
         <CardContent className="p-6">

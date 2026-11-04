@@ -1,23 +1,24 @@
 import { test, expect } from '@playwright/test';
 
-test('Fieldwork palette reaches the shared theme, minimal hero, navigation and demo logo', async ({ page, request }, info) => {
+test('Archive Indigo reaches the shared theme, editorial hero and approved falcon crest', async ({ page, request }, info) => {
   await page.goto('/');
   const palette = await page.evaluate(() => {
     const style = getComputedStyle(document.documentElement);
-    return Object.fromEntries(['brass', 'stone', 'paper', 'linen', 'sage', 'evergreen', 'midnight', 'ink'].map(name => [name, style.getPropertyValue(`--palette-${name}`).trim()]));
+    return Object.fromEntries(['indigo', 'ivory', 'lavender', 'lavender-pale', 'lavender-deep', 'muted', 'border', 'control-border'].map(name => [name, style.getPropertyValue(`--irip-${name}`).trim()]));
   });
-  expect(palette).toEqual({ brass: '#c5a46d', stone: '#dedcd3', paper: '#f5f3ed', linen: '#eae8df', sage: '#a7c2b2', evergreen: '#245448', midnight: '#122b39', ink: '#24323a' });
-  expect(await page.locator('[data-header-surface]').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(18, 43, 57)');
-  expect(await page.locator('[data-header-surface] a[href="/programs"]').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(197, 164, 109)');
-  expect(await page.locator('#route-content .bg-canvas').first().evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(245, 243, 237)');
-  const mark = await (await request.get('/images/irip-mark.svg')).text();
-  expect(mark).toContain('#C5A46D');
-  expect(mark).toContain('#245448');
-  expect(mark).not.toContain('#F7CBCA');
+  expect(palette).toEqual({ indigo: '41 36 66', ivory: '245 241 232', lavender: '164 155 203', 'lavender-pale': '238 234 246', 'lavender-deep': '84 71 115', muted: '95 89 108', border: '216 210 223', 'control-border': '116 109 130' });
+  expect(await page.locator('[data-header-surface]').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(41, 36, 66)');
+  expect(await page.locator('[data-header-surface] a[href="/programs"]').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(164, 155, 203)');
+  expect(await page.locator('#route-content .bg-canvas').first().evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(245, 241, 232)');
+  await expect(page.getByRole('banner').locator('img')).toHaveAttribute('src', '/images/irip-falcon-crest-192.png');
+  const mark = await request.get('/images/irip-falcon-crest-192.png');
+  expect(mark.headers()['content-type']).toContain('image/png');
+  expect(await page.locator('.irip-hero-title').evaluate(element => getComputedStyle(element).fontFamily)).toContain('Source Serif 4');
+  expect(await page.locator('.irip-hero-title em').evaluate(element => getComputedStyle(element).fontStyle)).toBe('italic');
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     await expect.poll(() => page.getByRole('heading', { level: 1 }).evaluate(element => getComputedStyle(element.parentElement!).opacity)).toBe('1');
-    await page.screenshot({ path: info.outputPath(`fieldwork-palette-${width}.png`) });
+    await page.screenshot({ path: info.outputPath(`archive-indigo-${width}.png`) });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
 });
@@ -31,12 +32,17 @@ test('primary palette pairings preserve normal-text contrast rather than using p
     const first = luminance(a), second = luminance(b);
     return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
   }
-  const ink = [36, 50, 58], paper = [245, 243, 237], brass = [197, 164, 109], evergreen = [36, 84, 72], midnight = [18, 43, 57];
-  expect(contrast(ink, paper)).toBeGreaterThanOrEqual(7);
-  expect(contrast(ink, brass)).toBeGreaterThanOrEqual(4.5);
-  expect(contrast([255, 255, 255], evergreen)).toBeGreaterThanOrEqual(4.5);
-  expect(contrast(evergreen, paper)).toBeGreaterThanOrEqual(4.5);
-  expect(contrast(brass, midnight)).toBeGreaterThanOrEqual(4.5);
-  expect(contrast([77, 92, 97], paper)).toBeGreaterThanOrEqual(4.5);
-  expect(contrast(midnight.map(channel => 0.9 * 255 + 0.1 * channel), midnight)).toBeGreaterThanOrEqual(4.5);
+  const indigo = [41, 36, 66], ivory = [245, 241, 232], lavender = [164, 155, 203], deep = [84, 71, 115], muted = [95, 89, 108];
+  expect(contrast(indigo, ivory)).toBeGreaterThanOrEqual(7);
+  expect(contrast(indigo, lavender)).toBeGreaterThanOrEqual(4.5);
+  expect(contrast([255, 255, 255], indigo)).toBeGreaterThanOrEqual(4.5);
+  expect(contrast(deep, ivory)).toBeGreaterThanOrEqual(4.5);
+  expect(contrast(muted, ivory)).toBeGreaterThanOrEqual(4.5);
+  expect(contrast([116, 109, 130], [255, 255, 255])).toBeGreaterThanOrEqual(3);
+  expect(contrast(lavender, ivory)).toBeLessThan(3); // Never use for light-surface text/boundaries.
+  for (const [foreground, background] of [
+    [[34, 98, 76], [232, 243, 236]],
+    [[121, 82, 13], [255, 243, 217]],
+    [[161, 44, 58], [252, 235, 237]],
+  ]) expect(contrast(foreground!, background!)).toBeGreaterThanOrEqual(4.5);
 });

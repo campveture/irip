@@ -4,34 +4,57 @@
 
 @layer base {
   :root {
-    /* Design tokens */
-    /* Fieldwork: neutral reading surfaces, cool anchors, scarce warm accents.
-       Colour associations are contextual, not a promise of behavioural effects. */
-    --palette-brass: #c5a46d;
-    --palette-stone: #dedcd3;
-    --palette-paper: #f5f3ed;
-    --palette-linen: #eae8df;
-    --palette-sage: #a7c2b2;
-    --palette-evergreen: #245448;
-    --palette-midnight: #122b39;
-    --palette-ink: #24323a;
-    --color-canvas: 245 243 237;
-    --color-surface: 255 255 255;
-    --color-brand-50: #f0f4f1;
-    --color-brand-100: #e0e9e2;
-    --color-brand-500: #477762;
-    --color-brand-600: #2d6150;
-    --color-brand-700: #245448;
-    --color-brand-900: #15362f;
-    --color-success: #10b981;
-    --color-warning: #f59e0b;
-    --color-danger: #ef4444;
-    --color-slate-50: #f7f7f4;
-    --color-slate-100: #eeeee9;
-    --color-slate-200: #deded6;
-    --color-slate-500: #626f71;
-    --color-slate-700: #394b53;
-    --color-slate-900: #24323a;
+    /* Archive Indigo. RGB channels support Tailwind opacity modifiers without
+       a second hard-coded palette. Authoritative source: docs/brand/archive-indigo/design.md. */
+    --irip-indigo: 41 36 66;
+    --irip-indigo-hover: 57 50 83;
+    --irip-indigo-pressed: 33 29 53;
+    --irip-ivory: 245 241 232;
+    --irip-white: 255 255 255;
+    --irip-lavender: 164 155 203;
+    --irip-lavender-pale: 238 234 246;
+    --irip-lavender-deep: 84 71 115;
+    --irip-muted: 95 89 108;
+    --irip-border: 216 210 223;
+    --irip-control-border: 116 109 130;
+    --irip-inverse-muted: 217 211 232;
+    --irip-success: 34 98 76;
+    --irip-success-surface: 232 243 236;
+    --irip-warning: 121 82 13;
+    --irip-warning-surface: 255 243 217;
+    --irip-error: 161 44 58;
+    --irip-error-surface: 252 235 237;
+    --color-canvas: var(--irip-ivory);
+    --color-surface: var(--irip-white);
+    --color-text: rgb(var(--irip-indigo));
+    --color-text-muted: rgb(var(--irip-muted));
+    --color-link: rgb(var(--irip-lavender-deep));
+    --color-border: rgb(var(--irip-border));
+    --color-control-border: rgb(var(--irip-control-border));
+    --color-focus: rgb(var(--irip-lavender-deep));
+    --color-on-brand: rgb(var(--irip-ivory));
+    --color-inverse-muted: rgb(var(--irip-inverse-muted));
+    --color-surface-selected: rgb(var(--irip-lavender-pale));
+    --color-brand-50: rgb(var(--irip-lavender-pale));
+    --color-brand-100: rgb(var(--irip-inverse-muted));
+    --color-brand-500: rgb(var(--irip-lavender-deep));
+    --color-brand-600: rgb(var(--irip-lavender-deep));
+    --color-brand-700: rgb(var(--irip-indigo));
+    --color-brand-900: rgb(var(--irip-indigo));
+    --color-success: rgb(var(--irip-success));
+    --color-success-surface: rgb(var(--irip-success-surface));
+    --color-warning: rgb(var(--irip-warning));
+    --color-warning-surface: rgb(var(--irip-warning-surface));
+    --color-danger: rgb(var(--irip-error));
+    --color-danger-surface: rgb(var(--irip-error-surface));
+    --color-slate-500: rgb(var(--irip-muted));
+    --color-slate-600: rgb(var(--irip-muted));
+    --button-primary-bg: rgb(var(--irip-indigo));
+    --button-primary-fg: rgb(var(--irip-white));
+    --button-primary-hover-bg: rgb(var(--irip-indigo-hover));
+    --button-primary-active-bg: rgb(var(--irip-indigo-pressed));
+    --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-editorial: 'Source Serif 4', Georgia, 'Times New Roman', serif;
 
     --radius-sm: 0.375rem;
     --radius-md: 0.5rem;
@@ -71,14 +94,16 @@
   }
   body {
     @apply font-sans text-slate-900 antialiased;
-    background: var(--palette-paper);
+    background: rgb(var(--color-canvas));
+    font-size: 16px;
+    line-height: 1.65;
   }
   :where(button, a, input, select, textarea):focus-visible {
-    outline: 2px solid var(--palette-evergreen);
+    outline: 3px solid var(--color-focus);
     outline-offset: 2px;
   }
   :where(input, select, textarea) {
-    accent-color: var(--palette-evergreen);
+    accent-color: rgb(var(--irip-indigo));
   }
   ::selection {
     @apply bg-brand-100 text-brand-900;
@@ -97,23 +122,31 @@
 }
 
 @layer components {
-  .irip-editorial-hero { position: relative; overflow: hidden; background-image: radial-gradient(ellipse at 95% 25%, rgb(36 84 72 / .55), transparent 58%); }
+  .irip-editorial-hero { position: relative; overflow: hidden; --color-focus: rgb(var(--irip-lavender)); background: rgb(var(--irip-indigo)); color: var(--color-on-brand); }
   .irip-hero-composition { position: relative; display: grid; align-items: center; gap: 32px; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); padding-block: 64px 48px; }
   .irip-hero-copy { position: relative; z-index: 1; min-width: 0; }
-  .irip-hero-eyebrow { display: flex; align-items: center; gap: 12px; color: var(--palette-sage); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .18em; }
-  .irip-hero-eyebrow::before { content: ''; width: 26px; height: 1px; background: var(--palette-brass); }
-  .irip-hero-title { max-width: 760px; margin-top: 24px; font-size: clamp(2.5rem, 4.7vw, 4.5rem); font-weight: 500; line-height: 1.08; letter-spacing: -.045em; text-wrap: balance; }
-  .irip-hero-title em { color: var(--palette-brass); font-family: Georgia, serif; font-weight: 400; }
-  .irip-hero-art { color: var(--palette-brass); pointer-events: none; }
+  .irip-hero-eyebrow { display: flex; align-items: center; gap: 12px; color: var(--color-inverse-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .13em; }
+  .irip-hero-eyebrow::before { content: ''; width: 26px; height: 1px; background: rgb(var(--irip-lavender)); }
+  .irip-hero-title { max-width: 760px; margin-top: 24px; font-family: var(--font-editorial); font-size: clamp(2.5rem, 4.7vw, 4rem); font-weight: 600; line-height: 1.12; letter-spacing: -.025em; text-wrap: balance; }
+  .irip-hero-title em { color: rgb(var(--irip-lavender)); font-family: var(--font-editorial); font-weight: 400; }
+  .irip-hero-art { color: rgb(var(--irip-lavender)); pointer-events: none; }
+  .irip-hero-lead { color: var(--color-inverse-muted); font-size: clamp(1.0625rem, 1.5vw, 1.2rem); line-height: 1.65; }
   .irip-hero-art svg { display: block; width: 100%; max-height: 370px; }
   .irip-hero-shortcuts { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgb(255 255 255 / .2); }
   .irip-hero-shortcut { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 92px; padding: 18px 24px; border-right: 1px solid rgb(255 255 255 / .15); transition: background-color 180ms ease; }
   .irip-hero-shortcut:first-child { padding-left: 0; }
   .irip-hero-shortcut:last-child { border-right: 0; }
   .irip-hero-shortcut:hover { background: rgb(255 255 255 / .06); }
-  .irip-hero-shortcut svg { color: var(--palette-brass); flex-shrink: 0; transition: transform 180ms ease; }
+  .irip-hero-shortcut svg { color: rgb(var(--irip-lavender)); flex-shrink: 0; transition: transform 180ms ease; }
   .irip-hero-shortcut:hover svg { transform: translate(2px, -2px); }
-  .irip-editorial-hero :where(a, button):focus-visible { outline-color: var(--palette-brass); outline-offset: -3px; }
+  .irip-editorial-hero :where(a, button):focus-visible { outline-color: rgb(var(--irip-lavender)); outline-offset: 3px; }
+  .irip-hero-shortcut:focus-visible { outline-offset: -3px; }
+  .irip-editorial-heading { font-family: var(--font-editorial); font-weight: 600; font-size: clamp(1.875rem, 3.2vw, 2.75rem); line-height: 1.2; letter-spacing: -.02em; text-wrap: balance; }
+  .irip-page-title { font-family: var(--font-editorial); font-weight: 600; font-size: clamp(2rem, 3.7vw, 3.25rem); line-height: 1.18; letter-spacing: -.02em; text-wrap: balance; }
+  .irip-public-detail h1 { font-family: var(--font-editorial); font-weight: 600; font-size: clamp(2rem, 3.7vw, 3.25rem); line-height: 1.18; letter-spacing: -.02em; text-wrap: balance; }
+  #faq-heading { font-family: var(--font-editorial); font-weight: 600; line-height: 1.2; letter-spacing: -.02em; }
+  .irip-inverse { --color-focus: rgb(var(--irip-lavender)); color: var(--color-on-brand); background: rgb(var(--irip-indigo)); }
+  .irip-inverse :where(a, button):focus-visible { outline-color: rgb(var(--irip-lavender)); }
   @media (max-width: 767px) {
     .irip-hero-composition { grid-template-columns: minmax(0, 1fr); padding-block: 48px 36px; }
     .irip-hero-copy { max-width: 580px; }
@@ -152,10 +185,10 @@
   [data-header-surface="deep-forest"] > section:first-child { padding-top: calc(3rem + var(--irip-header-height)); }
   .irip-header-frame {
     padding: var(--irip-space-2) var(--irip-space-3);
-    border: 1px solid var(--palette-stone);
+    border: 1px solid var(--color-border);
     border-radius: var(--irip-radius);
-    background: var(--palette-paper);
-    box-shadow: 0 5px 21px rgb(18 43 57 / .045), inset 0 1px 0 #fff;
+    background: rgb(var(--irip-ivory));
+    box-shadow: 0 4px 18px rgb(var(--irip-indigo) / .045), inset 0 1px 0 #fff;
   }
   .irip-header-navigation {
     display: flex;
@@ -166,33 +199,34 @@
     min-height: 54px;
   }
   .irip-header[data-scrolled="true"] .irip-header-frame {
-    border-color: rgb(77 92 97 / .35);
-    box-shadow: 0 4px 16px rgb(18 43 57 / .09), inset 0 1px 0 rgb(255 255 255 / .8);
+    border-color: rgb(var(--irip-control-border) / .4);
+    box-shadow: 0 4px 16px rgb(var(--irip-indigo) / .07), inset 0 1px 0 rgb(255 255 255 / .8);
   }
-  .irip-wordmark { display: flex; min-width: 0; align-items: center; gap: var(--irip-space-3); color: var(--palette-ink); }
+  .irip-wordmark { display: flex; min-width: 0; align-items: center; gap: var(--irip-space-3); color: var(--color-text); }
   .irip-symbol {
-    display: block; width: 44px; height: 44px; flex-shrink: 0;
+    display: block; width: 44px; height: 44px; flex-shrink: 0; object-fit: contain;
   }
   .irip-wordmark-note { display: block; margin-top: 3px; color: var(--color-slate-500); font-size: 8px; font-weight: 600; letter-spacing: .12em; white-space: nowrap; }
-  .irip-segments { gap: 2px; border: 1px solid var(--palette-stone); border-radius: 17px; background: var(--palette-linen); padding: 4px; }
+  .irip-segments { gap: 2px; border: 1px solid var(--color-border); border-radius: 17px; background: rgb(var(--irip-white) / .45); padding: 4px; }
   .irip-nav-link, .irip-control {
     display: inline-flex; min-height: 44px; flex-shrink: 0; align-items: center; justify-content: center;
     gap: var(--irip-space-1); border: 1px solid transparent; border-radius: var(--irip-space-3); padding: var(--irip-space-2) var(--irip-space-3);
-    font-size: 13px; font-weight: 550; color: var(--palette-ink); white-space: nowrap;
+    font-size: 14px; font-weight: 550; color: var(--color-text); white-space: nowrap;
     transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out), box-shadow 180ms var(--ease-out), transform 180ms var(--ease-out);
   }
-  .irip-nav-link:hover, .irip-control:hover { background: var(--palette-stone); color: var(--palette-ink); }
-  .irip-nav-link[aria-current="page"] { background: var(--palette-paper); color: var(--palette-evergreen); box-shadow: 0 2px 5px rgb(18 43 57 / .08), inset 0 0 0 1px rgb(18 43 57 / .05); }
-  .irip-control--primary { background: var(--palette-evergreen); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / .15), 0 2px 5px rgb(18 43 57 / .08); }
-  .irip-control--primary:hover { background: var(--palette-midnight); color: #fff; }
+  .irip-nav-link:hover, .irip-control:not(:disabled):hover { background: var(--color-surface-selected); color: var(--color-text); }
+  .irip-nav-link[aria-current="page"] { background: var(--color-surface-selected); color: var(--color-text); box-shadow: inset 0 0 0 1px rgb(var(--irip-control-border) / .5); font-weight: 600; }
+  .irip-control--primary { background: var(--button-primary-bg); color: var(--button-primary-fg); }
+  .irip-control--primary:not(:disabled):hover { background: var(--button-primary-hover-bg); color: var(--button-primary-fg); }
+  .irip-control--primary:not(:disabled):active { background: var(--button-primary-active-bg); }
   .irip-nav-link:active, .irip-control:active { transform: scale(.97); }
-  .irip-control:disabled { cursor: not-allowed; opacity: .6; transform: none; }
-  .irip-menu-trigger { min-width: 44px; background: var(--palette-linen); padding: 8px; }
+  .irip-control:disabled { cursor: not-allowed; color: var(--color-text-muted); opacity: 1; transform: none; }
+  .irip-menu-trigger { min-width: 44px; background: var(--color-surface-selected); padding: 8px; }
   .irip-chevron { transition: transform 180ms var(--ease-out); }
   [aria-expanded="true"] > .irip-chevron { transform: rotate(180deg); }
-  .irip-dropdown { border: 1px solid var(--palette-stone); border-radius: var(--irip-radius); padding: var(--irip-space-2); background: var(--palette-paper); box-shadow: 0 var(--irip-space-3) var(--irip-space-5) rgb(18 43 57 / .12), 0 2px 5px rgb(18 43 57 / .05); animation: irip-menu-enter 180ms var(--ease-out); transform-origin: top right; }
-  .irip-menu-link { display: block; min-height: 44px; border-radius: 13px; padding: 12px 13px; color: var(--palette-ink); font-size: 14px; font-weight: 500; transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out); }
-  .irip-menu-link:hover, .irip-menu-link[aria-current="page"] { background: var(--palette-linen); color: var(--palette-ink); }
+  .irip-dropdown { border: 1px solid var(--color-border); border-radius: var(--irip-radius); padding: var(--irip-space-2); background: rgb(var(--irip-ivory)); box-shadow: 0 var(--irip-space-3) var(--irip-space-5) rgb(var(--irip-indigo) / .1), 0 2px 5px rgb(var(--irip-indigo) / .04); animation: irip-menu-enter 180ms var(--ease-out); transform-origin: top right; }
+  .irip-menu-link { display: block; min-height: 44px; border-radius: 13px; padding: 12px 13px; color: var(--color-text); font-size: 14px; font-weight: 500; transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out); }
+  .irip-menu-link:hover, .irip-menu-link[aria-current="page"] { background: var(--color-surface-selected); color: var(--color-text); }
   @keyframes irip-menu-enter { from { opacity: .4; transform: translateY(-5px) scale(.98); } to { opacity: 1; transform: none; } }
   .container-page {
     width: 100%;
@@ -209,24 +243,24 @@
   .irip-program-dock {
     display: flex; align-items: center; gap: 16px;
     width: max-content; max-width: 100%; padding: 6px;
-    border: 1px solid var(--palette-stone); border-radius: var(--irip-radius);
-    background: var(--palette-paper); pointer-events: auto;
-    box-shadow: 0 5px 18px rgb(18 43 57 / .07), inset 0 1px 0 #fff;
+    border: 1px solid var(--color-border); border-radius: var(--irip-radius);
+    background: rgb(var(--irip-ivory)); pointer-events: auto;
+    box-shadow: 0 4px 16px rgb(var(--irip-indigo) / .045), inset 0 1px 0 #fff;
   }
-  .irip-program-dock-caption { padding: 0 16px 0 12px; border-right: 1px solid var(--palette-stone); color: var(--color-slate-500); font-size: 10px; line-height: 15px; letter-spacing: .08em; text-transform: uppercase; }
-  .irip-program-dock-caption strong { color: var(--palette-ink); font-weight: 600; }
+  .irip-program-dock-caption { padding: 0 16px 0 12px; border-right: 1px solid var(--color-border); color: var(--color-text-muted); font-size: 12px; line-height: 17px; letter-spacing: .06em; text-transform: uppercase; }
+  .irip-program-dock-caption strong { color: var(--color-text); font-weight: 600; }
   .irip-program-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; min-width: 0; }
   .irip-program-tab {
     display: inline-flex; min-height: 44px; min-width: 0; align-items: center; justify-content: center;
     gap: 8px; padding: 8px 16px; border: 1px solid transparent; border-radius: 14px;
-    color: var(--color-slate-600); font-size: 13px; font-weight: 550; white-space: nowrap;
+    color: var(--color-text-muted); font-size: 14px; font-weight: 550; white-space: nowrap;
     transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out);
   }
-  .irip-program-tab:hover { background: var(--palette-linen); color: var(--palette-evergreen); }
-  .irip-program-tab[aria-selected="true"] { background: var(--palette-midnight); color: #fff; box-shadow: inset 0 -2px 0 var(--palette-brass); }
+  .irip-program-tab:hover { background: var(--color-surface-selected); color: var(--color-text); }
+  .irip-program-tab[aria-selected="true"] { background: rgb(var(--irip-indigo)); color: var(--color-on-brand); box-shadow: inset 0 -2px 0 rgb(var(--irip-lavender)); }
 
   .portal-canvas {
-    background: var(--palette-paper);
+    background: rgb(var(--irip-ivory));
   }
 
   .eyebrow {
@@ -239,9 +273,9 @@
     @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card;
   }
 
-  /* Gradient text */
+  /* Flat editorial emphasis; no decorative metallic/AI gradient. */
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-brand-900;
+    color: var(--color-link);
   }
 
   /* Glass panel */
@@ -260,12 +294,22 @@
   }
 }
 
+/* Necessary field boundaries, scoped to the app shell and excluding nonvisual
+   and native choice controls. This changes colour only, never field behaviour. */
+.irip-shell :is(input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]), select, textarea) {
+  border-color: var(--color-control-border);
+  color: var(--color-text);
+  background-color: rgb(var(--irip-white));
+}
+.irip-shell :is(input, textarea)::placeholder { color: var(--color-text-muted); opacity: 1; }
+.irip-shell :is(input, select, textarea):focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   /* Bound the material to the actual rounded navigation surface. Do not add a
      viewport-wide blurred/masked layer: it creates a visible halo on dark heroes.
      Tint the background, never the whole element (labels stay fully opaque). */
   .irip-header-frame {
-    background: rgb(245 243 237 / .92);
+    background: rgb(var(--irip-ivory) / .96);
     -webkit-backdrop-filter: blur(24px) saturate(120%);
     backdrop-filter: blur(24px) saturate(120%);
   }
@@ -273,7 +317,7 @@
 
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   .irip-header-frame, .irip-program-dock {
-    background: var(--palette-paper);
+    background: rgb(var(--irip-ivory));
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -285,11 +329,11 @@
 
 dialog.irip-navigation-sheet {
   width: calc(100% - 16px); max-width: 416px; height: calc(100dvh - 16px); max-height: calc(100dvh - 16px);
-  margin: 8px 8px 8px auto; border: 1px solid var(--palette-stone); border-radius: 26px;
-  background: var(--palette-paper); box-shadow: 0 21px 55px rgb(18 43 57 / .2);
+  margin: 8px 8px 8px auto; border: 1px solid var(--color-border); border-radius: 26px;
+  background: rgb(var(--irip-ivory)); box-shadow: 0 21px 55px rgb(var(--irip-indigo) / .2);
 }
 dialog.irip-navigation-sheet[open] { animation: irip-menu-enter 220ms var(--ease-out); }
-dialog.irip-navigation-sheet::backdrop { background: rgb(18 43 57 / .42); backdrop-filter: blur(3px); }
+dialog.irip-navigation-sheet::backdrop { background: rgb(var(--irip-indigo) / .42); backdrop-filter: blur(3px); }
 @media (max-width: 639px) {
   :root { --irip-header-height: 78px; }
   .irip-header-frame { padding: 8px; }
@@ -297,9 +341,10 @@ dialog.irip-navigation-sheet::backdrop { background: rgb(18 43 57 / .42); backdr
   .irip-program-dock { width: 100%; }
   .irip-program-dock-caption { display: none; }
   .irip-program-tabs { width: 100%; }
-  .irip-program-tab { gap: 0; padding-inline: 5px; font-size: 12px; }
+  .irip-program-tab { gap: 0; padding-inline: 5px; font-size: 13px; }
   .irip-program-tab svg { display: none; }
   .irip-wordmark { gap: 8px; }
+  .irip-symbol { width: 40px; height: 40px; }
   .irip-wordmark-note { font-size: 7px; letter-spacing: .08em; }
 }
 @media (min-width: 640px) {

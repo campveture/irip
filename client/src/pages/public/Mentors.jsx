@@ -26,7 +26,7 @@ export default function Mentors() {
     return term ? mentors.filter(m => [m.full_name, m.expertise, m.bio].some(v => String(v || '').toLocaleLowerCase().includes(term))) : mentors;
   }, [mentors, query]);
 
-  return <main className="bg-canvas">
+  return <main className="irip-public-detail bg-canvas">
     <section className="container-page py-8 sm:py-10" aria-labelledby="mentors-heading">
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between"><div><h1 id="mentors-heading" className="text-2xl font-semibold tracking-tight text-brand-900 sm:text-3xl">Mentors</h1><p className="mt-1 text-sm leading-6 text-slate-600">Approved demo profiles. Credentials require verification before launch.</p></div><label className="relative block w-full md:max-w-xs"><span className="sr-only">Search mentors by name or expertise</span><Search size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" /><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search name or expertise" className="min-h-12 w-full rounded-full border border-slate-300 bg-white pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-500 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-200" /></label></div>
       <p className="my-7 text-sm text-slate-600" aria-live="polite">{loading ? 'Loading mentors…' : error ? 'Directory unavailable' : `${visible.length} mentor${visible.length === 1 ? '' : 's'} ${query.trim() ? 'match your search' : 'in the demo'}`}</p>

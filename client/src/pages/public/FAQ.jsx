@@ -40,7 +40,7 @@ export default function FAQ() {
   if (current) pairs.push(current);
 
   return (
-    <div className="container-page py-8 animate-fade-in">
+    <div className="irip-public-detail container-page py-8 animate-fade-in">
       <Link to="/" className="text-sm text-slate-600 hover:text-brand-600 inline-flex items-center mb-6 transition-colors">
         <ArrowLeft className="h-4 w-4 mr-1" /> Back to home
       </Link>

@@ -6,7 +6,20 @@ These locally hosted assets are visual placeholders, not evidence of IRIP people
 
 `program-research.svg`, `program-statistics.svg` and `program-writing.svg` are custom vector compositions created for this prototype. Their notebooks, charts and manuscripts are illustrations, not measured outcomes or actual course materials. Artwork is selected by program topic, not list position, so filtering preserves the correct cover.
 
-## Institution crest — 5 November 2026
+## Current identity: Archive Indigo — 5 November 2026
+
+The authoritative supplied guide and untouched raster source are kept in `docs/brand/archive-indigo/`. This supersedes the earlier Fieldwork crest below.
+
+- `irip-falcon-lockup.png` is a byte-identical copy of **IRIP indigo shield logo with ivory falcons.png**. The full-name lockup is displayed at reading size on About, on ivory, with meaningful alternative text.
+- `irip-falcon-crest.png` is the **user-approved crest-only crop**, box `(183, 102, 1071, 1034)` from the 1254px source. Pixels inside the crop are unchanged; only the surrounding canvas/name is excluded.
+- `irip-falcon-crest-192.png` is a proportional 183×192px compact PNG export used by `IripMark` across header/footer/portals. It avoids loading the 657kB full-resolution crop into a 40–48px slot. No bird, border, book, nib, flame, color or geometry is redesigned; no tint, trace or SVG wrapper is used. These are raster assets, not a verified vector master.
+- Reproduce these files with `python docs/brand/archive-indigo/prepare-logo.py` (Pillow is an artwork tool, not a website dependency).
+- The existing favicon and Apple touch icon remain unchanged, per the guide's exclusion of favicon redesign without a suitable approved small-format master. The previous crest exports remain historical assets, not the current site identity.
+- Seven editable `program-*.svg` / `course-*.svg` covers were individually recolored to indigo/ivory/lavender. Their paths, text, coordinates and topic assignment are unchanged. Stock photos, portraits, curriculum content and business data were not recolored or replaced.
+
+UI colors come from the design guide, **not sampled logo pixels**. Canonical RGB-channel tokens live in `client/src/index.css`; Tailwind, charts and shared controls reference them. Status green/amber/red remain semantic exceptions. Source Serif 4 is loaded through the existing Google Fonts mechanism; the app retains Inter, Baloo Da 2 and system/Georgia fallbacks.
+
+## Earlier institution crest — superseded by Archive Indigo
 
 The user-selected shield replaces the earlier discovery-book mark. The uploaded PNG is preserved at `docs/brand/irip-logo-original.png`. It is user-supplied artwork; authorship and rights have not been independently verified.
 

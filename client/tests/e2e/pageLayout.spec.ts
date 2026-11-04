@@ -31,7 +31,7 @@ test('floating header surround stays transparent over heroes and scrolled light 
   for (const path of ['/', '/programs', '/projects', '/mentors', '/courses', '/teach', '/about']) {
     await page.goto(path);
     await expect.poll(() => page.locator('header').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
-    expect(await page.locator('.irip-header-frame').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgba(245, 243, 237, 0.92)');
+    expect(await page.locator('.irip-header-frame').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgba(245, 241, 232, 0.96)');
   }
   // No colored bar may reappear after scrolling or client-side navigation.
   await page.goto('/programs');
@@ -73,7 +73,7 @@ test('increased contrast uses an opaque surface instead of glass', async ({ page
     const style = getComputedStyle(element);
     return { background: style.backgroundColor, backdrop: style.backdropFilter };
   });
-  expect(material).toEqual({ background: 'rgb(245, 243, 237)', backdrop: 'none' });
+  expect(material).toEqual({ background: 'rgb(245, 241, 232)', backdrop: 'none' });
 });
 
 test('portal dashboards and newer tools use one content boundary without double gutters', async ({ page }, info) => {

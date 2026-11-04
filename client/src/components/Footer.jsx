@@ -7,7 +7,7 @@ import { ReadOnlyPreviewNotice } from './shared/ReadOnlyPreview';
 
 export function Footer() {
   return (
-    <footer className="border-t border-brand-800 bg-brand-900 text-white/75 mt-auto">
+    <footer className="irip-inverse border-t border-brand-800 bg-brand-900 text-inverse mt-auto">
       <div className="container-page py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-8">
           <div className="col-span-2 md:col-span-1">
@@ -15,8 +15,8 @@ export function Footer() {
               <IripMark className="h-12 w-12 shrink-0" />
               <span className="text-sm font-semibold text-white">IRIP</span>
             </div>
-            <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.12em] text-brand-300">Institute of Research, Innovation and Practice</p>
-            <p className="text-sm text-slate-400 max-w-xs">
+            <p className="mb-3 text-[13px] font-medium leading-6 text-inverse">Institute of Research, Innovation and Practice</p>
+            <p className="text-sm text-inverse max-w-xs">
               Structured theory courses with supervised practical research projects for learners in Bangladesh.
             </p>
           </div>
@@ -59,7 +59,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mb-6 max-w-4xl space-y-2 text-brand-100"><DemoDisclosure />{READ_ONLY_PREVIEW && <ReadOnlyPreviewNotice />}</div>
-        <div className="border-t border-white/15 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/75">
+        <div className="border-t border-white/25 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[13px] text-inverse">
           <span>IRIP — Institute of Research, Innovation and Practice. Local prototype guided by the 28-sheet workbook.</span>
           <span>P0 launch essentials · No unverified commercial claims.</span>
         </div>

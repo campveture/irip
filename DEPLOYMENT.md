@@ -2,6 +2,8 @@
 
 This repository is configured to deploy a **synthetic read-only public demo**, not the SQLite-backed IRIP system.
 
+Current Vercel project: `campveture-7651/irip`. Public address: **https://irip.vercel.app**. The former `https://unknownacademy.vercel.app` address permanently redirects (308) to it, preserving paths and query parameters. Do not recreate the old project or remove that redirect during visual releases.
+
 ## GitHub integration
 
 Import `campveture/irip` into a Vercel account/team that can create projects and access the repository through the Vercel GitHub app. Use the repository root, production branch `main`, and Node.js **22.x**. The committed `vercel.json` supplies the settings:

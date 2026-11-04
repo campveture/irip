@@ -32,14 +32,15 @@ export default function About() {
   return (
     <main>
       <PublicHero eyebrow="About IRIP" title={<>Curiosity, with<br /><em>somewhere to go.</em></>} description="The Institute of Research, Innovation and Practice is building a place for learners in Bangladesh to turn curiosity into research." shortcuts={[{ to: '#our-approach', detail: 'The idea', label: 'Why we’re building this' }, { to: '/student-value', detail: 'The direction', label: 'Learner roadmap' }, { to: '/teach', detail: 'Get involved', label: 'Explore teaching' }]} actions={<>
-              <Link to="/programs" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brass px-6 text-sm font-semibold text-slate-950 hover:bg-white">Explore programs <ArrowUpRight size={17} aria-hidden="true" /></Link>
-              <a href="#our-approach" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/30 px-6 text-sm font-semibold hover:bg-white/10">Our approach</a>
+              <Link to="/programs" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-accent px-6 text-sm font-semibold text-brand-900 hover:bg-white">Explore programs <ArrowUpRight size={17} aria-hidden="true" /></Link>
+              <a href="#our-approach" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/70 px-6 text-sm font-semibold hover:bg-white/10">Our approach</a>
       </>} />
 
       <section id="our-approach" className="container-page grid gap-8 py-14 sm:py-20 lg:grid-cols-[.7fr_1.3fr]" aria-labelledby="approach-heading">
         <div>
-          <h2 id="approach-heading" className="text-3xl font-semibold tracking-tight text-slate-900">Learn by doing.</h2>
+          <h2 id="approach-heading" className="irip-editorial-heading text-slate-900">Learn by doing.</h2>
           <p className="mt-4 max-w-sm text-sm leading-7 text-slate-600">Structured learning. Useful feedback. Work you can explain.</p>
+          <img src="/images/irip-falcon-lockup.png" width="1254" height="1254" alt="Institute of Research, Innovation and Practice — woven falcon shield" loading="lazy" className="mt-6 h-auto w-full max-w-sm object-contain" />
         </div>
         <div className="min-w-0" aria-busy={loading}>
           {loading ? <p role="status" className="py-6 text-sm text-slate-600">Loading our story…</p> : error ? <div><p role="alert" className="text-sm leading-7 text-red-800">{error}</p><button type="button" onClick={() => setAttempt(value => value + 1)} className="mt-5 min-h-11 rounded-full border border-brand-300 px-5 text-sm font-semibold text-brand-800">Retry about content</button></div> : <article>

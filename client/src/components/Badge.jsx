@@ -2,12 +2,12 @@ import { cn } from './utils';
 
 const variants = {
   default: 'border-transparent bg-slate-100 text-slate-900',
-  success: 'border-transparent bg-green-100 text-green-800',
-  pending: 'border-transparent bg-amber-100 text-amber-800',
-  issued: 'border-transparent bg-green-100 text-green-800',
-  active: 'border-transparent bg-green-100 text-green-800',
+  success: 'border-transparent bg-success-50 text-success-600',
+  pending: 'border-transparent bg-warning-50 text-warning-600',
+  issued: 'border-transparent bg-success-50 text-success-600',
+  active: 'border-transparent bg-success-50 text-success-600',
   open: 'border-transparent bg-blue-100 text-blue-800',
-  rejected: 'border-transparent bg-red-100 text-red-800',
+  rejected: 'border-transparent bg-danger-50 text-danger-600',
   revoked: 'border-transparent bg-slate-100 text-slate-500',
 };
 

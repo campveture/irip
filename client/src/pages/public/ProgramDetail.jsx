@@ -99,9 +99,9 @@ export default function ProgramDetail() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: easeOut }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-900 via-brand-900 to-brand-700 text-white p-6 sm:p-8 mb-8 shadow-elevated"
+        className="irip-inverse relative overflow-hidden rounded-2xl bg-brand-900 p-6 sm:p-8 mb-8 shadow-soft"
       >
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, white 0, transparent 45%)' }} />
+        <div className="absolute inset-0 bg-brand-900" />
         <motion.div
           initial="hidden"
           animate="visible"
@@ -114,7 +114,7 @@ export default function ProgramDetail() {
             <Badge className="bg-white/10 border-white/20 text-brand-200">{program.level}</Badge>
             <Badge className="bg-amber-400/20 border-amber-300/30 text-amber-200">Proposed · Pending approval</Badge>
           </motion.div>
-          <motion.h1 variants={staggerItem} className="text-3xl sm:text-4xl font-bold mb-3">{program.title}</motion.h1>
+          <motion.h1 variants={staggerItem} className="irip-page-title mb-3">{program.title}</motion.h1>
           <motion.p variants={staggerItem} className="text-brand-100 leading-relaxed max-w-3xl mb-6">{program.summary}</motion.p>
           <motion.div variants={staggerItem} className="flex flex-wrap items-center gap-6 text-sm text-brand-200 mb-6">
             <span className="flex items-center gap-1.5"><Tag className="h-4 w-4" /> {program.slug === 'research-bootcamp' ? 'Next intake: ' : ''}BDT {Number(program.fee ?? 0).toLocaleString()}</span>
@@ -230,7 +230,7 @@ export default function ProgramDetail() {
                 <motion.div variants={stagger(0.1)} initial="hidden" animate="visible" className="space-y-8">
                   {offers.map((o) => (
                     <motion.div key={o.id} variants={staggerItem} className="grid items-start gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-10">
-                      <div className="rounded-3xl bg-brand-900 p-7 text-white sm:p-9">
+                      <div className="irip-inverse rounded-3xl bg-brand-900 p-7 sm:p-9">
                           <p className="text-xs font-semibold uppercase tracking-widest text-brand-200">Your program investment</p>
                           <div className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">{o.currency ?? 'BDT'} {Number(o.price ?? 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                           <p className="mt-3 text-sm text-brand-100">Proposed total program fee · {o.name ?? 'Program fee'}</p>

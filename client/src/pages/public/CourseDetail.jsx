@@ -47,7 +47,7 @@ export default function CourseDetail() {
   const totalMinutes = modules.reduce((a, m) => a + (m.lessons || []).reduce((b, l) => b + (l.duration_min || 0), 0), 0);
 
   return (
-    <div className="container-page py-8 animate-fade-in">
+    <div className="irip-public-detail container-page py-8 animate-fade-in">
       <Link to="/programs" className="text-sm text-slate-600 hover:text-brand-600 inline-flex items-center mb-6 transition-colors">
         <ArrowLeft className="h-4 w-4 mr-1" /> All programs
       </Link>

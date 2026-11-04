@@ -1,11 +1,11 @@
 import { cn } from './utils';
 
 const colorMap = {
-  brand: '#245448',
-  success: '#10b981',
-  warning: '#f59e0b',
-  danger: '#ef4444',
-  slate: '#626f71',
+  brand: 'rgb(var(--irip-indigo))',
+  success: 'var(--color-success)',
+  warning: 'var(--color-warning)',
+  danger: 'var(--color-danger)',
+  slate: 'var(--color-text-muted)',
 };
 
 export function RingProgress({ value = 0, max = 100, size = 96, stroke = 8, color = 'brand', label, sublabel, className }) {
@@ -16,7 +16,7 @@ export function RingProgress({ value = 0, max = 100, size = 96, stroke = 8, colo
   return (
     <div className={cn('relative inline-flex items-center justify-center', className)} style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="#dedcd3" strokeWidth={stroke} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--color-border)" strokeWidth={stroke} fill="none" />
         <circle
           cx={size / 2}
           cy={size / 2}

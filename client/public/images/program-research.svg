@@ -1,40 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620" viewBox="0 0 1000 620">
   <defs>
-    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#245448"/><stop offset="1" stop-color="#122B39"/></linearGradient>
-    <radialGradient id="glow"><stop stop-color="#A7C2B2" stop-opacity=".25"/><stop offset="1" stop-color="#A7C2B2" stop-opacity="0"/></radialGradient>
-    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#EAE8DF" stroke-opacity=".07"/></pattern>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#292442"/><stop offset="1" stop-color="#292442"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#A49BCB" stop-opacity=".25"/><stop offset="1" stop-color="#A49BCB" stop-opacity="0"/></radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#EEEAF6" stroke-opacity=".07"/></pattern>
     <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="16" stdDeviation="14" flood-opacity=".24"/></filter>
   </defs>
   <rect width="1000" height="620" fill="url(#bg)"/>
   <rect width="1000" height="620" fill="url(#grid)"/>
   <circle cx="800" cy="250" r="350" fill="url(#glow)"/>
-  <g fill="none" stroke="#A7C2B2" stroke-opacity=".18"><circle cx="760" cy="310" r="207"/><circle cx="760" cy="310" r="260"/></g>
+  <g fill="none" stroke="#A49BCB" stroke-opacity=".18"><circle cx="760" cy="310" r="207"/><circle cx="760" cy="310" r="260"/></g>
   <g font-family="Arial, sans-serif">
-    <rect x="54" y="48" width="46" height="32" rx="8" fill="#C5A46D"/>
-    <text x="77" y="70" text-anchor="middle" font-size="18" font-weight="700" fill="#122B39">ua</text>
-    <text x="114" y="70" font-size="15" letter-spacing="3" fill="#F5F3ED">THE RESEARCH SERIES</text>
-    <text x="54" y="175" font-size="15" letter-spacing="4" fill="#EAE8DF">ASK. INVESTIGATE. DISCOVER.</text>
-    <text x="50" y="258" font-size="70" font-weight="700" letter-spacing="-3" fill="#F5F3ED">Research</text>
-    <text x="50" y="336" font-size="70" font-weight="700" letter-spacing="-3" fill="#C5A46D">Methods.</text>
-    <path d="M56 370H170" stroke="#C5A46D" stroke-width="3"/>
-    <text x="54" y="415" font-size="20" fill="#EAE8DF">Turn a question into a research plan.</text>
-    <text x="54" y="559" font-size="15" letter-spacing="3" fill="#EAE8DF">QUESTION → METHOD → EVIDENCE</text>
+    <rect x="54" y="48" width="46" height="32" rx="8" fill="#A49BCB"/>
+    <text x="77" y="70" text-anchor="middle" font-size="18" font-weight="700" fill="#292442">ua</text>
+    <text x="114" y="70" font-size="15" letter-spacing="3" fill="#F5F1E8">THE RESEARCH SERIES</text>
+    <text x="54" y="175" font-size="15" letter-spacing="4" fill="#EEEAF6">ASK. INVESTIGATE. DISCOVER.</text>
+    <text x="50" y="258" font-size="70" font-weight="700" letter-spacing="-3" fill="#F5F1E8">Research</text>
+    <text x="50" y="336" font-size="70" font-weight="700" letter-spacing="-3" fill="#A49BCB">Methods.</text>
+    <path d="M56 370H170" stroke="#A49BCB" stroke-width="3"/>
+    <text x="54" y="415" font-size="20" fill="#EEEAF6">Turn a question into a research plan.</text>
+    <text x="54" y="559" font-size="15" letter-spacing="3" fill="#EEEAF6">QUESTION → METHOD → EVIDENCE</text>
   </g>
   <g transform="translate(610 123) rotate(9 145 180)" filter="url(#shadow)">
-    <rect x="-14" y="-10" width="280" height="365" rx="20" fill="#DEDCD3"/>
-    <rect width="280" height="365" rx="20" fill="#F5F3ED"/>
-    <g font-family="Arial, sans-serif" fill="#122B39">
+    <rect x="-14" y="-10" width="280" height="365" rx="20" fill="#D8D2DF"/>
+    <rect width="280" height="365" rx="20" fill="#F5F1E8"/>
+    <g font-family="Arial, sans-serif" fill="#292442">
       <text x="30" y="50" font-size="13" letter-spacing="2">RESEARCH NOTEBOOK</text>
-      <rect x="30" y="70" width="220" height="1" fill="#EAE8DF"/>
+      <rect x="30" y="70" width="220" height="1" fill="#EEEAF6"/>
       <text x="30" y="111" font-size="23" font-weight="700">Start with why.</text>
-      <rect x="30" y="133" width="175" height="7" rx="3" fill="#DEDCD3"/><rect x="30" y="149" width="139" height="7" rx="3" fill="#EAE8DF"/>
-      <path d="M69 199V218H204V246M136 218V246" fill="none" stroke="#245448" stroke-width="2"/>
-      <rect x="30" y="181" width="80" height="32" rx="8" fill="#A7C2B2"/><text x="70" y="202" text-anchor="middle" font-size="12">Question</text>
-      <rect x="96" y="242" width="80" height="32" rx="8" fill="#245448"/><text x="136" y="263" text-anchor="middle" font-size="12" fill="#F5F3ED">Method</text>
-      <rect x="181" y="242" width="72" height="32" rx="8" fill="#C5A46D"/><text x="217" y="263" text-anchor="middle" font-size="12">Evidence</text>
-      <path d="M30 308H248M30 328H191" stroke="#EAE8DF" stroke-width="5"/>
+      <rect x="30" y="133" width="175" height="7" rx="3" fill="#D8D2DF"/><rect x="30" y="149" width="139" height="7" rx="3" fill="#EEEAF6"/>
+      <path d="M69 199V218H204V246M136 218V246" fill="none" stroke="#544773" stroke-width="2"/>
+      <rect x="30" y="181" width="80" height="32" rx="8" fill="#A49BCB"/><text x="70" y="202" text-anchor="middle" font-size="12">Question</text>
+      <rect x="96" y="242" width="80" height="32" rx="8" fill="#544773"/><text x="136" y="263" text-anchor="middle" font-size="12" fill="#F5F1E8">Method</text>
+      <rect x="181" y="242" width="72" height="32" rx="8" fill="#A49BCB"/><text x="217" y="263" text-anchor="middle" font-size="12">Evidence</text>
+      <path d="M30 308H248M30 328H191" stroke="#EEEAF6" stroke-width="5"/>
     </g>
   </g>
-  <g transform="translate(807 376) rotate(-15)" filter="url(#shadow)"><circle r="66" fill="#A7C2B2"/><circle r="45" fill="#122B39"/><path d="M-20 0l14 14 28-30" fill="none" stroke="#C5A46D" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></g>
-  <circle cx="555" cy="143" r="5" fill="#C5A46D"/><path d="M932 480v24m-12-12h24" stroke="#A7C2B2" stroke-width="2"/>
+  <g transform="translate(807 376) rotate(-15)" filter="url(#shadow)"><circle r="66" fill="#A49BCB"/><circle r="45" fill="#292442"/><path d="M-20 0l14 14 28-30" fill="none" stroke="#A49BCB" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></g>
+  <circle cx="555" cy="143" r="5" fill="#A49BCB"/><path d="M932 480v24m-12-12h24" stroke="#A49BCB" stroke-width="2"/>
 </svg>

@@ -1,33 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620" viewBox="0 0 1000 620">
   <defs>
-    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#F5F3ED"/><stop offset="1" stop-color="#DEDCD3"/></linearGradient>
-    <pattern id="lines" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M0 40H40" stroke="#245448" stroke-opacity=".07"/></pattern>
-    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="15" stdDeviation="14" flood-color="#122B39" flood-opacity=".18"/></filter>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#F5F1E8"/><stop offset="1" stop-color="#D8D2DF"/></linearGradient>
+    <pattern id="lines" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M0 40H40" stroke="#544773" stroke-opacity=".07"/></pattern>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="15" stdDeviation="14" flood-color="#292442" flood-opacity=".18"/></filter>
   </defs>
   <rect width="1000" height="620" fill="url(#bg)"/><rect width="1000" height="620" fill="url(#lines)"/>
-  <circle cx="796" cy="300" r="251" fill="#C5A46D" opacity=".2"/>
+  <circle cx="796" cy="300" r="251" fill="#A49BCB" opacity=".2"/>
   <g font-family="Arial, sans-serif">
-    <rect x="54" y="48" width="46" height="32" rx="8" fill="#122B39"/>
-    <text x="77" y="70" text-anchor="middle" font-size="18" font-weight="700" fill="#F5F3ED">ua</text>
-    <text x="114" y="70" font-size="15" letter-spacing="3" fill="#122B39">THE RESEARCH SERIES</text>
-    <text x="54" y="175" font-size="15" letter-spacing="4" fill="#122B39">GIVE YOUR IDEAS A VOICE.</text>
-    <text x="50" y="258" font-size="66" font-weight="700" letter-spacing="-3" fill="#122B39">Academic</text>
-    <text x="50" y="336" font-size="70" font-weight="700" letter-spacing="-3" fill="#245448">Writing.</text>
-    <path d="M56 370H170" stroke="#245448" stroke-width="3"/>
-    <text x="54" y="415" font-size="20" fill="#122B39">From first draft to a clearer argument.</text>
-    <text x="54" y="559" font-size="15" letter-spacing="3" fill="#122B39">STRUCTURE → REFINE → PUBLISH</text>
+    <rect x="54" y="48" width="46" height="32" rx="8" fill="#292442"/>
+    <text x="77" y="70" text-anchor="middle" font-size="18" font-weight="700" fill="#F5F1E8">ua</text>
+    <text x="114" y="70" font-size="15" letter-spacing="3" fill="#292442">THE RESEARCH SERIES</text>
+    <text x="54" y="175" font-size="15" letter-spacing="4" fill="#292442">GIVE YOUR IDEAS A VOICE.</text>
+    <text x="50" y="258" font-size="66" font-weight="700" letter-spacing="-3" fill="#292442">Academic</text>
+    <text x="50" y="336" font-size="70" font-weight="700" letter-spacing="-3" fill="#544773">Writing.</text>
+    <path d="M56 370H170" stroke="#544773" stroke-width="3"/>
+    <text x="54" y="415" font-size="20" fill="#292442">From first draft to a clearer argument.</text>
+    <text x="54" y="559" font-size="15" letter-spacing="3" fill="#292442">STRUCTURE → REFINE → PUBLISH</text>
   </g>
   <g transform="translate(624 119) rotate(8 130 170)" filter="url(#shadow)">
-    <rect x="15" y="18" width="265" height="355" rx="12" fill="#A7C2B2"/>
-    <rect width="265" height="355" rx="12" fill="#F5F3ED"/>
-    <text x="29" y="41" font-family="Arial" font-size="10" letter-spacing="2" fill="#245448">THE WORKING PAPER</text>
-    <path d="M29 55H236" stroke="#DEDCD3"/>
-    <text x="29" y="94" font-family="Georgia" font-size="29" fill="#122B39">Ideas into</text>
-    <text x="29" y="128" font-family="Georgia" font-size="29" fill="#122B39">arguments.</text>
-    <rect x="28" y="156" width="128" height="10" fill="#C5A46D"/>
-    <g stroke="#DEDCD3" stroke-width="4"><path d="M29 180H235M29 194H235M29 208H216M29 236H235M29 250H235M29 264H190M29 292H235M29 306H196"/></g>
-    <path d="M27 217Q94 226 158 217M177 260l13 13 26-28" fill="none" stroke="#245448" stroke-width="2"/>
+    <rect x="15" y="18" width="265" height="355" rx="12" fill="#A49BCB"/>
+    <rect width="265" height="355" rx="12" fill="#F5F1E8"/>
+    <text x="29" y="41" font-family="Arial" font-size="10" letter-spacing="2" fill="#544773">THE WORKING PAPER</text>
+    <path d="M29 55H236" stroke="#D8D2DF"/>
+    <text x="29" y="94" font-family="Georgia" font-size="29" fill="#292442">Ideas into</text>
+    <text x="29" y="128" font-family="Georgia" font-size="29" fill="#292442">arguments.</text>
+    <rect x="28" y="156" width="128" height="10" fill="#A49BCB"/>
+    <g stroke="#D8D2DF" stroke-width="4"><path d="M29 180H235M29 194H235M29 208H216M29 236H235M29 250H235M29 264H190M29 292H235M29 306H196"/></g>
+    <path d="M27 217Q94 226 158 217M177 260l13 13 26-28" fill="none" stroke="#544773" stroke-width="2"/>
   </g>
-  <g transform="translate(850 409) rotate(31)" filter="url(#shadow)"><rect x="-8" y="-135" width="17" height="180" rx="5" fill="#122B39"/><rect x="-8" y="-134" width="17" height="23" rx="4" fill="#C5A46D"/><path d="M-8 45L0 67 9 45Z" fill="#DEDCD3"/><path d="M-3 60L0 67 3 60Z" fill="#122B39"/></g>
-  <g transform="translate(547 450) rotate(-12)" filter="url(#shadow)"><rect width="129" height="44" rx="8" fill="#245448"/><text x="64" y="29" text-anchor="middle" font-family="Arial" font-size="13" letter-spacing="2" fill="#F5F3ED">DRAFT / 01</text></g>
+  <g transform="translate(850 409) rotate(31)" filter="url(#shadow)"><rect x="-8" y="-135" width="17" height="180" rx="5" fill="#292442"/><rect x="-8" y="-134" width="17" height="23" rx="4" fill="#A49BCB"/><path d="M-8 45L0 67 9 45Z" fill="#D8D2DF"/><path d="M-3 60L0 67 3 60Z" fill="#292442"/></g>
+  <g transform="translate(547 450) rotate(-12)" filter="url(#shadow)"><rect width="129" height="44" rx="8" fill="#544773"/><text x="64" y="29" text-anchor="middle" font-family="Arial" font-size="13" letter-spacing="2" fill="#F5F1E8">DRAFT / 01</text></g>
 </svg>

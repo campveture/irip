@@ -55,10 +55,10 @@ export default function Home() {
   return (
     <div className="bg-canvas text-slate-900">
       <PublicHero eyebrow="IRIP" title={<>Start with a question.<br /><em>Build the answer.</em></>} description="Research learning, guided practice and proposed projects for Bangladesh." shortcuts={[{ to: '/programs/research-bootcamp#cohorts', detail: 'Plan your start', label: 'Bootcamp intakes' }, { to: '/courses', detail: 'Find your focus', label: 'Explore courses' }, { to: '/projects', detail: 'See the practice', label: 'Research projects' }]} actions={<>
-              <Link to="/programs" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brass px-6 font-semibold text-slate-950 transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+              <Link to="/programs" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-accent px-6 font-semibold text-brand-900 transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                 Explore programs <ArrowUpRight size={18} />
               </Link>
-              <a href="#how-it-works" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/30 px-6 font-medium text-white transition hover:border-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+              <a href="#how-it-works" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/70 px-6 font-medium text-white transition hover:border-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                 How it works
               </a>
       </>} />
@@ -66,7 +66,7 @@ export default function Home() {
       <section className="container-page py-20" aria-labelledby="programs-heading">
         <Reveal className="mb-9 flex flex-wrap items-end justify-between gap-5">
           <div className="max-w-2xl">
-            <h2 id="programs-heading" className="text-3xl font-semibold tracking-tight sm:text-4xl">Explore the catalog</h2>
+            <h2 id="programs-heading" className="irip-editorial-heading">Explore the catalog</h2>
           </div>
           <Link to="/programs" className="inline-flex items-center gap-2 font-semibold text-brand-800 hover:underline">All programs <ArrowRight size={17} /></Link>
         </Reveal>
@@ -93,7 +93,7 @@ export default function Home() {
       </section>
 
       <section id="how-it-works" className="container-page scroll-mt-24 py-20" aria-labelledby="journey-heading">
-        <Reveal className="max-w-2xl"><h2 id="journey-heading" className="text-3xl font-semibold tracking-tight sm:text-4xl">A practical path.</h2><p className="mt-3 text-sm text-slate-600">The proposed learning experience.</p></Reveal>
+        <Reveal className="max-w-2xl"><h2 id="journey-heading" className="irip-editorial-heading">A practical path.</h2><p className="mt-3 text-sm text-slate-600">The proposed learning experience.</p></Reveal>
         <div className="mt-8 grid gap-8 md:grid-cols-3">{steps.map(({ number, title, text, icon: Icon }) => <Reveal key={number}><div className="border-t border-stone pt-5"><div className="flex items-center gap-3"><Icon size={20} className="text-brand-700" aria-hidden="true" /><h3 className="text-lg font-semibold">{title}</h3></div><p className="mt-3 text-sm leading-6 text-slate-600">{text}</p></div></Reveal>)}</div>
       </section>
 

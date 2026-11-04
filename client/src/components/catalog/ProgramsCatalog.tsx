@@ -18,7 +18,7 @@ export function ProgramsCatalog() {
 
   return <main>
     <section className="container-page w-full space-y-6 py-8 sm:py-10" aria-labelledby="programs-heading">
-      <h1 id="programs-heading" className="text-2xl font-semibold tracking-tight text-brand-900 sm:text-3xl">Programs</h1>
+      <h1 id="programs-heading" className="irip-page-title text-brand-900">Programs</h1>
       <DemoCallout />
       <FilterBar label="Catalog search and filters">
         <label className="relative block min-w-0 flex-1 basis-60"><span className="sr-only">Search programs</span><Search size={18} aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" /><input type="search" maxLength={200} value={catalog.filters.search} onChange={event => catalog.search(event.target.value)} placeholder="Search programs, topics, skills…" className="min-h-12 w-full rounded-full border border-slate-300 bg-surface pl-11 pr-4 text-sm text-slate-900" /></label>
