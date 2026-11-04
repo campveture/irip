@@ -12,7 +12,7 @@ async function recordRouteAnimations(page: Page) {
   });
 }
 
-test('IRIP header keeps its segmented hierarchy, active state and compact mobile controls', async ({ page }, info) => {
+test('IRIP masthead keeps its navigation hierarchy, active state and compact mobile controls', async ({ page }, info) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/programs');
   const header = page.getByRole('banner');

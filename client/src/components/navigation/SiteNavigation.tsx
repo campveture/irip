@@ -35,7 +35,7 @@ export function SiteNavigation({ session }: { session: NavigationSession }) {
       <div className="irip-header-navigation">
       <Link to="/" aria-label="IRIP home" title="Institute of Research, Innovation and Practice" className="irip-wordmark">
         <IripMark className="irip-symbol" />
-        <span className="min-w-0"><span className="block truncate text-sm font-semibold tracking-tight sm:text-base">IRIP</span><span className="irip-wordmark-note">research . innovation . practice</span></span>
+        <span className="min-w-0"><span className="irip-masthead-name block truncate">IRIP</span><span className="irip-wordmark-note">research . innovation . practice</span></span>
       </Link>
       <div className="flex min-w-0 shrink-0 items-center gap-2">
         <nav aria-label="Main navigation" className="irip-segments hidden items-center xl:flex"><NavigationLinks links={primaryLinks} segmented /><NavigationDropdown label="More"><NavigationLinks links={moreLinks} /></NavigationDropdown></nav>

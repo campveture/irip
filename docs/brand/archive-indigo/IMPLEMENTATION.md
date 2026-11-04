@@ -1,5 +1,7 @@
 # Archive Indigo implementation
 
+The later user-approved photo-led homepage and academic masthead/menu refinement is documented in [HOMEPAGE.md](HOMEPAGE.md). It supersedes only the original homepage illustration and segmented-navigation appearance described in the initial migration below.
+
 ## Scope and sources
 
 - `design.md` and `IRIP indigo shield logo with ivory falcons.png` are the user's supplied files, copied into this folder without modification.

@@ -36,6 +36,12 @@ Rebuild with `python docs/brand/build-logo.py` after installing Pillow, numpy an
 
 Locally resized images from Unsplash; see the [Unsplash license](https://unsplash.com/license). No endorsement or institutional affiliation is implied.
 
+### Photographic homepage follow-up
+
+`home-study-800.jpg` and `home-study-1600.jpg` are proportional JPEG derivatives of [Unsplash image photo-1523240795612-9a054b0db644](https://images.unsplash.com/photo-1523240795612-9a054b0db644). They are real stock photography, not AI-generated scenes or IRIP members/premises. Both are hosted locally; the homepage uses a responsive `srcset`, eager lead-image loading and intrinsic dimensions. No Unsplash API or new image service is integrated.
+
+The homepage also reuses the existing `digital-learning.jpg`, `data-analysis.jpg`, `writing-desk.jpg` and `team-workshop.jpg` photographs below. Visible captions distinguish stock study/collaboration/topic scenes from IRIP people, results or facilities. Natural photo colours are retained; no theme tint, hue filter or blend mode is applied. Contributor identity is not guessed from a CDN filename. No photographs, logos, achievements, faculty names or text were copied from the university reference sites.
+
 | File | Source image | Purpose |
 | --- | --- | --- |
 | `team-workshop.jpg` | [photo-1522071820081-009f0129c71c](https://images.unsplash.com/photo-1522071820081-009f0129c71c) | Team collaboration / About |

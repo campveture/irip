@@ -82,7 +82,7 @@
     --irip-space-3: calc(var(--irip-space-2) * var(--irip-ratio));
     --irip-space-4: calc(var(--irip-space-3) * var(--irip-ratio));
     --irip-space-5: calc(var(--irip-space-4) * var(--irip-ratio));
-    --irip-radius: var(--irip-space-4);
+    --irip-radius: 10px; /* Shared editorial masthead / program-dock corner. */
     --irip-page-max: 80rem;
     --irip-page-gutter: 1rem;
     --irip-header-height: 88px;
@@ -132,6 +132,24 @@
   .irip-hero-art { color: rgb(var(--irip-lavender)); pointer-events: none; }
   .irip-hero-lead { color: var(--color-inverse-muted); font-size: clamp(1.0625rem, 1.5vw, 1.2rem); line-height: 1.65; }
   .irip-hero-art svg { display: block; width: 100%; max-height: 370px; }
+  /* Homepage-only photographic composition; other public heroes keep their
+     existing abstract illustrations and interactions. Natural photo colours. */
+  .irip-home-hero-composition { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: center; gap: 56px; padding-block: 56px 48px; }
+  .irip-home-hero .irip-hero-title { font-size: clamp(2.5rem, 4.5vw, 4rem); }
+  .irip-home-lead-photo { min-width: 0; }
+  .irip-home-lead-photo img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+  .irip-home-lead-photo figcaption { margin-top: 12px; font-size: 13px; line-height: 1.6; }
+  .irip-home-methods { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 64px; align-items: center; }
+  .irip-home-photo-label { position: absolute; left: 12px; bottom: 12px; padding: 4px 9px; background: rgb(var(--irip-ivory) / .96); color: var(--color-text); font-size: 12px; line-height: 1.5; }
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .irip-home-hero-composition { gap: 28px; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+    .irip-home-methods { gap: 32px; }
+  }
+  @media (max-width: 767px) {
+    .irip-home-hero-composition { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-block: 40px 32px; }
+    .irip-home-methods { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+    .irip-home-hero .irip-hero-title { font-size: 2.5rem; }
+  }
   .irip-hero-shortcuts { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgb(255 255 255 / .2); }
   .irip-hero-shortcut { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 92px; padding: 18px 24px; border-right: 1px solid rgb(255 255 255 / .15); transition: background-color 180ms ease; }
   .irip-hero-shortcut:first-child { padding-left: 0; }
@@ -206,8 +224,9 @@
   .irip-symbol {
     display: block; width: 44px; height: 44px; flex-shrink: 0; object-fit: contain;
   }
-  .irip-wordmark-note { display: block; margin-top: 3px; color: var(--color-slate-500); font-size: 8px; font-weight: 600; letter-spacing: .12em; white-space: nowrap; }
-  .irip-segments { gap: 2px; border: 1px solid var(--color-border); border-radius: 17px; background: rgb(var(--irip-white) / .45); padding: 4px; }
+  .irip-masthead-name { font-family: var(--font-editorial); font-size: 24px; font-weight: 600; line-height: 1.05; letter-spacing: .02em; }
+  .irip-wordmark-note { display: block; margin-top: 5px; color: var(--color-text-muted); font-size: 9px; font-weight: 500; letter-spacing: .07em; white-space: nowrap; }
+  .irip-segments { gap: 6px; border: 0; border-radius: 0; background: transparent; padding: 0; }
   .irip-nav-link, .irip-control {
     display: inline-flex; min-height: 44px; flex-shrink: 0; align-items: center; justify-content: center;
     gap: var(--irip-space-1); border: 1px solid transparent; border-radius: var(--irip-space-3); padding: var(--irip-space-2) var(--irip-space-3);
@@ -215,7 +234,11 @@
     transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out), box-shadow 180ms var(--ease-out), transform 180ms var(--ease-out);
   }
   .irip-nav-link:hover, .irip-control:not(:disabled):hover { background: var(--color-surface-selected); color: var(--color-text); }
-  .irip-nav-link[aria-current="page"] { background: var(--color-surface-selected); color: var(--color-text); box-shadow: inset 0 0 0 1px rgb(var(--irip-control-border) / .5); font-weight: 600; }
+  .irip-nav-link { border-width: 0 0 3px; border-bottom-color: transparent; border-radius: 0; padding: 12px 9px 9px; }
+  .irip-nav-link:hover { background: transparent; border-bottom-color: rgb(var(--irip-lavender-deep)); }
+  .irip-nav-link[aria-current="page"] { background: transparent; color: var(--color-text); border-bottom-color: rgb(var(--irip-indigo)); box-shadow: none; font-weight: 600; }
+  .irip-header .irip-control { border-radius: 6px; }
+  .irip-segments .irip-control[aria-expanded="true"] { background: var(--color-surface-selected); border-bottom-color: rgb(var(--irip-indigo)); }
   .irip-control--primary { background: var(--button-primary-bg); color: var(--button-primary-fg); }
   .irip-control--primary:not(:disabled):hover { background: var(--button-primary-hover-bg); color: var(--button-primary-fg); }
   .irip-control--primary:not(:disabled):active { background: var(--button-primary-active-bg); }
@@ -224,9 +247,12 @@
   .irip-menu-trigger { min-width: 44px; background: var(--color-surface-selected); padding: 8px; }
   .irip-chevron { transition: transform 180ms var(--ease-out); }
   [aria-expanded="true"] > .irip-chevron { transform: rotate(180deg); }
-  .irip-dropdown { border: 1px solid var(--color-border); border-radius: var(--irip-radius); padding: var(--irip-space-2); background: rgb(var(--irip-ivory)); box-shadow: 0 var(--irip-space-3) var(--irip-space-5) rgb(var(--irip-indigo) / .1), 0 2px 5px rgb(var(--irip-indigo) / .04); animation: irip-menu-enter 180ms var(--ease-out); transform-origin: top right; }
-  .irip-menu-link { display: block; min-height: 44px; border-radius: 13px; padding: 12px 13px; color: var(--color-text); font-size: 14px; font-weight: 500; transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out); }
-  .irip-menu-link:hover, .irip-menu-link[aria-current="page"] { background: var(--color-surface-selected); color: var(--color-text); }
+  .irip-dropdown { border: 1px solid var(--color-border); border-top: 3px solid rgb(var(--irip-indigo)); border-radius: 4px; padding: 8px; background: rgb(var(--irip-white)); box-shadow: 0 10px 26px rgb(var(--irip-indigo) / .09); animation: irip-menu-enter 180ms var(--ease-out); transform-origin: top right; }
+  .irip-menu-link { display: block; min-height: 46px; border-left: 3px solid transparent; border-bottom: 1px solid var(--color-border); border-radius: 0; padding: 12px 13px; color: var(--color-text); font-size: 14px; font-weight: 500; transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out); }
+  .irip-menu-link:last-child { border-bottom-color: transparent; }
+  .irip-menu-link:hover, .irip-menu-link[aria-current="page"] { background: var(--color-surface-selected); color: var(--color-text); border-left-color: rgb(var(--irip-indigo)); }
+  .irip-dropdown > a:not(.irip-menu-link) { border-radius: 0; border-bottom: 1px solid var(--color-border); }
+  .irip-dropdown > a:last-child { border-bottom-color: transparent; }
   @keyframes irip-menu-enter { from { opacity: .4; transform: translateY(-5px) scale(.98); } to { opacity: 1; transform: none; } }
   .container-page {
     width: 100%;
@@ -329,10 +355,11 @@
 
 dialog.irip-navigation-sheet {
   width: calc(100% - 16px); max-width: 416px; height: calc(100dvh - 16px); max-height: calc(100dvh - 16px);
-  margin: 8px 8px 8px auto; border: 1px solid var(--color-border); border-radius: 26px;
+  margin: 8px 8px 8px auto; border: 1px solid var(--color-border); border-top: 3px solid rgb(var(--irip-indigo)); border-radius: 8px;
   background: rgb(var(--irip-ivory)); box-shadow: 0 21px 55px rgb(var(--irip-indigo) / .2);
 }
 dialog.irip-navigation-sheet[open] { animation: irip-menu-enter 220ms var(--ease-out); }
+dialog.irip-navigation-sheet .irip-menu-link { min-height: 52px; padding-block: 14px; font-size: 17px; }
 dialog.irip-navigation-sheet::backdrop { background: rgb(var(--irip-indigo) / .42); backdrop-filter: blur(3px); }
 @media (max-width: 639px) {
   :root { --irip-header-height: 78px; }
@@ -345,7 +372,8 @@ dialog.irip-navigation-sheet::backdrop { background: rgb(var(--irip-indigo) / .4
   .irip-program-tab svg { display: none; }
   .irip-wordmark { gap: 8px; }
   .irip-symbol { width: 40px; height: 40px; }
-  .irip-wordmark-note { font-size: 7px; letter-spacing: .08em; }
+  .irip-masthead-name { font-size: 21px; }
+  .irip-wordmark-note { font-size: 8px; letter-spacing: .04em; }
 }
 @media (min-width: 640px) {
   :root { --irip-page-gutter: 1.5rem; }

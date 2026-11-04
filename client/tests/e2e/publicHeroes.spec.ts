@@ -1,6 +1,6 @@
 import { test, expect, type Locator } from '@playwright/test';
 
-test('editorial heroes pair concise copy and abstract artwork with useful shortcuts', async ({ page }, info) => {
+test('editorial heroes keep useful shortcuts; the homepage alone uses approved stock photography', async ({ page }, info) => {
   test.setTimeout(90000);
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
@@ -9,12 +9,19 @@ test('editorial heroes pair concise copy and abstract artwork with useful shortc
       const hero = page.locator('[data-public-hero]');
       await expect(hero).toBeVisible();
       await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
-      await expect(hero.locator('figure, img, canvas, article, aside, button')).toHaveCount(0);
-      await expect(hero.locator('.irip-hero-art')).toHaveAttribute('aria-hidden', 'true');
+      if (path === '/') {
+        await expect(hero.locator('figure')).toHaveCount(1);
+        await expect(hero.locator('img')).toHaveCount(1);
+        await expect(hero.locator('figcaption')).toContainText('Stock photo, not IRIP people or premises');
+        await expect(hero.locator('.irip-hero-art')).toHaveCount(0);
+      } else {
+        await expect(hero.locator('figure, img, canvas, article, aside, button')).toHaveCount(0);
+        await expect(hero.locator('.irip-hero-art')).toHaveAttribute('aria-hidden', 'true');
+      }
       await expect(hero.getByRole('navigation').getByRole('link')).toHaveCount(3);
       expect(await hero.innerText().then(text => text.trim().split(/\s+/).length)).toBeLessThanOrEqual(80);
       expect(await hero.getByRole('link').count()).toBeLessThanOrEqual(5);
-      expect(await hero.evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(850);
+      expect(await hero.evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(path === '/' && width < 768 ? 1200 : 850);
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
       if (path === '/' || path === '/about') await page.screenshot({ path: info.outputPath(`editorial-${path === '/' ? 'home' : 'about'}-${width}.png`), animations: 'disabled' });
     }
@@ -89,7 +96,7 @@ test('directory pages keep their next-step actions below the listing', async ({ 
   await expect(page).toHaveURL(/\/teach\/apply$/);
 });
 
-test('minimal home preserves catalog access and keeps detailed answers closed until requested', async ({ page }) => {
+test('photographic home preserves catalog access and keeps detailed answers closed until requested', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('a[href="/programs/research-bootcamp"]').first()).toBeVisible();
   const installments = page.getByRole('button', { name: 'How will program installments work?', exact: true });
