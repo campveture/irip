@@ -7,7 +7,7 @@
     "dev": "node --preserve-symlinks --preserve-symlinks-main dev.mjs",
     "build": "npm run typecheck && node --preserve-symlinks --preserve-symlinks-main build.mjs",
     "typecheck": "node --preserve-symlinks --preserve-symlinks-main node_modules/typescript/bin/tsc --noEmit",
-    "test": "npm run typecheck && node --import tsx --test tests/catalog.test.ts tests/navigation.test.ts tests/scholarships.test.ts tests/courses.test.ts tests/valueRoadmap.test.ts tests/growth.test.ts tests/readOnlyPreview.test.ts tests/installments.test.ts tests/programPlanning.test.ts tests/accounts.test.ts tests/researchPuzzles.test.ts",
+    "test": "npm run typecheck && node --import tsx --test tests/catalog.test.ts tests/navigation.test.ts tests/scholarships.test.ts tests/courses.test.ts tests/valueRoadmap.test.ts tests/growth.test.ts tests/readOnlyPreview.test.ts tests/installments.test.ts tests/programPlanning.test.ts tests/accounts.test.ts tests/researchPuzzles.test.ts tests/projects.test.ts",
     "test:e2e": "node --preserve-symlinks --preserve-symlinks-main node_modules/@playwright/test/cli.js test",
     "test:preview": "node --preserve-symlinks --preserve-symlinks-main node_modules/@playwright/test/cli.js test --config playwright.preview.config.ts",
     "preview": "node --preserve-symlinks --preserve-symlinks-main node_modules/vite/bin/vite.js preview"

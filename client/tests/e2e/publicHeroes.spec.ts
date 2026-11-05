@@ -70,7 +70,7 @@ test('directory pages skip the hero so programs, projects and mentors are search
   await page.goto('/mentors');
   await expect(page.locator('a[href^="/mentors/"]').first()).toBeVisible();
   await page.goto('/projects');
-  await expect(page.locator('a[href^="/projects/"]').first()).toBeVisible();
+  await expect(page.locator('[data-project-row] button[aria-expanded]').first()).toBeVisible();
 });
 
 test('directory pages keep their next-step actions below the listing', async ({ page }) => {
@@ -85,7 +85,8 @@ test('directory pages keep their next-step actions below the listing', async ({ 
 
   await page.goto('/projects');
   const projectAction = page.getByRole('main').getByRole('link', { name: 'Request a project', exact: true });
-  expect(await depth(page.locator('a[href^="/projects/"]').first())).toBeLessThan(await depth(projectAction));
+  await expect(page.locator('[data-project-row]').first()).toBeVisible();
+  expect(await depth(page.locator('[data-project-row]').first())).toBeLessThan(await depth(projectAction));
   await projectAction.click();
   await expect(page).toHaveURL(/\/contact$/);
 

@@ -289,6 +289,32 @@
     background: rgb(var(--irip-ivory));
   }
 
+  /* Research directory: sectioned editorial lists, not image cards. Entry and
+     planned team size stay outside the collapsible quick brief. */
+  .irip-project-label { color: rgb(var(--irip-lavender-deep)); font-size: 12px; font-weight: 600; letter-spacing: .075em; text-transform: uppercase; line-height: 1.6; }
+  .irip-project-pathway { margin-top: 28px; border-block: 1px solid var(--color-border); padding-block: 22px; }
+  .irip-project-group { scroll-margin-top: calc(var(--irip-header-height) + 20px); border-bottom: 1px solid var(--color-border); }
+  .irip-project-group-heading { border-top: 3px solid rgb(var(--irip-indigo)); padding: 24px; background: rgb(var(--irip-indigo)); color: rgb(var(--irip-ivory)); }
+  .irip-project-group-heading > p { color: rgb(var(--irip-inverse-muted)); }
+  .irip-project-group-heading-industry { border: 1px solid var(--color-border); border-top: 3px solid rgb(var(--irip-indigo)); background: rgb(var(--irip-lavender-pale)); color: rgb(var(--irip-indigo)); }
+  .irip-project-group-heading-industry > p { color: var(--color-text-muted); }
+  .irip-project-row { padding: 28px 24px; background: rgb(var(--irip-white)); }
+  .irip-project-row-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 290px); gap: 40px; align-items: start; }
+  .irip-project-entry { min-width: 0; border-left: 2px solid var(--color-border); padding-left: 20px; }
+  .irip-project-entry-link { display: inline-flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 10px 14px; border: 1px solid rgb(var(--irip-indigo)); border-radius: 5px; background: rgb(var(--irip-indigo)); color: rgb(var(--irip-white)); font-size: 13px; font-weight: 600; line-height: 1.6; }
+  .irip-project-entry-link:hover { background: rgb(var(--irip-indigo-hover)); }
+  .irip-project-toggle { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; border: 1px solid var(--color-control-border); border-radius: 5px; padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--color-text); }
+  .irip-project-toggle:hover, .irip-project-toggle[aria-expanded="true"] { background: rgb(var(--irip-lavender-pale)); border-color: rgb(var(--irip-indigo)); }
+  .irip-project-quick-brief { margin-top: 24px; padding: 24px; border-top: 1px solid var(--color-border); background: rgb(var(--irip-ivory)); }
+  @media (max-width: 767px) {
+    .irip-project-row { padding: 24px 16px; }
+    .irip-project-row-main { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .irip-project-entry { border-left: 0; border-top: 1px solid var(--color-border); padding-left: 0; padding-top: 18px; }
+    .irip-project-group-heading { padding: 20px 16px; }
+    .irip-project-group-heading h2 { font-size: 18px; }
+    .irip-project-quick-brief { padding: 20px 16px; }
+  }
+
   .eyebrow {
     @apply text-xs font-semibold uppercase text-brand-700;
     letter-spacing: .2em;

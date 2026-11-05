@@ -67,8 +67,18 @@ test('hosting rejects writes, exposes only a synthetic allowlist and includes no
   const snapshot = await request.get('/demo-snapshot.json');
   const data = await snapshot.json();
   expect(data.mode).toBe('read_only_synthetic');
-  expect(Object.keys(data.routes)).toHaveLength(36);
-    expect(Object.keys(data.routes).some(route => /accounts|auth|growth|student|admin|scholarship|studio/.test(route))).toBe(false);
+  // Eight added public project briefs contribute ID + slug GET snapshots.
+  expect(Object.keys(data.routes)).toHaveLength(52);
+  const projects = data.routes['/api/public/projects'];
+  expect(projects).toHaveLength(9);
+  for (const project of projects) {
+    expect(data.routes[`/api/public/projects/${project.id}`]?.project.title).toBe(project.title);
+    expect(data.routes[`/api/public/projects/${project.slug}`]?.project.title).toBe(project.title);
+  }
+  // Match route segments, not words inside public project titles such as
+  // "the Bangla-English students actually use".
+  expect(Object.keys(data.routes).every(route => /^\/api\/(?:public|recorded-courses|expansion)\//.test(route))).toBe(true);
+  expect(Object.keys(data.routes).some(route => /\/(?:accounts|auth|growth|student|admin|scholarship|studio)(?:\/|$)/.test(route))).toBe(false);
   expect(JSON.stringify(data)).not.toMatch(/"(?:password_hash|email|phone|profile_json|session)"\s*:/);
   for (const route of ['/api/auth/login', '/api/mentor-applications', '/api/accounts/profile', '/api/accounts/operations/mentors/6/decision', '/api/public/inquiries', '/api/growth/workspace']) {
     const response = await request.post(route, { data: { synthetic: true } });
