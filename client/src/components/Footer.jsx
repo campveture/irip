@@ -9,11 +9,13 @@ export function Footer() {
   return (
     <footer className="irip-inverse border-t border-brand-800 bg-brand-900 text-inverse mt-auto">
       <div className="container-page py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-8">
-          <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-3">
-              <IripMark className="h-12 w-12 shrink-0" />
-              <span className="text-sm font-semibold text-white">IRIP</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 mb-8">
+          <div className="col-span-2">
+            <div className="mb-5 flex items-center gap-4">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 p-2 shadow-lg sm:h-24 sm:w-24">
+                <IripMark className="h-full w-full" />
+              </div>
+              <span className="text-3xl font-semibold tracking-tight text-white">IRIP</span>
             </div>
             <p className="mb-3 text-[13px] font-medium leading-6 text-inverse">Institute of Research, Innovation and Practice</p>
             <p className="text-sm text-inverse max-w-xs">

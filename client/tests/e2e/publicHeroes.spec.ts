@@ -51,7 +51,7 @@ test('directory pages skip the hero so programs, projects and mentors are search
     await page.setViewportSize({ width, height: 900 });
     for (const [path, heading, search] of [
       ['/programs', 'Programs', 'Search programs, topics, skills…'],
-      ['/projects', 'Projects', 'Search topic or supervisor'],
+      ['/projects', 'Projects', 'Search title, track or journal'],
       ['/mentors', 'Mentors', 'Search name or expertise'],
     ] as const) {
       await page.goto(path);
