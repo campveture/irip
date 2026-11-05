@@ -23,8 +23,8 @@ test('the approved raster falcon crest and unchanged supplied lockup render with
     expect(await crest.evaluate((img: HTMLImageElement) => ({ width: img.naturalWidth, height: img.naturalHeight, fit: getComputedStyle(img).objectFit }))).toEqual({ width: 183, height: 192, fit: 'contain' });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await expect(page.locator('footer img[src*="irip-falcon-crest-192.png"]')).toHaveCount(1);
-    await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', '/images/irip-mark.svg?v=crest-1');
-    await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href', '/images/irip-apple-touch-icon.png?v=crest-1');
+    await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', '/images/irip-falcon-crest-192.png?v=falcon-1');
+    await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href', '/images/irip-falcon-crest-192.png?v=falcon-1');
     await page.screenshot({ path: info.outputPath(`institution-crest-${width}.png`) });
     await home.click();
     await expect(page).toHaveURL('/');
