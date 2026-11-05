@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
-test('the approved raster falcon crest and unchanged supplied lockup render without distortion', async ({ page, request }, info) => {
+test('the approved raster falcon crest, larger footer mark and sharp favicons render without distortion', async ({ page, request }, info) => {
   const asset = await request.get('/images/irip-falcon-crest-192.png');
   expect(asset.status()).toBe(200);
   expect(asset.headers()['content-type']).toContain('image/png');
@@ -22,16 +22,18 @@ test('the approved raster falcon crest and unchanged supplied lockup render with
     expect(size?.height).toBe(width < 640 ? 40 : 44);
     expect(await crest.evaluate((img: HTMLImageElement) => ({ width: img.naturalWidth, height: img.naturalHeight, fit: getComputedStyle(img).objectFit }))).toEqual({ width: 183, height: 192, fit: 'contain' });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await expect(page.locator('footer img[src*="irip-falcon-crest-192.png"]')).toHaveCount(1);
-    await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', '/images/irip-falcon-crest-192.png?v=falcon-1');
+    const footerCrest = page.locator('footer img[src*="irip-falcon-crest-192.png"]');
+    await expect(footerCrest).toHaveCount(1);
+    expect((await footerCrest.boundingBox())?.width).toBeGreaterThan(size?.width ?? 44);
+    await expect(page.locator('link[rel="icon"][sizes="48x48"]')).toHaveAttribute('href', '/images/irip-favicon-48.png?v=falcon-2');
+    await expect(page.locator('link[rel="icon"][sizes="512x512"]')).toHaveAttribute('href', '/images/irip-favicon-512.png?v=falcon-2');
     await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href', '/images/irip-falcon-crest-192.png?v=falcon-1');
     await page.screenshot({ path: info.outputPath(`institution-crest-${width}.png`) });
     await home.click();
     await expect(page).toHaveURL('/');
   }
 
-  // Small-format favicon assets intentionally stay unchanged in this pass.
-  for (const name of ['irip-falcon-crest.png', 'irip-falcon-crest-192.png', 'irip-falcon-lockup.png', 'irip-apple-touch-icon.png']) {
+  for (const name of ['irip-falcon-crest.png', 'irip-falcon-crest-192.png', 'irip-falcon-lockup.png', 'irip-apple-touch-icon.png', 'irip-favicon-48.png', 'irip-favicon-512.png']) {
     const image = await request.get(`/images/${name}`);
     expect(image.status()).toBe(200);
     expect(image.headers()['content-type']).toContain('image/png');
