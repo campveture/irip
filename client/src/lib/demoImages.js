@@ -19,8 +19,11 @@ export function programImage(program = {}) {
 }
 
 export function projectImage(project = {}) {
-  const topic = `${project.title || ''} ${project.summary || ''}`.toLowerCase();
+  const topic = `${project.title || ''} ${project.summary || ''} ${project.domain || ''}`.toLowerCase();
   if (/data|health|statistic|analysis/.test(topic)) return demoImages.data;
   if (/writ|publication|literature/.test(topic)) return demoImages.writing;
+  if (/flood|climate|satellite|observation/.test(topic)) return demoImages.data;
+  if (/defect|industrial|inspection|device|compression/.test(topic)) return demoImages.team;
+  if (/bangla|language|citation|research assistant|answer/.test(topic)) return demoImages.research;
   return demoImages.team;
 }

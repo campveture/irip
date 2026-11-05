@@ -114,7 +114,7 @@ function projectSlug(project) {
 }
 
 router.get('/projects', (req, res) => {
-  const rows = db.prepare(`SELECT p.id, p.title, p.summary, p.capacity, p.status,
+  const rows = db.prepare(`SELECT p.id, p.title, p.summary, p.capacity, p.status, p.domain,
     m.public_name AS supervisor_name,
     (SELECT COUNT(*) FROM project_applications pa WHERE pa.project_id = p.id AND pa.state = 'accepted') AS team_size
     FROM projects p LEFT JOIN users u ON u.id = p.supervisor_id AND u.status='active'
@@ -126,7 +126,7 @@ router.get('/projects', (req, res) => {
 router.get('/projects/:slug', (req, res) => {
   const id = Number(String(req.params.slug).split('-')[0]);
   if (!Number.isSafeInteger(id) || id < 1) return res.status(404).json({ error: 'not_found' });
-  const project = db.prepare(`SELECT p.id, p.title, p.summary, p.capacity, p.status,
+  const project = db.prepare(`SELECT p.id, p.title, p.summary, p.capacity, p.status, p.domain,
     m.public_name AS supervisor_name,
     (SELECT COUNT(*) FROM project_applications pa WHERE pa.project_id = p.id AND pa.state = 'accepted') AS team_size
     FROM projects p LEFT JOIN users u ON u.id = p.supervisor_id AND u.status='active'
