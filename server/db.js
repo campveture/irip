@@ -865,7 +865,7 @@ function seed() {
       addProject.run(title, summary, supervisorId, capacity, status, domain, ts);
     }
 
-    const proj1 = db.prepare("SELECT id FROM projects WHERE title = 'Secondary Data Analysis in Public Health'").get().id;
+    // proj1 (Secondary Data Analysis in Public Health) is seeded above; referenced by tests via the public API.
 
     // ---------- CRM persons / opportunities ----------
     const addPerson = db.prepare(
