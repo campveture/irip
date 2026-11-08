@@ -3,6 +3,8 @@ import { BookOpen, CalendarDays, ClipboardList, Clock3, GraduationCap, Ticket, U
 import { formatClassTime, formatEnrollmentDeadline, formatProgramDate, parseCohortPlans, type CohortPlan } from './programModel';
 import { LaunchEnrolAction } from '../pricing/LaunchPricing';
 import { formatInstallmentAmount } from '../pricing/installmentModel';
+import { EditSpot } from '../admin/preview/PreviewKit';
+import { PROGRAM_TARGETS } from './editTargets';
 
 function CohortDetails({ cohort, assessmentCount }: { cohort: CohortPlan; assessmentCount: unknown }) {
   const { plan, seats } = cohort;
@@ -22,16 +24,18 @@ function CohortDetails({ cohort, assessmentCount }: { cohort: CohortPlan; assess
       <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="text-xl font-semibold text-brand-900">{cohort.name}</h3><span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800">Proposed intake · Enrollment paused</span></div>
       <p className="mt-3 flex items-center gap-2 text-sm text-slate-600"><CalendarDays size={17} aria-hidden="true" />{formatProgramDate(cohort.start_date)} – {formatProgramDate(cohort.end_date)}{plan.duration_weeks !== null && ` · ${plan.duration_weeks} calendar weeks`}</p>
       <p className="mt-3 text-xs leading-5 text-slate-500">{cohort.launch ? 'First class is on the cohort start date at 08:30 PM Bangladesh time. Twelve weeks of weekend learning.' : 'Cohort window, not the first class date. All dates and teaching arrangements are proposed.'}</p>
-      {cohort.launch && <div className="mt-5 rounded-2xl bg-brand-50 p-5"><p className="text-sm font-semibold text-brand-900">{cohort.launch.position === 0 ? 'Next intake · BDT 4,000 launch discount' : 'Following intake · Standard program fee'}</p><p className="mt-2 text-2xl font-semibold text-brand-900">{formatInstallmentAmount(cohort.launch.total_fee, 'BDT')}<span className="ml-2 text-sm font-normal text-slate-600">total program fee</span></p>{cohort.launch.discount > 0 && <p className="mt-2 text-xs text-slate-500">Standard fee: BDT 25,000. Discounted total: BDT 21,000.</p>}<LaunchEnrolAction cohort={cohort} /></div>}
+      {cohort.launch && <EditSpot target={PROGRAM_TARGETS.fee} label="fee and discount"><div className="mt-5 rounded-2xl bg-brand-50 p-5"><p className="text-sm font-semibold text-brand-900">{cohort.launch.position === 0 && cohort.launch.discount > 0 ? `Next intake · ${formatInstallmentAmount(cohort.launch.discount, 'BDT')} launch discount` : cohort.launch.position === 0 ? 'Next intake · Standard program fee' : 'Following intake · Standard program fee'}</p><p className="mt-2 text-2xl font-semibold text-brand-900">{formatInstallmentAmount(cohort.launch.total_fee, 'BDT')}<span className="ml-2 text-sm font-normal text-slate-600">total program fee</span></p>{cohort.launch.discount > 0 && <p className="mt-2 text-xs text-slate-500">Standard fee: {formatInstallmentAmount(cohort.launch.standard_fee, 'BDT')}. Discounted total: {formatInstallmentAmount(cohort.launch.total_fee, 'BDT')}.</p>}<LaunchEnrolAction cohort={cohort} /></div></EditSpot>}
     </header>
     <div className="p-6 sm:p-8">
       <section aria-label="Cohort enrollment summary">
         <h4 className="text-base font-semibold text-brand-900">Your place in this cohort</h4>
         <dl className="mt-4 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-brand-100 bg-brand-50 p-5 sm:p-6">
+            <EditSpot target={PROGRAM_TARGETS.capacity} label="seats">
             <dt className="flex items-center gap-2 text-sm font-medium text-brand-800"><Users size={18} aria-hidden="true" />Class size</dt>
             <dd className="mt-4 text-3xl font-semibold tracking-tight text-brand-900 tabular-nums">{cohort.capacity}<span className="ml-2 text-base font-normal">students</span></dd>
             <p className="mt-3 text-xs leading-5 text-slate-600">Maximum learners planned for this cohort.</p>
+            </EditSpot>
           </div>
           <div className="rounded-2xl bg-brand-900 p-5 text-white sm:p-6">
             <dt className="flex items-center gap-2 text-sm font-medium text-brand-100"><Ticket size={18} aria-hidden="true" />Places left</dt>
@@ -55,7 +59,7 @@ function CohortDetails({ cohort, assessmentCount }: { cohort: CohortPlan; assess
       </section>
 
       <div className="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-        <section aria-label="Weekend class schedule" className="rounded-3xl bg-brand-900 p-6 text-white sm:p-7">
+        <EditSpot target={PROGRAM_TARGETS.hours} label="teaching hours"><section aria-label="Weekend class schedule" className="rounded-3xl bg-brand-900 p-6 text-white sm:p-7">
           <Clock3 size={24} className="text-brand-200" aria-hidden="true" /><p className="mt-4 text-xs font-semibold uppercase tracking-widest text-brand-200">Your weekend classroom</p>
           <h4 className="mt-3 text-3xl font-semibold tracking-tight">08:30 PM</h4><p className="mt-2 text-lg font-medium">Friday &amp; Saturday</p><p className="mt-2 text-sm text-brand-100">Bangladesh time · Asia/Dhaka · UTC+06:00</p>
           <p className="mt-4 text-sm leading-6 text-brand-100">Proposed class block: 08:30–10:30 PM, up to 2 hours per session and 4 hours per teaching weekend. Only the dates in the plan below are included; not every weekend necessarily has two classes.</p>
@@ -66,16 +70,16 @@ function CohortDetails({ cohort, assessmentCount }: { cohort: CohortPlan; assess
             <div className="flex flex-wrap justify-between gap-2"><dt className="text-brand-200">Program contact time</dt><dd className="font-semibold">{hours}</dd></div>
           </dl>
           <p className="mt-5 text-xs leading-5 text-brand-200">Weekend days and the 2-hour block are planning assumptions. Holidays, faculty, delivery platform and any changes must be confirmed before enrollment.</p>
-        </section>
+        </section></EditSpot>
 
         <div className="space-y-5">
-          <section aria-label="Assignment time and workload" className="rounded-2xl border border-brand-100 bg-brand-50 p-6">
+          <EditSpot target={PROGRAM_TARGETS.study} label="weekly study"><section aria-label="Assignment time and workload" className="rounded-2xl border border-brand-100 bg-brand-50 p-6">
             <div className="flex items-center gap-2"><ClipboardList size={19} className="text-brand-700" aria-hidden="true" /><h4 className="font-semibold text-brand-900">Make room for practice</h4></div>
             <p className="mt-3 text-2xl font-semibold text-brand-900">{plan.independent_hours_week ?? 'Weekly workload to be confirmed'}<span className="text-sm font-normal">{plan.independent_hours_week ? ' / week' : ''}</span></p>
             <p className="mt-2 text-sm leading-6 text-slate-600">Independent study and assignments, in addition to live classes. Spread reading, research practice and revisions across Sunday–Thursday; there is no compulsory daily assignment start time.</p>
             <dl className="mt-4 space-y-3 text-sm"><div><dt className="font-semibold text-brand-900">Proposed weekly submission time</dt><dd className="mt-1 text-slate-600">Thursday, 11:59 PM Bangladesh time, following the teaching weekend.</dd></div><div><dt className="font-semibold text-brand-900">Current assignment outlines</dt><dd className="mt-1 text-slate-600">{typeof assessmentCount === 'number' && Number.isSafeInteger(assessmentCount) && assessmentCount >= 0 ? `${assessmentCount} in the demo curriculum` : 'To be confirmed'}. This is not a promise of one assessed task each week.</dd></div></dl>
             <p className="mt-4 text-xs leading-5 text-slate-500">Submission cadence is a proposal, not an active due date. Exact briefs, release dates, final-project deadline, late-work rules and feedback turnaround require academic approval.</p>
-          </section>
+          </section></EditSpot>
           <section className="rounded-2xl border border-slate-200 p-6"><div className="flex items-center gap-2"><GraduationCap size={19} className="text-brand-700" aria-hidden="true" /><h4 className="font-semibold text-brand-900">What completion involves</h4></div><p className="mt-3 text-sm leading-6 text-slate-600">Work through the curriculum, submit original work, respond to feedback and complete the program’s approved final assessment. Attendance thresholds, pass marks, resubmission limits and certificate rules are not yet approved. Payment or attendance alone does not guarantee a certificate.</p></section>
         </div>
       </div>

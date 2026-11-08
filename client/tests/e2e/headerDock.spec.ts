@@ -35,7 +35,11 @@ async function scrollDown(page: Page) {
 test('header slides away during downward scroll and docks from above after the scroll settles', async ({ page }, info) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  await expect(page.locator('a[href="/programs/research-bootcamp"]').first()).toBeVisible();
+  await expect(page.locator('a[href="/programs/research-methods-acceleration"]').first()).toBeVisible();
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  });
   const header = page.locator('header');
   const surface = page.locator('.irip-header-frame');
   const originalHeight = await page.evaluate(() => document.documentElement.scrollHeight);
@@ -52,7 +56,7 @@ test('header slides away during downward scroll and docks from above after the s
 test('program tabs share the rounded design but scroll with the page instead of pinning', async ({ page }, info) => {
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto('/programs/research-bootcamp');
+    await page.goto('/programs/research-methods-acceleration');
     const tabs = page.getByRole('tablist', { name: 'Program details' });
     await expect(tabs).toBeVisible();
     const design = await page.locator('.irip-program-dock').evaluate(element => {

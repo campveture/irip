@@ -1,6 +1,7 @@
 const express = require('express');
 const { db } = require('../db');
 const { requireAuth, requireRoles } = require('../middleware/auth');
+const { requireCapability } = require('../admin/policy');
 const { pathway, requestKinds, rubricKeys, fail, input, text, eligibleAlumni, canReview, reviewers, artifact, audit } = require('../growth');
 const router = express.Router();
 router.use((req, res, next) => { res.set('Cache-Control', 'no-store'); next(); }, requireAuth, (req, res, next) => {
@@ -16,7 +17,8 @@ router.use((req, res, next) => { res.set('Cache-Control', 'no-store'); next(); }
 });
 const learner = requireRoles('learner', 'admin', 'owner');
 const mentor = requireRoles('mentor', 'supervisor', 'admin', 'owner');
-const staff = requireRoles('academic_ops', 'admin', 'owner');
+// Staff operations use the shared capability policy (admin/policy.js), not an ad-hoc role list.
+const staff = requireCapability('growth.manage');
 const ownArtifact = (req) => {
   const row = db.prepare('SELECT * FROM growth_artifacts WHERE id = ? AND user_id = ?').get(req.params.id, req.session.userId);
   if (!row) fail('Your portfolio artifact was not found.', 404);

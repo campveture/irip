@@ -39,7 +39,7 @@ function initProfiles(db) {
       application_id INTEGER REFERENCES mentor_applications(id),
       user_id INTEGER NOT NULL REFERENCES users(id),
       reviewer_id INTEGER NOT NULL REFERENCES users(id),
-      decision TEXT NOT NULL CHECK(decision IN ('approved','changes_requested','rejected','suspended','hidden')),
+      decision TEXT NOT NULL CHECK(decision IN ('approved','changes_requested','rejected','suspended','hidden','reinstated')),
       reason TEXT NOT NULL,
       verification_note TEXT NOT NULL DEFAULT '',
       grant_access INTEGER NOT NULL DEFAULT 0,
@@ -48,6 +48,29 @@ function initProfiles(db) {
     );
   `);
   add('mentor_applications', 'consent_epoch', 'INTEGER NOT NULL DEFAULT 0');
+  // 'reinstated' (admin/owner lifting a suspension) was added later. SQLite cannot alter a
+  // CHECK constraint, so older databases get the table rebuilt once with every row kept.
+  const decisionsSql = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='mentor_decisions'").get()?.sql || '';
+  if (!decisionsSql.includes("'reinstated'")) {
+    db.transaction(() => {
+      db.exec(`CREATE TABLE mentor_decisions_next (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        application_id INTEGER REFERENCES mentor_applications(id),
+        user_id INTEGER NOT NULL REFERENCES users(id),
+        reviewer_id INTEGER NOT NULL REFERENCES users(id),
+        decision TEXT NOT NULL CHECK(decision IN ('approved','changes_requested','rejected','suspended','hidden','reinstated')),
+        reason TEXT NOT NULL,
+        verification_note TEXT NOT NULL DEFAULT '',
+        grant_access INTEGER NOT NULL DEFAULT 0,
+        publish INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL
+      );
+      INSERT INTO mentor_decisions_next(id,application_id,user_id,reviewer_id,decision,reason,verification_note,grant_access,publish,created_at)
+        SELECT id,application_id,user_id,reviewer_id,decision,reason,verification_note,grant_access,publish,created_at FROM mentor_decisions;
+      DROP TABLE mentor_decisions;
+      ALTER TABLE mentor_decisions_next RENAME TO mentor_decisions;`);
+    })();
+  }
   db.exec(`
     CREATE TABLE IF NOT EXISTS mentor_intake (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

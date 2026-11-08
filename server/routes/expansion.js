@@ -1,6 +1,7 @@
 const express = require('express');
 const { db } = require('../db');
 const { requireAuth, requireRoles, auditLog } = require('../middleware/auth');
+const { requireCapability } = require('../admin/policy');
 
 const router = express.Router();
 
@@ -114,29 +115,47 @@ const adminCollections = {
   partners: { table: 'partner_records', fields: ['kind', 'name', 'summary', 'agreement_reference'] },
 };
 
+// Columns that are NOT NULL in the tables above (plus the admin form's own minimum).
+const REQUIRED = {
+  resources: ['slug', 'title', 'summary', 'body'],
+  events: ['slug', 'title', 'summary', 'starts_at'],
+  stories: ['slug', 'title', 'summary', 'body'],
+  ideas: ['title', 'summary'],
+  internships: ['slug', 'title', 'summary'],
+  partners: ['kind', 'name'],
+};
+const PLAIN_TEXT_FIELDS = ['title', 'name', 'speaker', 'supervisor_name'];
+
+/** Input problems the editor can fix; anything else is an internal error (generic 500). */
+class InputError extends Error {}
+
 function cleanInput(collection, body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) throw new InputError('Provide a JSON object.');
   const result = {};
   for (const field of collection.fields) {
     if (!Object.prototype.hasOwnProperty.call(body || {}, field)) continue;
     const value = body[field];
     if (field === 'partner_id') {
-      if (value !== null && value !== '' && (!Number.isSafeInteger(Number(value)) || Number(value) < 1)) throw new Error('Invalid partner.');
+      if (value !== null && value !== '' && (!Number.isSafeInteger(Number(value)) || Number(value) < 1)) throw new InputError('Invalid partner.');
       result[field] = value === null || value === '' ? null : Number(value);
     } else if (value === null) {
       result[field] = null;
     } else if (typeof value === 'string') {
       const max = field === 'body' || field === 'scope' || field === 'agenda' ? 10000 : 2000;
-      if (value.length > max) throw new Error(`${field} is too long.`);
+      if (value.length > max) throw new InputError(`${field} is too long.`);
+      if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(value)) throw new InputError(`${field} must be plain text.`);
+      if (PLAIN_TEXT_FIELDS.includes(field) && /[<>]/.test(value)) throw new InputError(`${field} cannot contain the characters < or >.`);
       result[field] = value.trim() || null;
     } else {
-      throw new Error(`Invalid ${field}.`);
+      throw new InputError(`Invalid ${field}.`);
     }
   }
-  if ('slug' in result && result.slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(result.slug)) throw new Error('Slug must use lowercase letters, numbers, and hyphens.');
-  if ('kind' in result && result.kind && !['institution', 'lab'].includes(result.kind)) throw new Error('Invalid partner kind.');
-  if ('compensation_status' in result && result.compensation_status && !['paid', 'unpaid'].includes(result.compensation_status)) throw new Error('Disclose paid or unpaid compensation status.');
-  if ('visibility' in result && result.visibility && !['private', 'team', 'public'].includes(result.visibility)) throw new Error('Invalid visibility.');
+  if ('slug' in result && result.slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(result.slug)) throw new InputError('Slug must use lowercase letters, numbers, and hyphens.');
+  if ('kind' in result && result.kind && !['institution', 'lab'].includes(result.kind)) throw new InputError('Invalid partner kind.');
+  if ('compensation_status' in result && result.compensation_status && !['paid', 'unpaid'].includes(result.compensation_status)) throw new InputError('Disclose paid or unpaid compensation status.');
+  if ('visibility' in result && result.visibility && !['private', 'team', 'public'].includes(result.visibility)) throw new InputError('Invalid visibility.');
   if ('timezone' in result && !result.timezone) result.timezone = 'Asia/Dhaka';
+  if (result.partner_id && !db.prepare('SELECT 1 FROM partner_records WHERE id = ?').get(result.partner_id)) throw new InputError('Partner not found.');
   return result;
 }
 
@@ -170,30 +189,38 @@ function publicationError(kind, record) {
   return null;
 }
 
-router.get('/admin/:collection', requireAuth, requireRoles('academic_ops', 'admin', 'owner'), (req, res) => {
+/** Maps write errors to safe answers: never echo database messages to the client. */
+function expansionError(res, error) {
+  if (error instanceof InputError) return res.status(400).json({ error: 'validation', message: error.message });
+  if (String(error.code || '').includes('UNIQUE')) return res.status(409).json({ error: 'conflict', message: 'This slug already exists.' });
+  if (String(error.code || '').startsWith('SQLITE_CONSTRAINT')) return res.status(400).json({ error: 'validation', message: 'Some required information is missing or invalid.' });
+  console.error('[expansion] unexpected error', error);
+  return res.status(500).json({ error: 'server', message: 'The request could not be completed.' });
+}
+
+router.get('/admin/:collection', requireAuth, requireCapability('expansion.manage'), (req, res) => {
   const collection = adminCollections[req.params.collection];
   if (!collection) return res.status(404).json({ error: 'not_found' });
   res.json(db.prepare(`SELECT * FROM ${collection.table} ORDER BY id DESC LIMIT 200`).all());
 });
 
-router.post('/admin/:collection', requireAuth, requireRoles('academic_ops', 'admin', 'owner'), (req, res) => {
+router.post('/admin/:collection', requireAuth, requireCapability('expansion.manage'), (req, res) => {
   const collection = adminCollections[req.params.collection];
   if (!collection) return res.status(404).json({ error: 'not_found' });
   try {
     const fields = cleanInput(collection, req.body);
-    const required = req.params.collection === 'partners' ? ['name', 'kind'] : req.params.collection === 'ideas' ? ['title'] : ['slug', 'title'];
+    const required = REQUIRED[req.params.collection];
     if (required.some((field) => !fields[field])) return res.status(400).json({ error: 'validation', message: `Required: ${required.join(', ')}.` });
     const keys = Object.keys(fields);
     const info = db.prepare(`INSERT INTO ${collection.table} (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`).run(...keys.map((key) => fields[key]));
     auditLog({ actorId: req.session.userId, action: 'expansion_create', target: `${req.params.collection}:${info.lastInsertRowid}` });
     return res.status(201).json({ id: info.lastInsertRowid, status: 'draft' });
   } catch (error) {
-    if (String(error.code || '').includes('UNIQUE')) return res.status(409).json({ error: 'conflict', message: 'This slug already exists.' });
-    return res.status(400).json({ error: 'validation', message: error.message });
+    return expansionError(res, error);
   }
 });
 
-router.patch('/admin/:collection/:id', requireAuth, requireRoles('academic_ops', 'admin', 'owner'), (req, res) => {
+router.patch('/admin/:collection/:id', requireAuth, requireCapability('expansion.manage'), (req, res) => {
   const collection = adminCollections[req.params.collection];
   const id = Number(req.params.id);
   if (!collection || !Number.isSafeInteger(id) || id < 1) return res.status(404).json({ error: 'not_found' });
@@ -205,16 +232,17 @@ router.patch('/admin/:collection/:id', requireAuth, requireRoles('academic_ops',
     const fields = cleanInput(collection, req.body);
     const keys = Object.keys(fields);
     if (!keys.length) return res.status(400).json({ error: 'validation', message: 'No editable fields supplied.' });
+    const cleared = REQUIRED[req.params.collection].filter((field) => field in fields && !fields[field]);
+    if (cleared.length) return res.status(400).json({ error: 'validation', message: `Required: ${cleared.join(', ')}.` });
     db.prepare(`UPDATE ${collection.table} SET ${keys.map((key) => `${key} = ?`).join(', ')} WHERE id = ?`).run(...keys.map((key) => fields[key]), id);
     auditLog({ actorId: req.session.userId, action: 'expansion_update', target: `${req.params.collection}:${id}` });
     return res.json({ ok: true });
   } catch (error) {
-    if (String(error.code || '').includes('UNIQUE')) return res.status(409).json({ error: 'conflict', message: 'This slug already exists.' });
-    return res.status(400).json({ error: 'validation', message: error.message });
+    return expansionError(res, error);
   }
 });
 
-router.patch('/admin/:collection/:id/status', requireAuth, requireRoles('academic_ops', 'admin', 'owner'), (req, res) => {
+router.patch('/admin/:collection/:id/status', requireAuth, requireCapability('expansion.manage'), (req, res) => {
   const collection = adminCollections[req.params.collection];
   const id = Number(req.params.id);
   const status = req.body?.status;

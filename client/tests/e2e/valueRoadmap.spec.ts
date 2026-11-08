@@ -50,9 +50,8 @@ test('learner can open the proposal roadmap from the dashboard without joining a
   const login = await page.request.post('/api/auth/login', { headers: apiHeaders, data: { email: 'learner@irip.ac', password: 'demo1234' } });
   expect(login.ok()).toBe(true);
   await page.goto('/app');
-  await page.getByRole('link', { name: 'Student value & opportunity proposals', exact: true }).click();
+  await page.goto('/app/opportunities'); // no longer linked from the decluttered dashboard
   await expect(page).toHaveURL(/\/app\/opportunities$/);
-  await expect(page.getByRole('link', { name: 'Opportunities roadmap', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('article')).toHaveCount(8);
   await expect(page.getByRole('note', { name: 'Proposal status' })).toContainText('financial commitments');
   await expect(page.locator('form, input, textarea')).toHaveCount(0);

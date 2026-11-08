@@ -5,12 +5,27 @@ const { requireAuth, requireRoles } = require('../middleware/auth');
 const { programOffers, enrollmentOption, programCohorts } = require('../catalog');
 const { syllabusFor } = require('../program-planning');
 const { launchProgramDisplay } = require('../launch-plan');
+// Programs/courses are edited in the panel (admin/curriculum-service.js); these helpers keep
+// internal columns (version, stored plan JSON) out of public responses and apply the saved order.
+const curriculum = require('../admin/curriculum-service');
 
-router.post('/inquiries', (req, res) => {
-  const name = String(req.body?.name || '').trim();
-  const email = String(req.body?.email || '').trim().toLowerCase();
-  const message = String(req.body?.message || '').trim();
-  if (name.length < 2 || name.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || message.length < 10 || message.length > 5000 || req.body?.consent !== true) {
+const { rateLimit } = require('../middleware/security');
+// Same per-IP limit as signup: the form is public and every post creates CRM rows.
+const inquiryLimit = rateLimit({ limit: 15, windowMs: 60000 });
+const CONTROL_CHARS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
+const textField = value => (typeof value === 'string' ? value.trim() : null);
+
+router.post('/inquiries', inquiryLimit, (req, res) => {
+  const body = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
+  const name = textField(body.name);
+  const rawEmail = textField(body.email);
+  const email = rawEmail === null ? null : rawEmail.toLowerCase();
+  const message = textField(body.message);
+  const unknown = Object.keys(body).some(key => !['name', 'email', 'message', 'consent'].includes(key));
+  if (unknown || name === null || email === null || message === null
+    || name.length < 2 || name.length > 120 || CONTROL_CHARS.test(name) || /[\r\n]/.test(name)
+    || email.length > 254 || !/^[^\s@]{1,64}@[^\s@]+\.[^\s@]+$/.test(email)
+    || message.length < 10 || message.length > 5000 || CONTROL_CHARS.test(message) || body.consent !== true) {
     return res.status(400).json({ error: 'validation', message: 'Provide a name, valid email, message of 10–5000 characters, and consent to store this inquiry in the local demo.' });
   }
   const id = db.transaction(() => {
@@ -44,7 +59,7 @@ router.get('/programs', (req, res) => {
   }
   sql += ' GROUP BY p.id ORDER BY p.created_at DESC';
   const rows = db.prepare(sql).all(params);
-  res.json(rows.map((row) => ({ ...launchProgramDisplay(row), enrollment: enrollmentOption(row.id) })));
+  res.json(rows.map((row) => ({ ...curriculum.publicProgram(launchProgramDisplay(row)), enrollment: enrollmentOption(row.id) })));
 });
 
 router.get('/programs/:slug', (req, res) => {
@@ -52,10 +67,11 @@ router.get('/programs/:slug', (req, res) => {
   if (!program) return res.status(404).json({ error: 'not_found', message: 'Program not found.' });
   const cohorts = programCohorts(program.id);
   const offers = programOffers(program.id);
-  const courses = db.prepare('SELECT * FROM courses WHERE program_id = ? AND status = ? ORDER BY id ASC').all(program.id, 'published');
+  const courses = db.prepare(`SELECT * FROM courses WHERE program_id = ? AND status = ? ORDER BY ${curriculum.ORDER.courses}`).all(program.id, 'published');
   const assessmentCount = db.prepare(`SELECT COUNT(*) AS count FROM assessments a JOIN modules m ON m.id = a.module_id
     JOIN courses c ON c.id = m.course_id WHERE c.program_id = ? AND c.status = 'published'`).get(program.id).count;
-  res.json({ program: launchProgramDisplay(program), cohorts, offers, courses: courses.map(course => ({ ...course, syllabus: syllabusFor(course.slug) })),
+  res.json({ program: curriculum.publicProgram(launchProgramDisplay(program)), cohorts, offers,
+    courses: courses.map(course => ({ ...curriculum.publicCourse(course), syllabus: curriculum.courseSyllabus(course) })),
     assessment_count: assessmentCount, enrollment: enrollmentOption(program.id) });
 });
 
@@ -64,7 +80,7 @@ router.get('/courses', (req, res) => {
       p.title AS program_title, p.slug AS program_slug, p.domain, p.level
     FROM courses c JOIN programs p ON p.id = c.program_id
     WHERE c.status = 'published' AND p.status = 'published'
-    ORDER BY p.title, c.id`).all();
+    ORDER BY p.title, COALESCE(c.position, 1000000000), c.id`).all();
   res.json(rows.map((row) => ({ ...row, enrollment: enrollmentOption(row.program_id) })));
 });
 
@@ -73,72 +89,65 @@ router.get('/courses/:slug', (req, res) => {
   if (!course) return res.status(404).json({ error: 'not_found', message: 'Course not found.' });
   const program = course.program_id ? db.prepare("SELECT * FROM programs WHERE id = ? AND status = 'published'").get(course.program_id) : null;
   if (course.program_id && !program) return res.status(404).json({ error: 'not_found', message: 'Course not found.' });
-  const modules = db.prepare('SELECT * FROM modules WHERE course_id = ? ORDER BY week, id').all(course.id);
+  const modules = db.prepare(`SELECT id, course_id, title, week, created_at FROM modules WHERE course_id = ? ORDER BY ${curriculum.ORDER.modules}`).all(course.id);
   const modulesWithLessons = modules.map((m) => {
-    const lessons = db.prepare('SELECT id, module_id, title, kind, duration_min, release_window FROM lessons WHERE module_id = ? ORDER BY id').all(m.id);
+    const lessons = db.prepare(`SELECT id, module_id, title, kind, duration_min, release_window FROM lessons WHERE module_id = ? AND COALESCE(status, 'published') = 'published' ORDER BY ${curriculum.ORDER.lessons}`).all(m.id);
     return { ...m, lessons };
   });
-  res.json({ course, program, modules: modulesWithLessons, syllabus: syllabusFor(course.slug),
+  // Same launch pricing and intake dates as the program pages (never the raw stored fee/dates).
+  res.json({ course: curriculum.publicCourse(course), program: program ? curriculum.publicProgram(launchProgramDisplay(program)) : null, modules: modulesWithLessons, syllabus: curriculum.courseSyllabus(course),
     enrollment: program ? enrollmentOption(program.id) : null });
 });
 
+// Mentors: approved, visible profiles only, explicit public columns. Private
+// mentor details (mentor_private_details, applications, notes) are never selected.
+const mentorProfiles = require('../profiles/service');
+const publicMentor = row => ({ id: row.id, full_name: row.full_name, headline: row.headline || '', bio: row.bio, expertise: row.expertise, status: row.status,
+  language: ['en', 'bn', 'both'].includes(row.language) ? row.language : null,
+  qualifications: mentorProfiles.storedQualifications(row.qualifications), links: mentorProfiles.storedLinks(row.public_links) });
 router.get('/mentors', (req, res) => {
   const rows = db
     .prepare(
-      `SELECT u.id, m.public_name AS full_name, m.bio, m.expertise, m.status
+      `SELECT u.id, m.public_name AS full_name, m.headline, m.bio, m.expertise, m.status, m.language, m.qualifications, m.public_links
        FROM mentor_profiles m
        JOIN users u ON u.id = m.user_id
         WHERE u.status = 'active' AND m.status = 'approved' AND m.public_visible = 1 AND m.public_name IS NOT NULL
         ORDER BY m.public_name`
     )
     .all();
-  res.json(rows);
+  res.json(rows.map(publicMentor));
 });
 
 router.get('/mentors/:slug', (req, res) => {
   // Exact ID/name only: wildcard LIKE could return an unrelated approved profile.
   const mentor = db
     .prepare(
-      `SELECT u.id, m.public_name AS full_name, m.bio, m.expertise, m.status
+      `SELECT u.id, m.public_name AS full_name, m.headline, m.bio, m.expertise, m.status, m.language, m.qualifications, m.public_links
        FROM mentor_profiles m
        JOIN users u ON u.id = m.user_id
          WHERE u.status = 'active' AND m.status = 'approved' AND m.public_visible = 1 AND m.public_name IS NOT NULL AND (u.id = ? OR m.public_name = ?)`
     )
     .get(req.params.slug, req.params.slug);
   if (!mentor) return res.status(404).json({ error: 'not_found', message: 'Mentor not found.' });
-  res.json(mentor);
+  res.json(publicMentor(mentor));
 });
 
-function projectSlug(project) {
-  return `${project.id}-${project.title.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
-}
-
-router.get('/projects', (req, res) => {
-  const rows = db.prepare(`SELECT p.id, p.title, p.summary, p.capacity, p.status, p.domain,
-    m.public_name AS supervisor_name,
-    (SELECT COUNT(*) FROM project_applications pa WHERE pa.project_id = p.id AND pa.state = 'accepted') AS team_size
-    FROM projects p LEFT JOIN users u ON u.id = p.supervisor_id AND u.status='active'
-    LEFT JOIN mentor_profiles m ON m.user_id=u.id AND m.status='approved' AND m.public_visible=1
-    WHERE p.status = 'open' ORDER BY p.created_at DESC`).all();
-  res.json(rows.map((project) => ({ ...project, slug: projectSlug(project) })));
-});
-
-router.get('/projects/:slug', (req, res) => {
-  const id = Number(String(req.params.slug).split('-')[0]);
-  if (!Number.isSafeInteger(id) || id < 1) return res.status(404).json({ error: 'not_found' });
-  const project = db.prepare(`SELECT p.id, p.title, p.summary, p.capacity, p.status, p.domain,
-    m.public_name AS supervisor_name,
-    (SELECT COUNT(*) FROM project_applications pa WHERE pa.project_id = p.id AND pa.state = 'accepted') AS team_size
-    FROM projects p LEFT JOIN users u ON u.id = p.supervisor_id AND u.status='active'
-    LEFT JOIN mentor_profiles m ON m.user_id=u.id AND m.status='approved' AND m.public_visible=1 WHERE p.id = ? AND p.status = 'open'`).get(id);
-  if (!project || (req.params.slug !== String(id) && req.params.slug !== projectSlug(project))) {
-    return res.status(404).json({ error: 'not_found' });
+// ---------- Research projects (teaching area: admin/teaching-projects.js) ----------
+// Only published projects (status other than draft) are returned; all text comes from the database.
+const projectContent = require('../admin/teaching-projects');
+const publicProjectRoute = fn => (req, res) => {
+  try { res.json(fn(req)); } catch (error) {
+    if (error && error.status === 404) return res.status(404).json({ error: 'not_found', message: 'Project not found.' });
+    console.error('[public] project read failed', error);
+    res.status(500).json({ error: 'server', message: 'Projects could not be loaded.' });
   }
-  res.json({ project: { ...project, slug: projectSlug(project) } });
-});
+};
+router.get('/projects', publicProjectRoute(() => projectContent.publicList()));
+router.get('/project-directory', publicProjectRoute(() => projectContent.publicDirectory()));
+router.get('/projects/:slug', publicProjectRoute(req => projectContent.publicProject(req.params.slug)));
 
 router.get('/certificates/:token/verify', (req, res) => {
-  const cert = db.prepare('SELECT * FROM certificates WHERE token = ?').get(req.params.token);
+  const cert = db.prepare('SELECT user_id, program_id, token, display_name, issue_date, state, revoked_on FROM certificates WHERE token = ?').get(String(req.params.token).slice(0, 100));
   if (!cert) {
     return res.json({ state: 'not_found', message: 'Certificate not found.' });
   }
@@ -151,64 +160,29 @@ router.get('/certificates/:token/verify', (req, res) => {
     program: program ? program.title : null,
     issue_date: cert.issue_date,
     revoked: cert.state === 'revoked',
+    // Revocation date only; the internal reason is never published.
+    revoked_on: cert.state === 'revoked' ? cert.revoked_on || null : null,
   });
 });
 
-// Public pages content (CMS-lite) - used by frontend for About / FAQ / Policies
+// Website content (admin/content-service.js): published pages only. Unpublished
+// policies return their fixed 'not yet approved' notice with status 'draft'.
 router.get('/pages/:key', (req, res) => {
-  const pages = {
-    about: {
-      title: 'About IRIP',
-      body: 'The Institute of Research, Innovation and Practice (IRIP) is a research-focused learning platform built for learners in Bangladesh who want to move from curiosity to a finished, supervised research project.\n\nWe combine structured theory courses with hands-on, supervisor-guided practical projects. A typical cohort runs for three months and includes weekly teaching sessions, research clinics, assignments with feedback, and a final assessed project.\n\nOur mentors teach theory and research literacy. Our approved supervisors guide practical work, review milestones, and assess final submissions. Completion is earned, not assumed — certificates are issued only when all completion rules are met.\n\nThis platform is currently a local prototype built from a 28-sheet specification workbook. IRIP identity, faculty, pricing, and policies are pending approval before any live enrollment or payment.',
-    },
-    'how-it-works': {
-      title: 'How It Works',
-      body: '1. Choose a program. Browse published programs, compare cohorts, and pick the track that fits your goals and schedule.\n2. Apply and enroll. Submit an application, receive an admission outcome, and confirm enrollment in an open cohort.\n3. Learn and practice. Attend teaching and clinic sessions, complete weekly assignments, and build research skills step by step.\n4. Join a supervised project. Apply to a project team, work with an approved supervisor, hit milestones, and receive feedback.\n5. Earn your certificate. Meet completion rules and receive a verifiable certificate with a public token anyone can check.\n\nEvery step is gated: applications are reviewed, cohorts have capacity limits, and certificates are issued only on verified completion.',
-    },
-    faq: {
-      title: 'Frequently Asked Questions',
-      body: 'Q: Can I enroll without prior research experience?\nA: Yes. The bootcamp starts with research literacy and builds up to a supervised project.\n\nQ: How long is a cohort?\nA: Typically three months, with weekly sessions and a final project.\n\nQ: Is a certificate guaranteed?\nA: No. Certificates are issued only when all completion requirements, including the final project, are met.\n\nQ: Can I learn at my own pace?\nA: Sessions are scheduled, but assignments and materials remain available for review within your cohort window.\n\nQ: How are supervisors assigned?\nA: Supervisor matching considers capacity, expertise, and project fit. You can see supervisor profiles before applying to a project.\n\nQ: How will program installments work?\nA: The proposed total program fee is divided into three installments: first at enrollment, second when classes start, and third one calendar month after classes start. The first two are rounded down to the nearest BDT 1,000 and the final installment covers the balance. For a BDT 25,000 program, that is BDT 8,000 + BDT 8,000 + BDT 9,000. See the program Pricing tab for the breakdown. These are installments of one program fee, not a recurring subscription. The independent recorded-course membership remains separate. Confirmed cohort dates and financial approval are required before collecting payments.\n\nQ: Is payment available now?\nA: No. This is a local demonstration. Payment, refund, and enrollment settlement are disabled until policies and providers are approved.\n\nQ: Is my data real?\nA: No. This demo uses synthetic people and transactions. Do not enter real personal information.',
-    },
-    contact: {
-      title: 'Contact Us',
-      body: 'Email: support@irip.ac\nPhone: +880 2 0000000\nAddress: Dhaka, Bangladesh\n\nSend a question using the form below. This local demo stores your inquiry in its sample CRM; it does not send an email or create a booking. If you are already learning with us, open a support ticket from your student portal instead.',
-    },
-    policies: {
-      title: 'Policies',
-      body: 'Policy drafts are being prepared. No public terms, privacy notice, or refund policy has been approved for enrollment or payment.',
-      status: 'draft',
-    },
-    terms: {
-      title: 'Terms of Service — Draft',
-      body: 'IRIP has not published binding terms of service. Enrollment and payment are unavailable in this local demonstration.',
-      status: 'draft',
-    },
-    privacy: {
-      title: 'Privacy Notice — Draft',
-      body: 'IRIP has not published a privacy notice. This local demonstration uses synthetic data; do not enter real personal information.',
-      status: 'draft',
-    },
-    refund: {
-      title: 'Refund Policy — Draft',
-      body: 'Refund eligibility, timing, and approval rules have not been finalized. This local demonstration does not process payments or refunds.',
-      status: 'draft',
-    },
-    integrity: {
-      title: 'Academic Integrity — Draft',
-      body: 'Academic integrity and authorship rules are awaiting approval. This local demonstration does not make academic or disciplinary decisions.',
-      status: 'draft',
-    },
-  };
-  const page = pages[req.params.key];
-  if (!page) return res.status(404).json({ error: 'not_found' });
+  const page = require('../admin/content-service').publicPage(req.params.key);
+  if (!page) return res.status(404).json({ error: 'not_found', message: 'This page is not published.' });
   res.json(page);
+});
+
+// Site details + homepage text (published only). Keys avoid bare email/phone names.
+router.get('/site', (req, res) => {
+  res.json(require('../admin/content-service').publicSite());
 });
 
 // Dashboard stats (public - aggregate, no learner data)
 router.get('/stats', (req, res) => {
   const programs = db.prepare("SELECT COUNT(*) AS c FROM programs WHERE status = 'published'").get().c;
-  const cohorts = db.prepare("SELECT COUNT(*) AS c FROM cohorts WHERE status = 'open'").get().c;
-  const enrollments = db.prepare("SELECT COUNT(*) AS c FROM enrollments WHERE state = 'active'").get().c;
+  const cohorts = db.prepare("SELECT COUNT(*) AS c FROM cohorts c JOIN programs p ON p.id = c.program_id WHERE c.status = 'open' AND p.status = 'published'").get().c;
+  const enrollments = db.prepare("SELECT COUNT(*) AS c FROM enrollments e JOIN cohorts c ON c.id = e.cohort_id JOIN programs p ON p.id = c.program_id WHERE e.state = 'active' AND p.status = 'published'").get().c;
   const mentors = db.prepare("SELECT COUNT(*) AS c FROM mentor_profiles m JOIN users u ON u.id=m.user_id WHERE m.status='approved' AND m.public_visible=1 AND u.status='active'").get().c;
   res.json({ programs, cohorts, enrollments, mentors });
 });

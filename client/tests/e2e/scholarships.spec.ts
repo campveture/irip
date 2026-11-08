@@ -26,7 +26,7 @@ test('learner can save a profile, see explainable references, track progress and
   await page.setViewportSize({ width: 1440, height: 1000 });
   await signIn(page);
   await page.goto('/app');
-  await page.getByRole('link', { name: 'Open scholarship planner' }).click();
+  await page.goto('/app/scholarships'); // no longer linked from the decluttered dashboard
   await expect(page).toHaveURL(/\/app\/scholarships$/);
   await expect(page.getByRole('complementary', { name: 'Local demonstration disclaimer' })).toHaveText(DEMO_DISCLAIMER);
   await saveProfile(page);

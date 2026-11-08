@@ -40,6 +40,8 @@ async function main() {
   const projects = await capture('/api/public/projects');
   for (const item of projects) { await capture(`/api/public/projects/${item.id}`); await capture(`/api/public/projects/${item.slug}`); }
   for (const key of ['about', 'how-it-works', 'faq', 'terms', 'privacy', 'refund', 'integrity']) await capture(`/api/public/pages/${key}`);
+  await capture('/api/public/site');
+  await capture('/api/public/project-directory');
   const catalog = await capture('/api/recorded-courses/catalog');
   for (const item of catalog.courses) await capture(`/api/recorded-courses/catalog/${item.slug}`);
   for (const kind of ['resources', 'events', 'stories', 'ideas', 'internships', 'partners/institution', 'partners/lab']) await capture(`/api/expansion/${kind}`);

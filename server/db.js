@@ -567,7 +567,27 @@ function initSchema() {
     if (!db.prepare('PRAGMA table_info(projects)').all().some(column => column.name === 'domain')) {
       db.exec('ALTER TABLE projects ADD COLUMN domain TEXT');
     }
+    // Additive: append-only history of access decisions made in the operations
+    // panel (role grants/revocations, account suspension, teaching assignment).
+    // role_grants/teaching_assignments hold current state; this table keeps the
+    // who/why/when that deleting a row would otherwise lose. Never UPDATE/DELETE.
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS access_changes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        subject_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        kind TEXT NOT NULL CHECK(kind IN ('role_grant','role_revoke','account_suspend','account_reactivate','teaching_assign','teaching_unassign')),
+        role TEXT,
+        cohort_id INTEGER REFERENCES cohorts(id) ON DELETE SET NULL,
+        expiry TEXT,
+        reason TEXT NOT NULL,
+        actor_id INTEGER NOT NULL REFERENCES users(id),
+        created_at TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_access_changes_subject ON access_changes(subject_user_id, id);
+    `);
     require('./profiles/schema').initProfiles(db);
+    // Additive, idempotent schema owned by each panel area (see server/admin/schema/).
+    require('./admin/schema').initAreaSchemas(db);
     // Additive rebrand migration: keep existing synthetic demo records usable after the rename.
     for (const table of ['users', 'persons', 'mentor_intake']) {
       if (db.prepare('PRAGMA table_info(' + table + ')').all().some(column => column.name === 'email')) {
@@ -638,7 +658,7 @@ function seed() {
     // Learner
     const learner = addUser.run('learner@irip.ac', pw, 'Rakib Hasan', 'learner', 'active', ts);
     grant.run(6, 'learner', 'global', ts);
-    upsertProfile.run(6, '+880 1700 000000', 'Complete the research bootcamp and publish a paper.', JSON.stringify({ goal: 'Research publication', plan: [] }), ts);
+    upsertProfile.run(6, '+880 1700 000000', 'Complete Research Methods Acceleration and publish a paper.', JSON.stringify({ goal: 'Research publication', plan: [] }), ts);
 
     // Second learner
     const learner2 = addUser.run('student2@irip.ac', pw, 'Nusrat Jahan', 'learner', 'active', ts);
@@ -650,9 +670,9 @@ function seed() {
       'INSERT OR IGNORE INTO programs(slug, title, summary, domain, level, fee, currency, capacity, start_date, end_date, contact_hours, independent_hours_week, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
     addProgram.run(
-      'research-bootcamp',
-      'Research Methods Bootcamp (3 Months)',
-      'A supervised three-month research bootcamp combining structured theory with practical research projects. Learners progress from research literacy to a final assessed project package.',
+      'research-methods-acceleration',
+      'Research Methods Acceleration',
+      'A supervised three-month Research Methods Acceleration program combining structured theory with practical research projects. Learners progress from research literacy to a final assessed project package.',
       'Research Methods',
       'Undergraduate / Postgraduate',
       25000,
@@ -678,7 +698,7 @@ function seed() {
       '2026-12-14',
       20,
       '4-5 hours',
-      'published',
+      'draft',
       ts
     );
     addProgram.run(
@@ -694,11 +714,11 @@ function seed() {
       '2026-12-21',
       16,
       '3-4 hours',
-      'published',
+      'draft',
       ts
     );
 
-    const pBootcamp = db.prepare("SELECT id FROM programs WHERE slug = 'research-bootcamp'").get().id;
+    const pAcceleration = db.prepare("SELECT id FROM programs WHERE slug = 'research-methods-acceleration'").get().id;
     const pStats = db.prepare("SELECT id FROM programs WHERE slug = 'statistics-for-research'").get().id;
     const pWriting = db.prepare("SELECT id FROM programs WHERE slug = 'academic-writing'").get().id;
 
@@ -706,10 +726,10 @@ function seed() {
     const addCourse = db.prepare(
       'INSERT OR IGNORE INTO courses(slug, program_id, title, summary, status, created_at) VALUES (?, ?, ?, ?, ?, ?)'
     );
-    addCourse.run('research-literacy', pBootcamp, 'Research Literacy & Question Framing', 'Research ethics, realistic outcomes, and framing a research question.', 'published', ts);
-    addCourse.run('search-strategy', pBootcamp, 'Search Strategy & Reference Management', 'Credible sources, search logs, annotated reading lists.', 'published', ts);
-    addCourse.run('critical-reading', pBootcamp, 'Critical Reading & Gap Mapping', 'Literature matrix and gap argument.', 'published', ts);
-    addCourse.run('research-design', pBootcamp, 'Research Design & Method Selection', 'Proposal and feasibility/data plan.', 'published', ts);
+    addCourse.run('research-literacy', pAcceleration, 'Research Literacy & Question Framing', 'Research ethics, realistic outcomes, and framing a research question.', 'published', ts);
+    addCourse.run('search-strategy', pAcceleration, 'Search Strategy & Reference Management', 'Credible sources, search logs, annotated reading lists.', 'published', ts);
+    addCourse.run('critical-reading', pAcceleration, 'Critical Reading & Gap Mapping', 'Literature matrix and gap argument.', 'published', ts);
+    addCourse.run('research-design', pAcceleration, 'Research Design & Method Selection', 'Proposal and feasibility/data plan.', 'published', ts);
     addCourse.run('descriptive-stats', pStats, 'Descriptive Statistics', 'Measures of central tendency, dispersion, and visualization.', 'published', ts);
     addCourse.run('inferential-stats', pStats, 'Inferential Statistics', 'Hypothesis testing, confidence intervals, p-values.', 'published', ts);
 
@@ -751,28 +771,28 @@ function seed() {
     const addOffer = db.prepare(
       'INSERT OR IGNORE INTO offers(program_id, type, price, currency, admission_mode, access_duration, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
     );
-    addOffer.run(pBootcamp, 'one_time', 25000, 'BDT', 'direct', '12 weeks', 'published', ts);
+    addOffer.run(pAcceleration, 'one_time', 25000, 'BDT', 'direct', '12 weeks', 'published', ts);
     addOffer.run(pStats, 'one_time', 12000, 'BDT', 'direct', '6 weeks', 'published', ts);
     addOffer.run(pWriting, 'one_time', 15000, 'BDT', 'direct', '6 weeks', 'published', ts);
 
-    const oBootcamp = db.prepare("SELECT id FROM offers WHERE program_id = ? AND type = 'one_time'").get(pBootcamp).id;
+    const oAcceleration = db.prepare("SELECT id FROM offers WHERE program_id = ? AND type = 'one_time'").get(pAcceleration).id;
     const oStats = db.prepare("SELECT id FROM offers WHERE program_id = ? AND type = 'one_time'").get(pStats).id;
 
     // ---------- Cohorts ----------
     const addCohort = db.prepare(
       'INSERT OR IGNORE INTO cohorts(program_id, name, capacity, start_date, end_date, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
     );
-    addCohort.run(pBootcamp, 'Cohort November 2026', 30, '2026-11-02', '2027-01-24', 'open', ts);
+    addCohort.run(pAcceleration, 'Cohort November 2026', 30, '2026-11-02', '2027-01-24', 'open', ts);
     addCohort.run(pStats, 'Cohort November 2026', 40, '2026-11-09', '2026-12-14', 'open', ts);
 
-    const cohortBootcamp = db.prepare("SELECT id FROM cohorts WHERE name = 'Cohort November 2026' AND program_id = ?").get(pBootcamp).id;
+    const cohortAcceleration = db.prepare("SELECT id FROM cohorts WHERE name = 'Cohort November 2026' AND program_id = ?").get(pAcceleration).id;
     const cohortStats = db.prepare("SELECT id FROM cohorts WHERE name = 'Cohort November 2026' AND program_id = ?").get(pStats).id;
 
-    // ---------- Enrollments (seed learner into bootcamp) ----------
+    // ---------- Enrollments (seed learner into Research Methods Acceleration) ----------
     const addEnrollment = db.prepare(
       'INSERT OR IGNORE INTO enrollments(user_id, cohort_id, order_item_id, state, entitlement_source, created_at) VALUES (?, ?, ?, ?, ?, ?)'
     );
-    addEnrollment.run(6, cohortBootcamp, null, 'active', 'purchase', ts);
+    addEnrollment.run(6, cohortAcceleration, null, 'active', 'purchase', ts);
     addEnrollment.run(7, cohortStats, null, 'active', 'purchase', ts);
 
     // ---------- Orders (paid) ----------
@@ -788,7 +808,7 @@ function seed() {
     const addOrderItem = db.prepare(
       'INSERT OR IGNORE INTO order_items(order_id, offer_id, cohort_id, name, price, created_at) VALUES (?, ?, ?, ?, ?, ?)'
     );
-    addOrderItem.run(order1, oBootcamp, cohortBootcamp, 'Research Methods Bootcamp', 25000, ts);
+    addOrderItem.run(order1, oAcceleration, cohortAcceleration, 'Research Methods Acceleration', 25000, ts);
     addOrderItem.run(order2, oStats, cohortStats, 'Statistics for Research', 12000, ts);
 
     const addPayment = db.prepare(
@@ -798,7 +818,7 @@ function seed() {
     addPayment.run(order2, 'manual', 'REF-DEMO-002', 12000, 'BDT', 'succeeded', ts, ts);
 
     // Link enrollments to order items
-    db.prepare("UPDATE enrollments SET order_item_id = (SELECT id FROM order_items WHERE order_id = ? AND cohort_id = enrollments.cohort_id) WHERE user_id = ? AND cohort_id = ?").run(order1, 6, cohortBootcamp);
+    db.prepare("UPDATE enrollments SET order_item_id = (SELECT id FROM order_items WHERE order_id = ? AND cohort_id = enrollments.cohort_id) WHERE user_id = ? AND cohort_id = ?").run(order1, 6, cohortAcceleration);
     db.prepare("UPDATE enrollments SET order_item_id = (SELECT id FROM order_items WHERE order_id = ? AND cohort_id = enrollments.cohort_id) WHERE user_id = ? AND cohort_id = ?").run(order2, 7, cohortStats);
 
     // ---------- Assessments ----------
@@ -819,7 +839,7 @@ function seed() {
     const addSubmission = db.prepare(
       'INSERT OR IGNORE INTO submissions(assessment_id, user_id, enrollment_id, state, attempt, brief, submitted_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
     );
-    addSubmission.run(a1, 6, db.prepare("SELECT id FROM enrollments WHERE user_id = 6 AND cohort_id = ?").get(cohortBootcamp).id, 'submitted', 1, 'My research question: ...', ts, ts);
+    addSubmission.run(a1, 6, db.prepare("SELECT id FROM enrollments WHERE user_id = 6 AND cohort_id = ?").get(cohortAcceleration).id, 'submitted', 1, 'My research question: ...', ts, ts);
     addSubmission.run(a5, 7, db.prepare("SELECT id FROM enrollments WHERE user_id = 7 AND cohort_id = ?").get(cohortStats).id, 'graded', 1, 'Completed practice set.', ts, ts);
 
     const s1 = db.prepare("SELECT id FROM submissions WHERE assessment_id = ? AND user_id = 6 ORDER BY id DESC LIMIT 1").get(a1).id;
@@ -835,16 +855,16 @@ function seed() {
     const addAnnouncement = db.prepare(
       'INSERT OR IGNORE INTO announcements(cohort_id, title, body, published_at, created_at) VALUES (?, ?, ?, ?, ?)'
     );
-    addAnnouncement.run(cohortBootcamp, 'Welcome to Cohort November 2026', 'The proposed cohort window begins on 2 November 2026. The first demo teaching session is Friday 6 November at 8:30 PM Bangladesh time. Dates require approval.', ts, ts);
-    addAnnouncement.run(cohortBootcamp, 'First Clinic Scheduled', 'The proposed first demo clinic is Saturday 7 November 2026, 8:30 PM Bangladesh time. This is not a live booking.', ts, ts);
+    addAnnouncement.run(cohortAcceleration, 'Welcome to Cohort November 2026', 'The proposed cohort window begins on 2 November 2026. The first demo teaching session is Friday 6 November at 8:30 PM Bangladesh time. Dates require approval.', ts, ts);
+    addAnnouncement.run(cohortAcceleration, 'First Clinic Scheduled', 'The proposed first demo clinic is Saturday 7 November 2026, 8:30 PM Bangladesh time. This is not a live booking.', ts, ts);
 
     // ---------- Sessions ----------
     const addSession = db.prepare(
       'INSERT OR IGNORE INTO sessions(cohort_id, title, kind, starts_at, ends_at, timezone, meeting_link, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
     );
     const wk1 = new Date('2026-11-06T20:30:00+06:00').toISOString();
-    addSession.run(cohortBootcamp, 'Teaching Session 1: Research Literacy', 'teaching', wk1, new Date(new Date(wk1).getTime() + 120 * 60000).toISOString(), 'Asia/Dhaka', null, ts);
-    addSession.run(cohortBootcamp, 'Supervised Clinic 1', 'clinic', new Date('2026-11-07T20:30:00+06:00').toISOString(), new Date('2026-11-07T22:30:00+06:00').toISOString(), 'Asia/Dhaka', null, ts);
+    addSession.run(cohortAcceleration, 'Teaching Session 1: Research Literacy', 'teaching', wk1, new Date(new Date(wk1).getTime() + 120 * 60000).toISOString(), 'Asia/Dhaka', null, ts);
+    addSession.run(cohortAcceleration, 'Supervised Clinic 1', 'clinic', new Date('2026-11-07T20:30:00+06:00').toISOString(), new Date('2026-11-07T22:30:00+06:00').toISOString(), 'Asia/Dhaka', null, ts);
 
     // ---------- Projects ----------
     const addProject = db.prepare(
@@ -880,7 +900,7 @@ function seed() {
     const addOpportunity = db.prepare(
       'INSERT OR IGNORE INTO opportunities(person_id, program_id, stage, owner, next_task, created_at) VALUES (?, ?, ?, ?, ?, ?)'
     );
-    addOpportunity.run(person1, pBootcamp, 'qualified', 4, 'Send program brochure', ts);
+    addOpportunity.run(person1, pAcceleration, 'qualified', 4, 'Send program brochure', ts);
     addOpportunity.run(person2, pWriting, 'consultation', 3, 'Schedule scope call', ts);
 
     // ---------- Tickets ----------
@@ -908,4 +928,25 @@ function seed() {
   console.log('Seed complete.');
 }
 
-module.exports = { db, initSchema, hashPassword, verifyPassword, now, seed };
+// Keep existing local demo databases aligned with the single-program public catalog.
+// This is deliberately non-destructive: retired programs and their historical records stay in place.
+function migrateProgramCatalog() {
+  const legacy = db.prepare("SELECT id FROM programs WHERE slug = 'research-bootcamp'").get();
+  const current = db.prepare("SELECT id FROM programs WHERE slug = 'research-methods-acceleration'").get();
+  if (legacy && !current) {
+    db.prepare('UPDATE programs SET slug = ?, title = ?, summary = ?, domain = ?, status = ? WHERE id = ?').run(
+      'research-methods-acceleration',
+      'Research Methods Acceleration',
+      'A supervised three-month Research Methods Acceleration program combining structured theory with practical research projects. Learners progress from research literacy to a final assessed project package.',
+      'Research Methods',
+      'published',
+      legacy.id
+    );
+  } else if (legacy && current) {
+    db.prepare("UPDATE programs SET status = 'draft' WHERE id = ?").run(legacy.id);
+  }
+  db.prepare("UPDATE programs SET status = 'draft' WHERE slug IN ('statistics-for-research', 'academic-writing')").run();
+  db.prepare("UPDATE order_items SET name = 'Research Methods Acceleration' WHERE name = 'Research Methods Bootcamp'").run();
+}
+
+module.exports = { db, initSchema, hashPassword, verifyPassword, now, seed, migrateProgramCatalog };

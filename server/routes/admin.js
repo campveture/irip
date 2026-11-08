@@ -3,19 +3,22 @@ const router = express.Router();
 const { db } = require('../db');
 const { requireAuth, requireRoles, hasRole, auditLog } = require('../middleware/auth');
 
-router.use(requireAuth, requireRoles('academic_ops', 'finance', 'support', 'admin', 'owner'));
-router.use((req, res, next) => {
-  const roles = req.roles || [];
-  if (roles.includes('admin') || roles.includes('owner')) return next();
-  const prefix = req.path.split('/')[1];
-  const allowed = {
-    academic_ops: ['dashboard', 'modules', 'learners', 'catalog', 'academics', 'mentors', 'projects', 'cohorts', 'admissions', 'crm', 'certificates', 'reports'],
-    finance: ['dashboard', 'modules', 'finance', 'reports'],
-    support: ['dashboard', 'modules', 'support', 'learners'],
-  };
-  if (roles.some(r => (allowed[r] || []).includes(prefix))) return next();
-  return res.status(403).json({ error: 'forbidden', message: 'Module permission required.' });
-});
+const policy = require('../admin/policy');
+const { requireCapability: cap, can } = policy;
+const { handle, fail, body: bodyOf, reason: reasonOf, id: idOf, oneOf, likeContains } = require('../admin/validate');
+const accessService = require('../admin/access-service');
+const learnerService = require('../admin/learner-service');
+const cohortService = require('../admin/cohort-service');
+const auditService = require('../admin/audit-service');
+const { rateLimit } = require('../middleware/security');
+
+// Gate 1: signed in with at least one staff role. Gate 2: every route below
+// declares exactly one capability from admin/policy.js (default deny).
+router.use(requireAuth, requireRoles(...policy.STAFF_ROLES));
+// Keyed by the signed-in staff member (requireAuth above guarantees one), so one busy
+// person cannot exhaust the budget for colleagues behind the same network address.
+const commandLimit = rateLimit({ limit: 60, windowMs: 60000, key: req => (req.user ? `user:${req.user.id}` : `ip:${req.ip}`) });
+router.use((req, res, next) => (['GET', 'HEAD'].includes(req.method) ? next() : commandLimit(req, res, next)));
 
 // Permission matrix per spec section 8
 const PERMISSION_MATRIX = {
@@ -36,16 +39,17 @@ function roleKey(role) {
 }
 
 // ---------- Overview ----------
-router.get('/dashboard', (req, res) => {
+router.get('/dashboard', cap('dashboard.read'), (req, res) => {
   const stats = {
     paid_enrollments: db.prepare("SELECT COUNT(*) AS c FROM enrollments WHERE state = 'active'").get().c,
-    net_collected_cash: db.prepare("SELECT COALESCE(SUM(amount),0) AS s FROM payment_attempts WHERE state = 'succeeded'").get().s,
+    // Cash totals are finance data: other staff see null rather than the figure.
+    net_collected_cash: can(req.roles, 'finance.read') ? db.prepare("SELECT COALESCE(SUM(amount),0) AS s FROM payment_attempts WHERE state = 'succeeded'").get().s : null,
     seats: db.prepare('SELECT COALESCE(SUM(capacity),0) AS s FROM cohorts').get().s,
     queues: db.prepare("SELECT COUNT(*) AS c FROM tickets WHERE state = 'open'").get().c,
   };
-  const recentOrders = db
+  const recentOrders = can(req.roles, 'finance.read') ? db
     .prepare('SELECT o.order_no, o.total, o.status, u.full_name, o.created_at FROM orders o JOIN users u ON u.id = o.user_id ORDER BY o.created_at DESC LIMIT 8')
-    .all();
+    .all() : [];
   const cohorts = db
     .prepare(
       `SELECT c.name, c.capacity, c.status, p.title AS program_title,
@@ -57,31 +61,16 @@ router.get('/dashboard', (req, res) => {
 });
 
 // ---------- Modules metadata ----------
-router.get('/modules', (req, res) => {
+// Navigation + capabilities come from the same policy that guards the routes,
+// so the UI can never show a module the API would refuse (or vice versa).
+router.get('/modules', cap('dashboard.read'), (req, res) => {
   const userRoles = req.roles || [];
-  const can = (r) => userRoles.includes(r) || userRoles.includes('admin') || userRoles.includes('owner');
-  const modules = [
-    { key: 'overview', label: 'Overview', icon: 'LayoutDashboard', accessible: can('admin') || can('owner') },
-    { key: 'crm', label: 'CRM', icon: 'Users', accessible: can('academic_ops') || can('support') || can('owner') },
-    { key: 'admissions', label: 'Admissions', icon: 'FileText', accessible: can('academic_ops') || can('owner') },
-    { key: 'learners', label: 'Learners', icon: 'UserCircle', accessible: can('academic_ops') || can('support') || can('owner') },
-    { key: 'catalog', label: 'Catalog / Academics', icon: 'BookOpen', accessible: can('academic_ops') || can('owner') },
-    { key: 'cohorts', label: 'Cohorts', icon: 'Calendar', accessible: can('academic_ops') || can('owner') },
-    { key: 'mentors', label: 'Mentor Operations', icon: 'User', accessible: can('academic_ops') || can('owner') },
-    { key: 'research', label: 'Research / Projects', icon: 'FlaskConical', accessible: can('academic_ops') || can('owner') },
-    { key: 'finance', label: 'Finance', icon: 'Banknote', accessible: can('finance') || can('owner') },
-    { key: 'support', label: 'Support', icon: 'Headphones', accessible: can('support') || can('owner') },
-    { key: 'cms', label: 'CMS', icon: 'Edit', accessible: can('academic_ops') || can('owner') },
-    { key: 'reports', label: 'Reports', icon: 'BarChart3', accessible: can('academic_ops') || can('finance') || can('owner') },
-    { key: 'automations', label: 'Automations', icon: 'Zap', accessible: can('owner') },
-    { key: 'automations', label: 'Automations', icon: 'Zap', accessible: can('owner') },
-    { key: 'system', label: 'System', icon: 'Settings', accessible: can('owner') },
-  ];
-  res.json({ modules, permission_matrix: PERMISSION_MATRIX, user_roles: userRoles });
+  const modules = policy.MODULES.map(m => ({ key: m.key, label: m.label, path: m.path, accessible: can(userRoles, m.capability) }));
+  res.json({ modules, capabilities: policy.capabilitiesFor(userRoles), permission_matrix: PERMISSION_MATRIX, user_roles: userRoles });
 });
 
 // ---------- Learners (Learner 360) ----------
-router.get('/learners', (req, res) => {
+router.get('/learners', cap('learners.read'), (req, res) => {
   const { search } = req.query;
   let sql = `SELECT u.id, u.email, u.full_name, u.status, u.email_verified,
                     COALESCE(s.phone, lp.phone) AS phone,
@@ -91,20 +80,22 @@ router.get('/learners', (req, res) => {
               LEFT JOIN account_settings s ON s.user_id = u.id
              WHERE u.role = 'learner'`;
   const params = [];
+  if (search !== undefined && (typeof search !== 'string' || search.length > 120)) return res.status(400).json({ error: 'validation', message: 'Search must be text of at most 120 characters.' });
   if (search) {
-    sql += ' AND (u.full_name LIKE ? OR u.email LIKE ?)';
-    params.push(`%${search}%`, `%${search}%`);
+    // % and _ in the search box match literally, not as wildcards.
+    sql += " AND (u.full_name LIKE ? ESCAPE '\\' OR u.email LIKE ? ESCAPE '\\')";
+    params.push(likeContains(search), likeContains(search));
   }
   sql += ' ORDER BY u.full_name';
   res.json(db.prepare(sql).all(params));
 });
 
-router.get('/learners/:id', (req, res) => {
+router.get('/learners/:id', cap('learners.read'), (req, res) => {
   const userId = req.params.id;
   if (!/^[1-9]\d*$/.test(userId) || !Number.isSafeInteger(Number(userId))) return res.status(400).json({ message: 'Invalid learner ID.' });
   const user = db.prepare("SELECT id, email, full_name, role, status, email_verified, created_at FROM users WHERE id = ? AND role = 'learner'").get(userId);
   if (!user) return res.status(404).json({ error: 'not_found' });
-  const canReadLearning = (req.roles || []).some(role => ['academic_ops','admin','owner'].includes(role));
+  const canReadLearning = can(req.roles, 'learners.read_academic');
   const savedProfile = require('../profiles/service').profile(user.id);
   const profile = canReadLearning ? savedProfile : { phone: savedProfile.phone };
   const enrollments = db
@@ -121,16 +112,17 @@ router.get('/learners/:id', (req, res) => {
        WHERE sb.user_id = ? ORDER BY sb.created_at DESC LIMIT 10`
     )
     .all(userId);
-  const tickets = db.prepare('SELECT * FROM tickets WHERE user_id = ? ORDER BY created_at DESC LIMIT 5').all(userId);
+  const tickets = db.prepare(`SELECT t.id, t.ticket_no, t.subject, t.category, t.priority, ${require('../admin/operations-support').STATUS_SQL} AS state, t.created_at
+    FROM tickets t WHERE t.user_id = ? ORDER BY t.created_at DESC LIMIT 5`).all(userId);
   res.json({ user, profile, enrollments, submissions: canReadLearning ? submissions : [], tickets });
 });
 
 // ---------- Catalog ----------
-router.get('/catalog/programs', (req, res) => {
+router.get('/catalog/programs', cap('catalog.read'), (req, res) => {
   res.json(db.prepare('SELECT * FROM programs ORDER BY created_at DESC').all());
 });
 
-router.post('/catalog/programs', requireRoles('academic_ops', 'admin', 'owner'), (req, res) => {
+router.post('/catalog/programs', cap('catalog.edit_draft'), (req, res) => {
   const { slug, title, summary, domain, level, fee, capacity, start_date, end_date } = req.body || {};
   if (typeof slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 120 ||
       typeof title !== 'string' || !title.trim() || title.trim().length > 180 ||
@@ -153,7 +145,7 @@ router.post('/catalog/programs', requireRoles('academic_ops', 'admin', 'owner'),
 
 // Only draft copy can be edited. Published records require an approval/versioning
 // workflow before edits can be safely surfaced to the public catalog.
-router.patch('/catalog/programs/:id', requireRoles('academic_ops', 'admin', 'owner'), (req, res) => {
+router.patch('/catalog/programs/:id', cap('catalog.edit_draft'), (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: 'validation', message: 'Invalid program ID.' });
   const program = db.prepare('SELECT id, status FROM programs WHERE id = ?').get(id);
@@ -187,7 +179,7 @@ router.patch('/catalog/programs/:id', requireRoles('academic_ops', 'admin', 'own
 });
 
 // ---------- Academic, mentor and project review workspaces ----------
-router.get('/academics', (req, res) => {
+router.get('/academics', cap('academics.read'), (req, res) => {
   const courses = db.prepare(`SELECT c.id, c.slug, c.title, c.status, p.title AS program_title,
     (SELECT COUNT(*) FROM modules m WHERE m.course_id = c.id) AS module_count,
     (SELECT COUNT(*) FROM assessments a JOIN modules m ON m.id = a.module_id WHERE m.course_id = c.id) AS assessment_count
@@ -198,7 +190,7 @@ router.get('/academics', (req, res) => {
   res.json({ courses, modules, publication_note: 'Curriculum versioning and academic approval are not configured.' });
 });
 
-router.get('/mentors', (req, res) => {
+router.get('/mentors', cap('mentors.read'), (req, res) => {
   const mentors = db.prepare(`SELECT u.id, u.full_name, u.email, u.status AS account_status,
     m.bio, m.expertise, m.status AS application_status, m.updated_at,
     (SELECT COUNT(*) FROM teaching_assignments ta WHERE ta.mentor_id = u.id) AS teaching_assignments,
@@ -207,7 +199,7 @@ router.get('/mentors', (req, res) => {
   res.json({ mentors, approval_note: 'Credential verification and agreements must be recorded before approving new mentors.' });
 });
 
-router.get('/projects', (req, res) => {
+router.get('/projects', cap('projects.read'), (req, res) => {
   const projects = db.prepare(`SELECT p.id, p.title, p.summary, p.capacity, p.status,
     u.full_name AS supervisor_name,
     (SELECT COUNT(*) FROM project_applications pa WHERE pa.project_id = p.id AND pa.state = 'accepted') AS accepted_count,
@@ -217,7 +209,7 @@ router.get('/projects', (req, res) => {
   res.json({ projects });
 });
 
-router.get('/projects/:id', (req, res) => {
+router.get('/projects/:id', cap('projects.read'), (req, res) => {
   const project = db.prepare('SELECT id, title, summary, capacity, status, supervisor_id FROM projects WHERE id = ?').get(req.params.id);
   if (!project) return res.status(404).json({ error: 'not_found', message: 'Project not found.' });
   const applications = db.prepare(`SELECT pa.id, pa.state, pa.proposal, pa.created_at, u.id AS learner_id,
@@ -227,7 +219,7 @@ router.get('/projects/:id', (req, res) => {
   res.json({ project, applications, milestones, review_note: 'Approval requires readiness, ethics and supervisor capacity checks that are not configured.' });
 });
 
-router.get('/automations', requireRoles('admin', 'owner'), (req, res) => {
+router.get('/automations', cap('automations.read'), (req, res) => {
   const notifications = db.prepare(`SELECT channel, COUNT(*) AS count FROM notifications GROUP BY channel`).all();
   const recent_audit = db.prepare(`SELECT id, actor_id, action, target, created_at FROM audit_events ORDER BY id DESC LIMIT 20`).all();
   res.json({ notifications, recent_audit, worker_status: 'not_configured',
@@ -235,7 +227,7 @@ router.get('/automations', requireRoles('admin', 'owner'), (req, res) => {
 });
 
 // ---------- Admissions ----------
-router.get('/admissions', (req, res) => {
+router.get('/admissions', cap('admissions.read'), (req, res) => {
   const rows = db
     .prepare(
       `SELECT a.id, a.state, a.outcome, a.outcome_reason, a.evidence, a.created_at, u.full_name, u.email, p.title AS program_title
@@ -248,24 +240,36 @@ router.get('/admissions', (req, res) => {
   res.json(rows);
 });
 
-router.post('/admissions/:id/outcome', requireRoles('academic_ops', 'admin', 'owner'), (req, res) => {
-  const { outcome, reason, cohort_id } = req.body || {};
-  if (!['offered', 'waitlisted', 'rejected', 'withdrawn'].includes(outcome)) {
-    return res.status(400).json({ error: 'validation', message: 'Invalid outcome.' });
-  }
-  const updated = db.prepare(
-    'UPDATE applications SET outcome = ?, outcome_reason = ?, reviewed_by = ?, reviewed_at = ? WHERE id = ?'
-  ).run(outcome, reason || null, req.session.userId, new Date().toISOString(), req.params.id);
-  if (!updated.changes) return res.status(404).json({ error: 'not_found', message: 'Application not found.' });
-  auditLog({ actorId: req.session.userId, action: 'admission_outcome', target: 'applications', meta: JSON.stringify({ id: req.params.id, outcome }) });
-  res.json({ ok: true, outcome });
-});
+// Admission decisions: reason required, and final outcomes are locked.
+// Only an undecided or waitlisted application can receive a (new) outcome;
+// the conditional UPDATE makes two reviewers deciding at once safe (one 409s).
+const ADMISSION_OUTCOMES = ['offered', 'waitlisted', 'rejected', 'withdrawn'];
+router.post('/admissions/:id/outcome', cap('admissions.decide'), handle(req => {
+  const input = bodyOf(req.body, ['outcome', 'reason', 'cohort_id']);
+  const applicationId = idOf(req.params.id, 'application ID');
+  const outcome = oneOf(input.outcome, ADMISSION_OUTCOMES, 'Outcome');
+  const why = reasonOf(input.reason);
+  return db.transaction(() => {
+    const row = db.prepare('SELECT id, user_id, outcome FROM applications WHERE id = ?').get(applicationId);
+    if (!row) fail('Application not found.', 404);
+    if (row.user_id === req.user.id) fail('You cannot decide your own application.', 403);
+    const now = new Date().toISOString();
+    const changed = db.prepare(`UPDATE applications SET outcome = ?, outcome_reason = ?, reviewed_by = ?, reviewed_at = ?
+      WHERE id = ? AND (outcome IS NULL OR outcome = 'waitlisted')`).run(outcome, why, req.user.id, now, applicationId).changes;
+    if (!changed) fail(`This application already has a final outcome (${row.outcome}).`, 409);
+    db.prepare('INSERT INTO audit_events(actor_id, action, target, meta, created_at) VALUES (?, ?, ?, ?, ?)')
+      .run(req.user.id, 'admission_outcome', `applications:${applicationId}`, JSON.stringify({ outcome, payload_logged: false }), now);
+    db.prepare("INSERT INTO notifications(user_id, channel, template, deep_link, created_at) VALUES (?, 'in_app', ?, '/app', ?)")
+      .run(row.user_id, `Your application decision is available: ${outcome}.`, now);
+    return { ok: true, outcome, outcome_reason: why };
+  })();
+}));
 
 // ---------- CRM ----------
-router.get('/crm/persons', (req, res) => {
+router.get('/crm/persons', cap('crm.read'), (req, res) => {
   res.json(db.prepare('SELECT * FROM persons ORDER BY created_at DESC').all());
 });
-router.get('/crm/opportunities', (req, res) => {
+router.get('/crm/opportunities', cap('crm.read'), (req, res) => {
   const rows = db
     .prepare(
       `SELECT o.*, p.name AS person_name, pr.title AS program_title
@@ -279,7 +283,7 @@ router.get('/crm/opportunities', (req, res) => {
 });
 
 // ---------- Support ----------
-router.get('/support/tickets', (req, res) => {
+router.get('/support/tickets', cap('support.read'), (req, res) => {
   const rows = db
     .prepare(
       `SELECT t.*, u.full_name AS user_name, u.email AS user_email
@@ -291,7 +295,7 @@ router.get('/support/tickets', (req, res) => {
 });
 
 // ---------- Finance ----------
-router.get('/finance/orders', (req, res) => {
+router.get('/finance/orders', cap('finance.read'), (req, res) => {
   const rows = db
     .prepare(
       `SELECT o.*, u.full_name, u.email
@@ -301,7 +305,7 @@ router.get('/finance/orders', (req, res) => {
     .all();
   res.json(rows);
 });
-router.get('/finance/refunds', (req, res) => {
+router.get('/finance/refunds', cap('finance.read'), (req, res) => {
   const rows = db
     .prepare(
       `SELECT r.*, o.order_no, u.full_name
@@ -311,12 +315,12 @@ router.get('/finance/refunds', (req, res) => {
     .all();
   res.json(rows);
 });
-router.post('/finance/refunds/:id/approve', requireRoles('finance', 'admin', 'owner'), (req, res) => {
+router.post('/finance/refunds/:id/approve', cap('finance.approve_refund'), (req, res) => {
   return res.status(501).json({ error: 'demo_only', message: 'Refund approval is disabled until finance policy and provider settlement are configured.' });
 });
 
 // ---------- Certificates ----------
-router.get('/certificates', (req, res) => {
+router.get('/certificates', cap('certificates.read'), (req, res) => {
   const rows = db
     .prepare(
       `SELECT cert.*, u.full_name, p.title AS program_title
@@ -328,19 +332,19 @@ router.get('/certificates', (req, res) => {
 });
 
 // ---------- Reports ----------
-router.get('/reports/funnel', (req, res) => {
+router.get('/reports/funnel', cap('reports.read'), (req, res) => {
   const inquiries = db.prepare('SELECT COUNT(*) AS c FROM persons').get().c;
   const applications = db.prepare('SELECT COUNT(*) AS c FROM applications').get().c;
   const offers = db.prepare("SELECT COUNT(*) AS c FROM applications WHERE outcome = 'offered'").get().c;
   const paid = db.prepare("SELECT COUNT(*) AS c FROM enrollments WHERE state = 'active'").get().c;
   res.json({ inquiries, applications, offers, paid_enrollments: paid });
 });
-router.get('/reports/cohort-contribution', (req, res) => {
+router.get('/reports/cohort-contribution', cap('reports.read'), (req, res) => {
   res.json({ cohorts: [], note: 'Configure accounting policy before using revenue figures.' });
 });
 
 // ---------- Settings ----------
-router.get('/settings', (req, res) => {
+router.get('/settings', cap('settings.read'), (req, res) => {
   const rows = db.prepare('SELECT * FROM settings').all();
   const obj = {};
   rows.forEach((r) => {
@@ -348,5 +352,35 @@ router.get('/settings', (req, res) => {
   });
   res.json(obj);
 });
+
+// ---------- Learner account status ----------
+router.get('/learners/:id/account', cap('learners.read'), handle(req => learnerService.accountState(req.params.id)));
+router.post('/learners/:id/status', cap('learners.manage_status'), handle(req => learnerService.setStatus(req.user, req.params.id, req.body)));
+
+// ---------- Cohorts & teaching assignments ----------
+router.get('/cohorts', cap('cohorts.read'), handle(() => cohortService.listCohorts()));
+router.get('/cohorts/:id', cap('cohorts.read'), handle(req => cohortService.cohortDetail(req.params.id, req.user)));
+router.post('/cohorts/:id/mentors', cap('cohorts.assign_mentors'), handle(req => cohortService.assignMentor(req.user, req.params.id, req.body)));
+router.post('/cohorts/:id/mentors/:mentorId/remove', cap('cohorts.assign_mentors'), handle(req => cohortService.unassignMentor(req.user, req.params.id, req.params.mentorId, req.body)));
+
+// ---------- Staff access ----------
+router.get('/staff', cap('staff.read'), handle(req => accessService.listStaff(req.roles)));
+router.get('/staff/candidates', cap('staff.manage'), handle(req => accessService.searchCandidates(req.query.search)));
+router.post('/staff/:userId/grants', cap('staff.manage'), handle(req => accessService.grant(req.user, req.roles, req.params.userId, req.body)));
+router.post('/staff/:userId/revoke', cap('staff.manage'), handle(req => accessService.revoke(req.user, req.roles, req.params.userId, req.body)));
+
+// ---------- Audit log ----------
+router.get('/audit', cap('audit.read'), handle(req => auditService.list(req.query)));
+
+// ---------- Area routers (each area owns one file; every route inside declares a capability) ----------
+router.use('/website', require('../admin/routes/website'));
+router.use('/curriculum', require('../admin/routes/curriculum'));
+router.use('/teaching', require('../admin/routes/teaching'));
+router.use('/operations', require('../admin/routes/operations'));
+router.use('/enrollments', require('../admin/routes/enrollments'));
+router.use('/accounts', require('../admin/routes/accounts'));
+
+// Default deny: any /api/admin path not declared above.
+router.use((req, res) => res.status(404).json({ error: 'not_found', message: 'Operations route not found.' }));
 
 module.exports = router;

@@ -2,10 +2,10 @@ import { test, expect } from '@playwright/test';
 
 test('cohort planner shows reconciled seats, weekend 8:30 PM classes and assignment workload', async ({ page }, info) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto('/programs/research-bootcamp#cohorts');
+  await page.goto('/programs/research-methods-acceleration#cohorts');
   await expect(page.getByRole('tab', { name: 'Cohorts', exact: true })).toHaveAttribute('aria-selected', 'true');
-  const january = page.getByRole('article', { name: 'January 2027 Bootcamp', exact: true });
-  await expect(page.getByRole('article', { name: /2027 Bootcamp/ })).toHaveCount(2);
+  const january = page.getByRole('article', { name: 'January 2027 Research Methods Acceleration', exact: true });
+  await expect(page.getByRole('article', { name: /2027 Research Methods Acceleration/ })).toHaveCount(2);
   const seats = january.getByRole('region', { name: 'Cohort enrollment summary' });
   await expect(seats.getByText('Class size', { exact: true })).toBeVisible();
   await expect(seats.getByText('Places left', { exact: true })).toBeVisible();
@@ -36,7 +36,7 @@ test('cohort planner shows reconciled seats, weekend 8:30 PM classes and assignm
 });
 
 test('curriculum expands detailed outcomes, topics, exercises and deliverables with matching course pages', async ({ page }, info) => {
-  await page.goto('/programs/research-bootcamp#curriculum');
+  await page.goto('/programs/research-methods-acceleration#curriculum');
   const curriculum = page.getByRole('region', { name: 'Detailed program curriculum' });
   await expect(curriculum.getByRole('article')).toHaveCount(4);
   await expect(curriculum).toContainText('48 outlined contact hours');
@@ -53,32 +53,38 @@ test('curriculum expands detailed outcomes, topics, exercises and deliverables w
   await expect(page.getByText('Playback is not connected.', { exact: false })).toBeVisible();
 });
 
-test('mobile cohort/curriculum controls fit and empty programs do not invent a timetable', async ({ page }, info) => {
+test('mobile cohort/curriculum controls fit the single public program', async ({ page }, info) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/programs/statistics-for-research#cohorts');
-  await expect(page.getByRole('region', { name: 'Weekend class schedule' })).toContainText('20 hours');
-  await expect(page.getByText('View all 10 proposed class dates', { exact: true })).toBeVisible();
+  await page.goto('/programs/research-methods-acceleration#cohorts');
+  await expect(page.getByRole('region', { name: 'Weekend class schedule' }).first()).toContainText('48 hours');
+  await expect(page.getByText('View all 24 proposed class dates', { exact: true }).first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath('cohort-planning-mobile.png'), fullPage: true });
   await page.getByRole('button', { name: 'Explore the detailed curriculum' }).click();
   await page.getByRole('button', { name: 'Expand all courses', exact: true }).click();
-  await expect(page.getByRole('region', { name: 'Detailed program curriculum' }).getByRole('article')).toHaveCount(2);
+  await expect(page.getByRole('region', { name: 'Detailed program curriculum' }).getByRole('article')).toHaveCount(4);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.goto('/programs/academic-writing#cohorts');
-  await expect(page.getByText('No open cohort is currently planned', { exact: false })).toBeVisible();
-  await expect(page.getByRole('region', { name: 'Weekend class schedule' })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Explore the detailed curriculum' }).click();
-  await expect(page.getByText('No program courses have been published yet.', { exact: false })).toBeVisible();
+});
+
+test('retired programs are hidden from the public catalog and detail routes', async ({ page }) => {
+  await page.goto('/programs');
+  await expect(page.getByRole('heading', { name: '1 program found' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Statistics for Research', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Academic Writing & Publication', exact: true })).toHaveCount(0);
+  for (const slug of ['statistics-for-research', 'academic-writing']) {
+    await page.goto(`/programs/${slug}`);
+    await expect(page.getByText('Program not found.', { exact: true })).toBeVisible();
+  }
 });
 
 test('malformed planning data fails closed instead of inventing seat availability or learning promises', async ({ page }) => {
-  await page.route('**/api/public/programs/research-bootcamp', async route => {
+  await page.route('**/api/public/programs/research-methods-acceleration', async route => {
     const response = await route.fetch(); const data = await response.json();
     data.cohorts[0].seats.remaining = 999;
     data.courses[0].syllabus.status = 'approved';
     await route.fulfill({ response, json: data });
   });
-  await page.goto('/programs/research-bootcamp#cohorts');
+  await page.goto('/programs/research-methods-acceleration#cohorts');
   await expect(page.getByRole('status')).toContainText('Cohort planning details could not be verified');
   await expect(page.getByRole('region', { name: 'Cohort enrollment summary' })).toHaveCount(0);
   await page.getByRole('tab', { name: 'Courses', exact: true }).click();
@@ -86,12 +92,12 @@ test('malformed planning data fails closed instead of inventing seat availabilit
 });
 
 test('a configured enrollment deadline displays its Bangladesh date/time and never enables enrollment', async ({ page }) => {
-  await page.route('**/api/public/programs/research-bootcamp', async route => {
+  await page.route('**/api/public/programs/research-methods-acceleration', async route => {
     const response = await route.fetch(); const data = await response.json();
     data.cohorts[0].seats.as_of = '2026-10-31T12:00:00Z';
     await route.fulfill({ response, json: data });
   });
-  await page.goto('/programs/research-bootcamp#cohorts');
+  await page.goto('/programs/research-methods-acceleration#cohorts');
   const summary = page.getByRole('region', { name: 'Cohort enrollment summary' }).first();
   await expect(summary.locator('time')).toHaveText('10 Jan 2027');
   await expect(summary).toContainText('11:59 PM Bangladesh time');
@@ -100,7 +106,7 @@ test('a configured enrollment deadline displays its Bangladesh date/time and nev
 });
 
 test('a full cohort and a passed deadline do not suggest that enrollment is open', async ({ page }) => {
-  await page.route('**/api/public/programs/research-bootcamp', async route => {
+  await page.route('**/api/public/programs/research-methods-acceleration', async route => {
     const response = await route.fetch(); const data = await response.json();
     const cohort = data.cohorts[0];
     cohort.seats.active = cohort.capacity; cohort.seats.pending = 0; cohort.seats.held = 0;
@@ -108,7 +114,7 @@ test('a full cohort and a passed deadline do not suggest that enrollment is open
     cohort.seats.as_of = '2027-01-11T12:00:00Z';
     await route.fulfill({ response, json: data });
   });
-  await page.goto('/programs/research-bootcamp#cohorts');
+  await page.goto('/programs/research-methods-acceleration#cohorts');
   const summary = page.getByRole('region', { name: 'Cohort enrollment summary' }).first();
   await expect(summary).toContainText('No unallocated places remain.');
   await expect(summary).toContainText('Proposed deadline has passed.');

@@ -1,50 +1,57 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { BookOpen, CalendarDays, LayoutDashboard, Users, Banknote, Award, Headphones, LogOut, GraduationCap, ClipboardCheck, Settings, Bell, Menu, X } from 'lucide-react';
+import { BookOpen, CalendarDays, LayoutDashboard, Users, Banknote, Award, Headphones, LogOut, GraduationCap, ClipboardCheck, Settings, Bell, Menu, X, ShieldCheck, ScrollText, FlaskConical, Globe, Inbox, BarChart3 } from 'lucide-react';
 import { useState } from 'react';
 import { IripMark } from './shared/IripMark';
 import { DemoDisclosure } from './shared/DemoNotice';
 
+// Navigation per workspace. Keep these short: a page belongs here only if the
+// person does it regularly. ['§', 'Heading'] starts a labelled group.
+// The 4th element lists roles that see the item (UI only; the API enforces access).
+const ACAD = ['academic_ops', 'admin', 'owner'];
+const ADMIN = ['admin', 'owner'];
 const menus = {
   app: [
-    ['Home', '/app', LayoutDashboard], ['Learn', '/app/learning', BookOpen],
-    ['Scholarships', '/app/scholarships', GraduationCap],
-    ['Recorded courses', '/app/courses', BookOpen],
-    ['Guided path', '/app/growth', BookOpen],
-    ['Private portfolio', '/app/portfolio', ClipboardCheck],
-    ['Career & support', '/app/career', GraduationCap],
-    ['Alumni pilot', '/app/alumni', Users],
-    ['Opportunities roadmap', '/app/opportunities', Users],
-    ['Calendar', '/app/calendar', CalendarDays], ['Assignments', '/app/assignments', ClipboardCheck],
-    ['Projects', '/app/projects', Users], ['Study plan', '/app/plan', BookOpen],
-    ['Billing', '/app/billing', Banknote], ['Certificates', '/app/certificates', Award],
-    ['Subscription', '/app/subscription', Banknote],
-    ['Support', '/app/support', Headphones], ['Notifications', '/app/notifications', Bell],
+    ['Home', '/app', LayoutDashboard], ['My courses', '/app/learning', BookOpen],
+    ['Assignments', '/app/assignments', ClipboardCheck], ['Calendar', '/app/calendar', CalendarDays],
+    ['Research projects', '/app/projects', Users], ['Certificates', '/app/certificates', Award],
+    ['Payments', '/app/billing', Banknote], ['Help & support', '/app/support', Headphones],
+    ['Notifications', '/app/notifications', Bell],
   ],
   mentor: [
-    ['Overview', '/mentor', LayoutDashboard], ['Classes', '/mentor/classes', CalendarDays],
-    ['Course studio', '/mentor/courses', BookOpen],
-    ['Artifact feedback', '/mentor/feedback', ClipboardCheck],
-    ['Grading', '/mentor/grading', ClipboardCheck], ['Projects', '/mentor/projects', Users],
-    ['Availability', '/mentor/availability', CalendarDays], ['Topics', '/mentor/topics', BookOpen],
-    ['Earnings', '/mentor/earnings', Banknote], ['Application', '/mentor/application', GraduationCap],
+    ['Overview', '/mentor', LayoutDashboard], ['My classes', '/mentor/classes', CalendarDays],
+    ['Grading', '/mentor/grading', ClipboardCheck], ['Research projects', '/mentor/projects', Users],
+    ['Availability', '/mentor/availability', CalendarDays], ['My mentor profile', '/mentor/application', GraduationCap],
   ],
   admin: [
-    ['Overview', '/admin', LayoutDashboard], ['Modules', '/admin/modules', LayoutDashboard],
-    ['Learners', '/admin/learners', Users, ['academic_ops', 'support', 'admin', 'owner']], ['Catalog', '/admin/catalog', BookOpen, ['academic_ops', 'admin', 'owner']],
-    ['Approval queue', '/admin/approvals', ClipboardCheck, ['academic_ops', 'admin', 'owner']],
-    ['Academics', '/admin/academics', BookOpen, ['academic_ops', 'admin', 'owner']],
-    ['Learner success', '/admin/learner-success', GraduationCap, ['academic_ops', 'admin', 'owner']],
-    ['Mentors', '/admin/mentors', GraduationCap, ['academic_ops', 'admin', 'owner']],
-    ['Projects', '/admin/projects', Users, ['academic_ops', 'admin', 'owner']],
-    ['Content', '/admin/content', BookOpen, ['academic_ops', 'admin', 'owner']],
-    ['Automations', '/admin/automations', Bell, ['admin', 'owner']],
-    ['Cohorts', '/admin/cohorts', CalendarDays, ['academic_ops', 'admin', 'owner']], ['Admissions', '/admin/admissions', ClipboardCheck, ['academic_ops', 'admin', 'owner']],
-    ['CRM', '/admin/crm', Users, ['academic_ops', 'admin', 'owner']], ['Support', '/admin/support', Headphones, ['support', 'admin', 'owner']],
-    ['Finance', '/admin/finance', Banknote, ['finance', 'admin', 'owner']], ['Certificates', '/admin/certificates', Award, ['academic_ops', 'admin', 'owner']],
-    ['Reports', '/admin/reports', LayoutDashboard, ['academic_ops', 'finance', 'admin', 'owner']], ['Settings', '/admin/settings', Settings, ['admin', 'owner']],
+    ['Overview', '/admin', LayoutDashboard],
+    ['§', 'People'],
+    ['Learners', '/admin/learners', Users, ['academic_ops', 'support', 'admin', 'owner']],
+    ['Mentors', '/admin/mentors', GraduationCap, ACAD],
+    ['Staff access', '/admin/staff', ShieldCheck, ADMIN],
+    ['§', 'Teaching'],
+    ['Programs & courses', '/admin/programs', BookOpen, ACAD],
+    ['Cohorts & classes', '/admin/cohorts', CalendarDays, ACAD],
+    ['Research projects', '/admin/projects', FlaskConical, ACAD],
+    ['Admissions', '/admin/admissions', ClipboardCheck, ACAD],
+    ['§', 'Website'],
+    ['Website content', '/admin/website', Globe, ACAD],
+    ['§', 'Service'],
+    ['Support tickets', '/admin/support', Headphones, ['support', 'admin', 'owner']],
+    ['Inquiries', '/admin/inquiries', Inbox, ['academic_ops', 'support', 'admin', 'owner']],
+    ['Certificates', '/admin/certificates', Award, ACAD],
+    ['§', 'Money & records'],
+    ['Finance', '/admin/finance', Banknote, ['finance', 'admin', 'owner']],
+    ['Reports', '/admin/reports', BarChart3, ['academic_ops', 'finance', 'admin', 'owner']],
+    ['Audit log', '/admin/audit', ScrollText, ADMIN],
   ],
 };
+
+/** Visible items for these roles; drops group headings that end up empty. */
+export function visibleNav(items, roles) {
+  const allowed = items.filter(([key, , , required]) => key === '§' || !required || required.some((role) => roles.includes(role)));
+  return allowed.filter((item, i) => item[0] !== '§' || (allowed[i + 1] && allowed[i + 1][0] !== '§'));
+}
 
 export function PortalLayout() {
   const { user, roles, logout } = useAuth();
@@ -66,7 +73,7 @@ export function PortalLayout() {
     roles.some((r) => ['academic_ops', 'finance', 'support', 'admin', 'owner'].includes(r)) && ['Operations', '/admin'],
   ].filter(Boolean);
 
-  const navItems = (menus[section] || []).filter(([, , , requiredRoles]) => !requiredRoles || requiredRoles.some((role) => roles.includes(role)));
+  const navItems = visibleNav(menus[section] || [], roles);
 
   return (
     <div className="portal-canvas flex min-h-screen flex-col md:flex-row">
@@ -113,7 +120,9 @@ export function PortalLayout() {
           </div>
         </div>
         <nav aria-label={`${section} navigation`} className="flex gap-1 overflow-x-auto p-2 md:flex-col">
-          {navItems.map(([label, to, Icon]) => (
+          {navItems.map(([label, to, Icon]) => label === '§' ? (
+            <p key={`group-${to}`} className="hidden px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500 md:block">{to}</p>
+          ) : (
             <NavLink
               key={to}
               to={to}

@@ -479,3 +479,7 @@ dialog.irip-navigation-sheet::backdrop { background: rgb(var(--irip-indigo) / .4
     animation: scale-in 0.25s ease-out;
   }
 }
+
+/* Editor: briefly highlight the form section an "Edit" button in the preview jumped to. */
+.irip-edit-flash { box-shadow: 0 0 0 3px rgb(164 155 203 / 0.9); }
+@media (prefers-reduced-motion: reduce) { .irip-edit-flash { transition: none; } }

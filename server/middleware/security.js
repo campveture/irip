@@ -28,12 +28,16 @@ function apiSafety(origins) {
 }
 
 // Bounded, process-local abuse protection, not a production distributed limiter.
-function rateLimit({ limit = 30, windowMs = 60000, maxKeys = 2000, clock = Date.now } = {}) {
+/**
+ * Fixed-window in-memory limiter. `key(req)` chooses the bucket (default: client IP);
+ * a falsy key falls back to the IP.
+ */
+function rateLimit({ limit = 30, windowMs = 60000, maxKeys = 2000, clock = Date.now, key: keyOf = null } = {}) {
   const entries = new Map();
   return (req, res, next) => {
     const now = clock();
     for (const [key, row] of entries) if (row.until <= now) entries.delete(key);
-    const key = req.ip;
+    const key = (keyOf && keyOf(req)) || req.ip;
     let row = entries.get(key);
     if (!row) {
       if (entries.size >= maxKeys) return res.status(429).json({ error: 'rate_limited', message: 'Please retry later.' });

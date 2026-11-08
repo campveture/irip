@@ -47,7 +47,7 @@ test('page changes animate only the new content, including history and rapid nav
   await page.locator('footer').getByRole('link', { name: 'Projects', exact: true }).click();
   await expect(page).toHaveURL(/\/projects$/);
   await expect(content).toHaveAttribute('data-motion-count', '1');
-  await expect(page.getByRole('heading', { name: /3 programs found/ })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: /1 program found/ })).toHaveCount(0);
   await expect.poll(() => content.evaluate(element => element.getAnimations().length)).toBe(0);
   await page.goBack();
   await expect(page).toHaveURL(/\/programs$/);

@@ -35,9 +35,12 @@ export interface LaunchDetails {
 function parseLaunch(value: unknown, id: string | number, firstClass: string, deadline: string | null): LaunchDetails | null {
   if (value === null || value === undefined) return null;
   const row = record(value), key = text(row.key), position = count(row.position);
-  if (!/^\d{4}-(?:0[1-9]|1[0-2])$/.test(key) || id !== `research-bootcamp-${key}` || position > 1
-    || row.standard_fee !== 25000 || row.discount !== (position === 0 ? 4000 : 0)
-    || row.total_fee !== 25000 - Number(row.discount) || row.currency !== 'BDT' || row.payment_mode !== 'demo_only'
+  if (!/^\d{4}-(?:0[1-9]|1[0-2])$/.test(key) || id !== `research-methods-acceleration-${key}` || position > 1
+    // Prices come from the admin-editable program record; only their arithmetic is checked here.
+    || typeof row.standard_fee !== 'number' || !Number.isSafeInteger(row.standard_fee) || row.standard_fee <= 0
+    || typeof row.discount !== 'number' || !Number.isSafeInteger(row.discount) || row.discount < 0 || row.discount > row.standard_fee
+    || (position === 1 && row.discount !== 0)
+    || row.total_fee !== row.standard_fee - row.discount || row.currency !== 'BDT' || row.payment_mode !== 'demo_only'
     || firstClass.slice(0, 7) !== key || new Date(`${firstClass}T00:00:00Z`).getUTCDay() !== 5
     || Number(firstClass.slice(-2)) < 15 || Number(firstClass.slice(-2)) > 21
     || deadline === null || Date.parse(deadline) !== Date.parse(`${firstClass}T17:59:00Z`) - 5 * 86400000
@@ -52,7 +55,7 @@ function parseLaunch(value: unknown, id: string | number, firstClass: string, de
       || (due === null ? installment.due_at !== null : typeof installment.due_at !== 'string' || Date.parse(installment.due_at) !== Date.parse(due!))) throw new Error('Launch installment amounts or dates do not reconcile.');
     return { amount, due_at: due ?? null };
   });
-  return { key, position, standard_fee: 25000, discount: count(row.discount), total_fee: total, currency: 'BDT', installments };
+  return { key, position, standard_fee: count(row.standard_fee), discount: count(row.discount), total_fee: total, currency: 'BDT', installments };
 }
 
 export interface PlannedSession {
@@ -85,7 +88,7 @@ export function parseCohortPlans(value: unknown): readonly CohortPlan[] {
   const ids = new Set<number | string>();
   return value.map(item => {
     const row = record(item), seats = record(row.seats), plan = record(row.plan);
-    const id = typeof row.id === 'string' && /^research-bootcamp-\d{4}-(?:0[1-9]|1[0-2])$/.test(row.id) ? row.id : count(row.id);
+    const id = typeof row.id === 'string' && /^research-methods-acceleration-\d{4}-(?:0[1-9]|1[0-2])$/.test(row.id) ? row.id : count(row.id);
     const capacity = count(row.capacity);
     if ((typeof id === 'number' && id < 1) || ids.has(id) || row.status !== 'open' || seats.basis !== 'synthetic' || plan.status !== 'proposed'
       || plan.timezone !== 'Asia/Dhaka' || plan.start_time !== '20:30' || plan.session_minutes !== 120

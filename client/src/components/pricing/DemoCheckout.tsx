@@ -12,7 +12,7 @@ export default function DemoCheckout() {
   useEffect(() => {
     let active = true;
     setRecord(null); setError('');
-    if (slug !== 'research-bootcamp' || !intake || !/^\d{4}-(?:0[1-9]|1[0-2])$/.test(intake)) { setError('This launch intake is not available. Choose an intake from the program pricing page.'); return; }
+    if (slug !== 'research-methods-acceleration' || !intake || !/^\d{4}-(?:0[1-9]|1[0-2])$/.test(intake)) { setError('This launch intake is not available. Choose an intake from the program pricing page.'); return; }
     api.get(`/public/programs/${slug}`).then((payload: unknown) => {
       if (!payload || typeof payload !== 'object' || !('program' in payload) || !('cohorts' in payload)) throw new Error('Checkout details could not be verified.');
       const program = payload.program;
@@ -26,7 +26,7 @@ export default function DemoCheckout() {
   const cohort = record?.cohort, launch = cohort?.launch;
   const closed = cohort && (cohort.seats.remaining === 0 || (cohort.enrollment_deadline !== null && Date.parse(cohort.enrollment_deadline) <= Date.parse(cohort.seats.as_of)));
   return <main className="container-page py-10 sm:py-14">
-    <Link to={`/programs/research-bootcamp?intake=${encodeURIComponent(intake ?? '')}#pricing`} className="text-sm font-semibold text-brand-800 underline">Back to intake pricing</Link>
+    <Link to={`/programs/research-methods-acceleration?intake=${encodeURIComponent(intake ?? '')}#pricing`} className="text-sm font-semibold text-brand-800 underline">Back to intake pricing</Link>
     <section className="mx-auto mt-6 max-w-3xl overflow-hidden rounded-3xl border border-brand-100 bg-white shadow-sm">
       <header className="bg-brand-900 p-6 text-white sm:p-8"><p className="text-xs font-semibold uppercase tracking-widest text-brand-200">Demo checkout · No payments</p><h1 className="mt-3 text-3xl font-semibold">Review your enrollment plan.</h1><p className="mt-3 text-sm leading-6 text-brand-100">This is a read-only checkout preview. It does not enroll you, reserve a place, create an order or send you to a payment provider.</p></header>
       <div className="p-6 sm:p-8">

@@ -3,7 +3,7 @@ import { apiHeaders } from './http';
 
 test('public pages share the same header, section and footer width at every breakpoint', async ({ page }, info) => {
   test.setTimeout(120000);
-  const paths = ['/', '/programs', '/courses', '/projects', '/mentors', '/about', '/teach', '/teach/apply', '/how-it-works', '/faq', '/contact', '/student-value', '/resources', '/events', '/stories', '/ideas', '/internships', '/institutions', '/labs', '/demo-guide', '/signup', '/login', '/recover', '/verify', '/certificates', '/policies/privacy', '/programs/research-bootcamp', '/enrol/research-bootcamp/2027-01'];
+  const paths = ['/', '/programs', '/courses', '/projects', '/mentors', '/about', '/teach', '/teach/apply', '/how-it-works', '/faq', '/contact', '/student-value', '/resources', '/events', '/stories', '/ideas', '/internships', '/institutions', '/labs', '/demo-guide', '/signup', '/login', '/recover', '/verify', '/certificates', '/policies/privacy', '/programs/research-methods-acceleration', '/enrol/research-methods-acceleration/2027-01'];
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     for (const path of paths) {
@@ -118,8 +118,8 @@ test('desktop portal sidebar stays pinned and its long menu scrolls independentl
   await expect.poll(() => sidebar.evaluate(element => Math.round(element.getBoundingClientRect().top))).toBe(0);
   expect((await sidebar.boundingBox())!.x).toBe(initial!.x);
   const pagePosition = await page.evaluate(() => window.scrollY);
-  await sidebar.getByRole('link', { name: 'Settings', exact: true }).scrollIntoViewIfNeeded();
-  await expect(sidebar.getByRole('link', { name: 'Settings', exact: true })).toBeVisible();
+  await sidebar.getByRole('link', { name: 'Audit log', exact: true }).scrollIntoViewIfNeeded();
+  await expect(sidebar.getByRole('link', { name: 'Audit log', exact: true })).toBeVisible();
   expect(await sidebar.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
   expect(await page.evaluate(() => window.scrollY)).toBe(pagePosition);
   await page.screenshot({ path: info.outputPath('sticky-portal-sidebar.png') });

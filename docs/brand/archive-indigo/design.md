@@ -30,18 +30,18 @@ The design should work for prospective learners, academic mentors and institutio
 | Typography | Inter is used for navigation and interface text; desktop navigation measured approximately 13px | Keep Inter; test modest size improvements against available width |
 | Catalog | Programs search and Domain/Level filter groups, counts, cards and detail links | Style existing controls without replacing filter logic |
 | Filters | Any selected tag within a group; both groups must match | Preserve OR-within / AND-between behavior exactly |
-| Bootcamp detail | Overview, Cohorts, Pricing and Courses tabs | Preserve tab roles, selection, panels and navigation behavior |
+| Research Methods Acceleration detail | Overview, Cohorts, Pricing and Courses tabs | Preserve tab roles, selection, panels and navigation behavior |
 | Pricing | Two intake choices, selected state, different totals, installment information and demo enrollment link | Preserve all calculations, date rules and targets |
 | Contact destination | Explicit read-only notice; no live forms, accounts, submissions or saved data on hosted preview | This is intentional, not a missing feature to repair |
 | Footer | Local demonstration and hosted read-only notices; policy, certificate and support links | Preserve notices, destinations and readable contrast |
 
 Current sampled colors included green #245448, dark text #24323A, muted text #626F71, warm background #F5F3ED and soft surface #EAE8DF. These are observations of rendered elements, not a complete source-code token inventory.
 
-The bootcamp Pricing tab was activated during inspection. It displayed January 2027 at BDT 21,000, a following February 2027 intake at BDT 25,000, and a proposed three-installment plan. **These values are evidence of existing behavior, not constants to copy into code.** Dates and eligible intakes may change. The current repository's data and calculation logic remain authoritative.
+The program's Pricing tab was activated during inspection. It displayed January 2027 at BDT 21,000, a following February 2027 intake at BDT 25,000, and a proposed three-installment plan. **These values are evidence of existing behavior, not constants to copy into code.** Dates and eligible intakes may change. The current repository's data and calculation logic remain authoritative.
 
 ### Review boundaries
 
-This was a public desktop browser review of the homepage, program catalog, bootcamp detail/pricing and contact preview state, plus navigation/footer destinations. The review did not inspect the source repository, authenticate into portals, submit forms, exercise a live payment service, or verify a backend. Mobile viewports and every route were not exhaustively tested. Do not describe this as a full functional or accessibility certification.
+This was a public desktop browser review of the homepage, program catalog, Research Methods Acceleration detail/pricing and contact preview state, plus navigation/footer destinations. The review did not inspect the source repository, authenticate into portals, submit forms, exercise a live payment service, or verify a backend. Mobile viewports and every route were not exhaustively tested. Do not describe this as a full functional or accessibility certification.
 
 Some navigation captures showed loading states. Do not treat temporary loading opacity as a confirmed permanent visual defect.
 
@@ -425,7 +425,7 @@ Do not alter databases, services, server actions, middleware, payment configurat
 
 The public demo intentionally disables real services. Preserve “Portal unavailable,” read-only notices and all synthetic/proposed/pending-approval labels. Do not enable contact submissions, enrollment, payment, certificate lookup, accounts or portals.
 
-The bootcamp has four tabs and dynamic intake/pricing presentation. Treat those as functional code, not static marketing elements. Preserve existing selection state, installment calculation, date handling and enrollment destinations exactly.
+The Research Methods Acceleration program has four tabs and dynamic intake/pricing presentation. Treat those as functional code, not static marketing elements. Preserve existing selection state, installment calculation, date handling and enrollment destinations exactly.
 
 If a proposed styling improvement would require behavior changes, omit that improvement, document the reason and continue the rest of the visual task. Do not silently broaden scope.
 
@@ -476,7 +476,7 @@ Do not add decorative sections, new marketing claims, a theme toggle, new icons,
 Use the existing repository test/build tooling. Validate:
 - Homepage and shared header/footer.
 - Programs search and multi-filter behavior, counts and clear/reset.
-- All four bootcamp tabs.
+- All four program tabs.
 - Both intake selections and resulting totals, installment amounts and link targets.
 - Same date/timezone rules with a controlled baseline.
 - Read-only contact and existing portal/certificate restrictions.
@@ -511,7 +511,7 @@ Do not say “all functionality preserved” without evidence. State the checks 
 
 ## 13. Source notes
 
-- Live observations: https://irip.vercel.app/ ; the public program catalog, bootcamp detail and contact destination were inspected directly. These observations describe the reviewed state, not a permanent feature guarantee.
+- Live observations: https://irip.vercel.app/ ; the public program catalog, Research Methods Acceleration detail and contact destination were inspected directly. These observations describe the reviewed state, not a permanent feature guarantee.
 - Source Serif official specimen: https://adobe-fonts.github.io/source-serif/
 - Source Serif official repository and licensing/distribution information: https://github.com/adobe-fonts/source-serif
 - WCAG text contrast explanation: https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html

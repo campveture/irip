@@ -44,7 +44,7 @@ test('Archive Indigo keeps real text, hover, selected and necessary field bounda
   await skip.click();
   await expect(page.locator('#route-content')).toBeFocused();
 
-  await page.goto('/programs/research-bootcamp#pricing');
+  await page.goto('/programs/research-methods-acceleration#pricing');
   const choices = page.getByRole('group', { name: 'Choose launch intake' }).getByRole('button');
   await expect(choices).toHaveCount(2);
   for (const index of [0, 1]) {
@@ -71,7 +71,7 @@ test('public surfaces fit the existing breakpoints, intermediate nav widths and 
   page.on('pageerror', error => errors.push(error.message));
   for (const width of [320, 360, 390, 768, 1024, 1279, 1280, 1440]) {
     await page.setViewportSize({ width, height: 960 });
-    for (const route of ['/', '/programs', '/programs/research-bootcamp#pricing', '/courses', '/about', '/projects', '/mentors']) {
+    for (const route of ['/', '/programs', '/programs/research-methods-acceleration#pricing', '/courses', '/about', '/projects', '/mentors']) {
       await page.goto(route);
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       if (route.includes('#pricing')) await expect(page.getByRole('group', { name: 'Choose launch intake' })).toBeVisible();
@@ -85,7 +85,7 @@ test('public surfaces fit the existing breakpoints, intermediate nav widths and 
   expect(errors).toEqual([]);
   // 200% zoom at a 1280px-wide display presents approximately a 640px CSS layout.
   await page.setViewportSize({ width: 640, height: 480 });
-  await page.goto('/programs/research-bootcamp#pricing');
+  await page.goto('/programs/research-methods-acceleration#pricing');
   await expect(page.getByRole('tab', { name: 'Pricing', exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath('archive-pricing-200-percent-reflow.png') });

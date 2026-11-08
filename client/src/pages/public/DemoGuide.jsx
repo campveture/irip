@@ -23,7 +23,7 @@ const journeys = [
   { id: 'mentor', title: 'Try the mentor workspace', account: 'mentor', tasks: [
     { label: 'See assigned classes and sessions', href: '/mentor/classes' },
     { label: 'Inspect the grading queue and project workspace', href: '/mentor/grading' },
-    { label: 'Review demo earnings without initiating a payout', href: '/mentor/earnings' },
+    { label: 'Set weekly availability for teaching', href: '/mentor/availability' },
     { label: 'Give rubric feedback on an explicitly shared private artifact', href: '/mentor/feedback' },
   ] },
   { id: 'academic', title: 'Review academic operations', account: 'academic', tasks: [

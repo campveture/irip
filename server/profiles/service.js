@@ -9,6 +9,8 @@ function text(value, name, min = 0, max = 2000) {
   if (typeof value !== 'string' || value.trim().length < min || value.trim().length > max || /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(value)) fail(`${name} must contain ${min}–${max} characters.`);
   return value.trim();
 }
+/** Names and headlines are shown as plain text: refuse < and > (same rule as admin/validate.js { plain: true }). */
+function plainText(value, name, min, max) { const out = text(value, name, min, max); if (/[<>]/.test(out)) fail(`${name} cannot contain the characters < or >.`); return out; }
 function integer(value, name, min = 0) { if (!Number.isSafeInteger(value) || value < min) fail(`Invalid ${name}.`); return value; }
 function id(value) { if (!/^[1-9]\d*$/.test(String(value))) fail('Invalid ID.'); return integer(Number(value), 'ID', 1); }
 function audit(actor, action, target) {
@@ -30,7 +32,7 @@ function profile(userId) {
 }
 function saveProfile(userId, body) {
   input(body, ['full_name', 'phone', 'language', 'timezone', 'goals', 'interests', 'study_plan', 'version']);
-  const name = text(body.full_name, 'Name', 2, 120), phone = text(body.phone, 'Phone', 0, 40);
+  const name = plainText(body.full_name, 'Name', 2, 120), phone = text(body.phone, 'Phone', 0, 40);
   const goals = text(body.goals, 'Goals'), interests = text(body.interests, 'Interests', 0, 500), studyPlan = text(body.study_plan, 'Study plan');
   const language = text(body.language, 'Language', 2, 2), timezone = text(body.timezone, 'Timezone', 1, 100), version = integer(body.version, 'profile version');
   if (!['en', 'bn'].includes(language)) fail('Unsupported language.');
@@ -48,37 +50,155 @@ function saveProfile(userId, body) {
   })();
 }
 
-const applicationFields = ['public_name', 'bio', 'expertise', 'experience', 'availability', 'language', 'public_consent', 'version'];
+const applicationFields = ['public_name', 'bio', 'expertise', 'experience', 'availability', 'language', 'public_consent', 'version', 'headline', 'qualifications', 'links'];
+// ---- Extra public fields (headline, qualifications, public links). They follow
+// the same governance as the biography: saved on a draft revision, published
+// only when staff approve that revision.
+const LINK_KINDS = { linkedin: host => host === 'linkedin.com' || host.endsWith('.linkedin.com'), scholar: host => /^scholar\.google\.[a-z.]+$/.test(host), orcid: host => host === 'orcid.org' || host.endsWith('.orcid.org'), website: () => true };
+const LINK_LABEL = { linkedin: 'LinkedIn', scholar: 'Google Scholar', orcid: 'ORCID', website: 'Personal website' };
+function httpsUrl(value, name, { host } = {}) {
+  if (typeof value !== 'string') fail(`${name} must be text.`);
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  if (trimmed.length > 300) fail(`${name} must contain at most 300 characters.`);
+  let url; try { url = new URL(trimmed); } catch { fail(`${name} must be a full web address starting with https://`); }
+  if (url.protocol !== 'https:' || url.username || url.password) fail(`${name} must start with https:// and contain no password.`);
+  if (host && !host(url.hostname.toLowerCase())) fail(`${name} must be a ${name} address.`);
+  return url.toString();
+}
+function parseJson(value, fallback) { try { const parsed = JSON.parse(value); return parsed && typeof parsed === 'object' ? parsed : fallback; } catch { return fallback; } }
+/** Normalises stored JSON so only well-formed, https-only values ever leave the server. */
+function storedQualifications(value) {
+  const list = parseJson(value, []);
+  return Array.isArray(list) ? list.filter(q => q && typeof q.degree === 'string' && typeof q.institution === 'string').slice(0, 10)
+    .map(q => ({ degree: q.degree, institution: q.institution, year: Number.isSafeInteger(q.year) ? q.year : null })) : [];
+}
+function storedLinks(value) {
+  const links = parseJson(value, {}), out = {};
+  for (const kind of Object.keys(LINK_KINDS)) {
+    if (typeof links[kind] !== 'string' || !links[kind]) continue;
+    try { out[kind] = httpsUrl(links[kind], LINK_LABEL[kind], { host: LINK_KINDS[kind] }); } catch { /* drop invalid stored value */ }
+  }
+  return out;
+}
+function publicExtras(body, base) {
+  const headline = body.headline === undefined ? base.headline : plainText(body.headline, 'Professional headline', 0, 120);
+  let qualifications = base.qualifications;
+  if (body.qualifications !== undefined) {
+    if (!Array.isArray(body.qualifications) || body.qualifications.length > 10) fail('Add at most 10 qualifications.');
+    const maxYear = new Date().getUTCFullYear() + 1;
+    qualifications = body.qualifications.map(item => {
+      const q = input(item, ['degree', 'institution', 'year']);
+      const year = q.year === null || q.year === undefined || q.year === '' ? null : q.year;
+      if (year !== null && (!Number.isSafeInteger(year) || year < 1950 || year > maxYear)) fail(`Qualification year must be between 1950 and ${maxYear}.`);
+      return { degree: text(q.degree, 'Degree or qualification', 2, 120), institution: text(q.institution, 'Institution', 2, 160), year };
+    });
+  }
+  let links = base.links;
+  if (body.links !== undefined) {
+    const raw = input(body.links, Object.keys(LINK_KINDS));
+    links = {};
+    for (const kind of Object.keys(raw)) { const url = httpsUrl(raw[kind], LINK_LABEL[kind], { host: LINK_KINDS[kind] }); if (url) links[kind] = url; }
+  }
+  return { headline, qualifications, links };
+}
+function withExtras(row) {
+  if (!row) return null;
+  return { ...row, headline: row.headline ?? '', qualifications: storedQualifications(row.qualifications), public_links: undefined, links: storedLinks(row.public_links) };
+}
 function latest(userId) { return db.prepare('SELECT * FROM mentor_applications WHERE user_id=? ORDER BY revision DESC LIMIT 1').get(userId) || null; }
 function approvedProfile(userId) {
-  return db.prepare(`SELECT public_name,bio,expertise,status,public_visible,approved_revision_id,revision FROM mentor_profiles WHERE user_id=? AND status IN ('approved','suspended')`).get(userId) || null;
+  const row = db.prepare(`SELECT public_name,bio,expertise,status,public_visible,approved_revision_id,revision,headline,language,qualifications,public_links FROM mentor_profiles WHERE user_id=? AND status IN ('approved','suspended')`).get(userId) || null;
+  if (!row) return null;
+  const { public_links, ...rest } = withExtras(row);
+  return rest;
 }
+function cleanApplication(row) { if (!row) return null; const { public_links, ...rest } = withExtras(row); return rest; }
 function ownApplication(userId) {
   const history = db.prepare(`SELECT id,application_id,decision,reason,created_at FROM mentor_decisions WHERE user_id=? ORDER BY id DESC`).all(userId);
-  return { application: latest(userId), approved_profile: approvedProfile(userId), history };
+  return { application: cleanApplication(latest(userId)), approved_profile: approvedProfile(userId), history };
+}
+
+// ---- "For IRIP only" details: private, saved immediately (no review), versioned.
+const CONTACT_METHODS = ['email', 'phone', 'whatsapp'];
+const privateFields = ['phone', 'institution', 'years_experience', 'cv_url', 'supervision_areas', 'max_learners', 'max_projects', 'contact_method', 'coordinator_notes', 'version'];
+function hasMentorRecord(userId) {
+  return Boolean(db.prepare('SELECT 1 FROM mentor_profiles WHERE user_id=? UNION SELECT 1 FROM mentor_applications WHERE user_id=? LIMIT 1').get(userId, userId));
+}
+function privateDetails(userId) {
+  const row = db.prepare(`SELECT phone,institution,years_experience,cv_url,supervision_areas,max_learners,max_projects,contact_method,coordinator_notes,version,updated_at FROM mentor_private_details WHERE user_id=?`).get(userId);
+  return row || { phone: '', institution: '', years_experience: null, cv_url: '', supervision_areas: '', max_learners: null, max_projects: null, contact_method: 'email', coordinator_notes: '', version: 0, updated_at: null };
+}
+function ownPrivateDetails(userId) {
+  if (!hasMentorRecord(userId)) fail('Save a mentor profile draft first.', 404);
+  return privateDetails(userId);
+}
+function optionalInt(value, name, min, max) {
+  if (value === null || value === undefined || value === '') return null;
+  if (!Number.isSafeInteger(value) || value < min || value > max) fail(`${name} must be a whole number from ${min} to ${max}.`);
+  return value;
+}
+function savePrivateDetails(userId, body) {
+  input(body, privateFields);
+  const version = integer(body.version, 'details version');
+  const phone = text(body.phone ?? '', 'Phone', 0, 40);
+  if (phone && !/^\+?[0-9 ()-]{6,40}$/.test(phone)) fail('Phone may contain only digits, spaces, brackets, dashes and a leading +.');
+  const values = {
+    phone, institution: text(body.institution ?? '', 'Current institution or employer', 0, 160),
+    years_experience: optionalInt(body.years_experience, 'Years of experience', 0, 60),
+    cv_url: httpsUrl(body.cv_url ?? '', 'CV or portfolio link'),
+    supervision_areas: text(body.supervision_areas ?? '', 'Research and supervision areas', 0, 1000),
+    max_learners: optionalInt(body.max_learners, 'Maximum learners per intake', 0, 200),
+    max_projects: optionalInt(body.max_projects, 'Maximum projects per intake', 0, 50),
+    contact_method: body.contact_method ?? 'email',
+    coordinator_notes: text(body.coordinator_notes ?? '', 'Notes for coordinators', 0, 1000),
+  };
+  if (!CONTACT_METHODS.includes(values.contact_method)) fail('Preferred contact must be email, phone or WhatsApp.');
+  return db.transaction(() => {
+    if (!hasMentorRecord(userId)) fail('Save a mentor profile draft first.', 404);
+    const now = new Date().toISOString(), cols = Object.keys(values);
+    let changed;
+    if (version === 0) {
+      changed = db.prepare(`INSERT INTO mentor_private_details(user_id,${cols.join(',')},version,updated_at) VALUES (?,${cols.map(() => '?').join(',')},1,?) ON CONFLICT(user_id) DO NOTHING`)
+        .run(userId, ...Object.values(values), now).changes;
+    } else {
+      changed = db.prepare(`UPDATE mentor_private_details SET ${cols.map(c => `${c}=?`).join(',')},version=version+1,updated_at=? WHERE user_id=? AND version=?`)
+        .run(...Object.values(values), now, userId, version).changes;
+    }
+    if (!changed) fail('Someone else changed these details. Reload to see the latest version.', 409);
+    audit(userId, 'mentor_private_details_saved', userId);
+    return privateDetails(userId);
+  })();
 }
 function saveApplication(userId, body) {
   input(body, applicationFields);
-  const values = [text(body.public_name, 'Public name', 0, 120), text(body.bio, 'Biography', 0, 3000),
+  const values = [plainText(body.public_name, 'Public name', 0, 120), text(body.bio, 'Biography', 0, 3000),
     text(body.expertise, 'Expertise', 0, 500), text(body.experience, 'Experience', 0, 3000),
     text(body.availability, 'Availability', 0, 500), text(body.language, 'Language', 2, 4)];
   if (!['en','bn','both'].includes(body.language) || typeof body.public_consent !== 'boolean') fail('Choose a supported language and an explicit public-profile preference.');
   const version = integer(body.version, 'application version');
   return db.transaction(() => {
     const row = latest(userId), now = new Date().toISOString();
+    // Fields a client leaves out are carried over from the latest revision (or the approved copy).
+    const base = withExtras(row) ?? approvedProfile(userId) ?? { headline: '', qualifications: [], links: {} };
+    const extras = publicExtras(body, { headline: base.headline ?? '', qualifications: base.qualifications ?? [], links: base.links ?? {} });
+    const extraValues = [extras.headline, JSON.stringify(extras.qualifications), JSON.stringify(extras.links)];
     const epoch = db.prepare('SELECT consent_epoch FROM mentor_profiles WHERE user_id=?').get(userId)?.consent_epoch ?? 0;
     if ((row?.version ?? 0) !== version) fail('This application changed. Reload before saving.', 409);
     if (row?.state === 'pending') fail('Submitted applications are locked. Withdraw it before editing.', 409);
     if (row?.state === 'draft') {
-      db.prepare(`UPDATE mentor_applications SET public_name=?,bio=?,expertise=?,experience=?,availability=?,language=?,public_consent=?,consent_epoch=?,state='draft',version=version+1,updated_at=? WHERE id=?`).run(...values, Number(body.public_consent), epoch, now, row.id);
+      db.prepare(`UPDATE mentor_applications SET public_name=?,bio=?,expertise=?,experience=?,availability=?,language=?,public_consent=?,consent_epoch=?,headline=?,qualifications=?,public_links=?,state='draft',version=version+1,updated_at=? WHERE id=?`).run(...values, Number(body.public_consent), epoch, ...extraValues, now, row.id);
     } else {
-      db.prepare(`INSERT INTO mentor_applications(user_id,revision,version,public_name,bio,expertise,experience,availability,language,public_consent,consent_epoch,state,created_at,updated_at)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,'draft',?,?)`).run(userId, (row?.revision ?? 0) + 1, (row?.version ?? 0) + 1, ...values, Number(body.public_consent), epoch, now, now);
+      db.prepare(`INSERT INTO mentor_applications(user_id,revision,version,public_name,bio,expertise,experience,availability,language,public_consent,consent_epoch,headline,qualifications,public_links,state,created_at,updated_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,'draft',?,?)`).run(userId, (row?.revision ?? 0) + 1, (row?.version ?? 0) + 1, ...values, Number(body.public_consent), epoch, ...extraValues, now, now);
     }
     audit(userId, 'mentor_draft_saved', latest(userId).id);
     return ownApplication(userId);
   })();
 }
+const SUSPENDED_SUBMIT = 'Your mentor profile is suspended. You can keep saving drafts, but you cannot submit them for review until an IRIP administrator reinstates you. The reason is in your review history.';
+function mentorStatus(userId) { return db.prepare('SELECT status FROM mentor_profiles WHERE user_id=?').get(userId)?.status ?? null; }
+const isAdmin = roles => Array.isArray(roles) && roles.some(role => ['admin','owner'].includes(role));
 function transitionOwn(userId, action, body) {
   input(body, ['version']); const version = integer(body.version, 'application version', 1);
   return db.transaction(() => {
@@ -87,6 +207,7 @@ function transitionOwn(userId, action, body) {
     if (row.version !== version) fail('This application changed. Reload before continuing.', 409);
     if (action === 'submit' && row.state !== 'draft') fail('Save a new draft before submitting.', 409);
     if (action === 'withdraw' && row.state !== 'pending') fail('Only a pending application can be withdrawn.', 409);
+    if (action === 'submit' && mentorStatus(userId) === 'suspended') fail(SUSPENDED_SUBMIT, 409);
     if (action === 'submit') {
       text(row.public_name, 'Public name', 2, 120); text(row.bio, 'Biography', 20, 3000);
       text(row.expertise, 'Expertise', 3, 500); text(row.experience, 'Experience', 20, 3000); text(row.availability, 'Availability', 3, 500);
@@ -113,7 +234,7 @@ function reviewDetail(userId) {
   const user = db.prepare('SELECT id,full_name,email,status AS account_status FROM users WHERE id=?').get(userId);
   const application = db.prepare('SELECT * FROM mentor_applications WHERE user_id=? AND submitted_at IS NOT NULL ORDER BY revision DESC LIMIT 1').get(userId) || null;
   if (!user || (!application && !approvedProfile(userId))) fail('Submitted mentor record not found.', 404);
-  return { user, application, approved_profile: approvedProfile(userId), history: db.prepare(`SELECT d.id,d.application_id,d.decision,d.reason,d.verification_note,d.grant_access,d.publish,d.created_at,u.full_name AS reviewer_name
+  return { user, application: cleanApplication(application), approved_profile: approvedProfile(userId), private_details: privateDetails(userId), history: db.prepare(`SELECT d.id,d.application_id,d.decision,d.reason,d.verification_note,d.grant_access,d.publish,d.created_at,u.full_name AS reviewer_name
     FROM mentor_decisions d JOIN users u ON u.id=d.reviewer_id WHERE d.user_id=? ORDER BY d.id DESC`).all(userId) };
 }
 function decide(reviewerId, roles, userId, body) {
@@ -132,15 +253,17 @@ function decide(reviewerId, roles, userId, body) {
     if (row.state !== 'pending' || row.version !== version) fail('This submitted revision changed or was already reviewed. Reload before deciding.', 409);
     if (db.prepare('SELECT status FROM users WHERE id=?').get(userId)?.status !== 'active') fail('This account is not active.', 409);
     const epoch = db.prepare('SELECT consent_epoch FROM mentor_profiles WHERE user_id=?').get(userId)?.consent_epoch ?? 0;
+    if (body.decision === 'approved' && mentorStatus(userId) === 'suspended') fail('This mentor is suspended. An administrator or owner must reinstate them before any revision can be approved. You can still request changes or reject.', 409);
     if (body.publish && (!row.public_consent || row.consent_epoch !== epoch)) fail('Public consent is missing or was withdrawn. A newly consented revision is required.', 409);
     const now = new Date().toISOString();
     db.prepare('UPDATE mentor_applications SET state=?,version=version+1,updated_at=? WHERE id=?').run(body.decision, now, row.id);
     if (body.decision === 'approved') {
       const alreadyApproved = approvedProfile(userId)?.status === 'approved';
-      db.prepare(`INSERT INTO mentor_profiles(user_id,public_name,bio,expertise,status,public_visible,approved_revision_id,updated_at)
-        VALUES (?,?,?,?,'approved',?,?,?) ON CONFLICT(user_id) DO UPDATE SET public_name=excluded.public_name,bio=excluded.bio,expertise=excluded.expertise,
-        status='approved',public_visible=excluded.public_visible,approved_revision_id=excluded.approved_revision_id,revision=mentor_profiles.revision+1,updated_at=excluded.updated_at`)
-        .run(userId, row.public_name, row.bio, row.expertise, Number(body.publish), row.id, now);
+      db.prepare(`INSERT INTO mentor_profiles(user_id,public_name,bio,expertise,status,public_visible,approved_revision_id,updated_at,headline,qualifications,public_links,language)
+        VALUES (?,?,?,?,'approved',?,?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET public_name=excluded.public_name,bio=excluded.bio,expertise=excluded.expertise,
+        status='approved',public_visible=excluded.public_visible,approved_revision_id=excluded.approved_revision_id,revision=mentor_profiles.revision+1,updated_at=excluded.updated_at,
+        headline=excluded.headline,qualifications=excluded.qualifications,public_links=excluded.public_links,language=excluded.language`)
+        .run(userId, row.public_name, row.bio, row.expertise, Number(body.publish), row.id, now, row.headline ?? '', row.qualifications ?? '[]', row.public_links ?? '{}', row.language);
       // Copy approval and access are separate. Preserve active grants but never
       // revive legacy/suspended grants without an explicit new access decision.
       if (!alreadyApproved) db.prepare("DELETE FROM role_grants WHERE user_id=? AND role IN ('mentor','supervisor')").run(userId);
@@ -156,18 +279,51 @@ function decide(reviewerId, roles, userId, body) {
     return reviewDetail(userId);
   })();
 }
-function moderate(reviewerId, userId, body) {
+/**
+ * Moderation of an approved mentor:
+ *  - hide: removes the public listing, keeps access (any reviewer);
+ *  - suspend: hides, revokes mentor/supervisor grants, removes every teaching assignment
+ *    (cohort-service#unassignForSuspension) and releases supervised projects
+ *    (teaching-projects#releaseSuspendedSupervisor), all in this one transaction;
+ *  - reinstate: lifts a suspension. Admin/owner only (403 otherwise). Restores the
+ *    mentor grant but not the public listing, cohorts or projects: those need new,
+ *    separate decisions. A suspended mentor cannot submit revisions and no revision of
+ *    theirs can be approved until they are reinstated.
+ * Every action needs a reason and is recorded in mentor_decisions and audit_events.
+ */
+function moderate(reviewerId, roles, userId, body) {
   input(body, ['version','action','reason']); const version = integer(body.version, 'profile version', 1);
+  if (!['suspend','hide','reinstate'].includes(body.action)) fail('Unsupported moderation action.');
   const reason = text(body.reason, 'Reason', 10, 1500);
-  if (!['suspend','hide'].includes(body.action)) fail('Unsupported moderation action.');
   if (reviewerId === userId) fail('You cannot moderate your own mentor privileges.', 403);
+  if (body.action === 'reinstate' && !isAdmin(roles)) fail('Only an administrator or owner can reinstate a suspended mentor.', 403);
   return db.transaction(() => {
     const row = approvedProfile(userId);
     if (!row) fail('Approved profile not found.', 404);
-    if (row.revision !== version || row.status !== 'approved') fail('This profile changed or is not active. Reload before continuing.', 409);
-    db.prepare(`UPDATE mentor_profiles SET public_visible=0,status=?,revision=revision+1,updated_at=? WHERE user_id=?`).run(body.action === 'suspend' ? 'suspended' : row.status, new Date().toISOString(), userId);
-    if (body.action === 'suspend') db.prepare("DELETE FROM role_grants WHERE user_id=? AND role IN ('mentor','supervisor')").run(userId);
-    db.prepare('INSERT INTO mentor_decisions(user_id,reviewer_id,decision,reason,created_at) VALUES (?,?,?,?,?)').run(userId, reviewerId, body.action === 'suspend' ? 'suspended' : 'hidden', reason, new Date().toISOString());
+    const expectedStatus = body.action === 'reinstate' ? 'suspended' : 'approved';
+    if (row.revision !== version || row.status !== expectedStatus) fail(body.action === 'reinstate' ? 'This mentor is not suspended, or the profile changed. Reload before continuing.' : 'This profile changed or is not active. Reload before continuing.', 409);
+    const now = new Date().toISOString();
+    if (body.action === 'reinstate') {
+      if (db.prepare('SELECT status FROM users WHERE id=?').get(userId)?.status !== 'active') fail('This account is not active. Reactivate the account first.', 409);
+      db.prepare(`UPDATE mentor_profiles SET status='approved',public_visible=0,revision=revision+1,updated_at=? WHERE user_id=? AND status='suspended'`).run(now, userId);
+      db.prepare(`INSERT INTO role_grants(user_id,role,scope,granted_by,created_at)
+        SELECT ?,'mentor','global',?,? WHERE NOT EXISTS (SELECT 1 FROM role_grants WHERE user_id=? AND role='mentor' AND scope='global'
+        AND (expiry IS NULL OR julianday(expiry)>julianday('now')))`).run(userId, reviewerId, now, userId);
+      db.prepare('INSERT INTO mentor_decisions(user_id,reviewer_id,decision,reason,grant_access,created_at) VALUES (?,?,?,?,1,?)').run(userId, reviewerId, 'reinstated', reason, now);
+      audit(reviewerId, 'mentor_reinstate', userId);
+      db.prepare("INSERT INTO notifications(user_id,channel,template,deep_link,created_at) VALUES (?,'in_app',?,'/account/mentor-application',?)")
+        .run(userId, 'Your mentor suspension was lifted and your mentor access restored. Cohorts and projects are assigned separately; your public listing stays hidden until a new revision is approved.', now);
+      return reviewDetail(userId);
+    }
+    db.prepare(`UPDATE mentor_profiles SET public_visible=0,status=?,revision=revision+1,updated_at=? WHERE user_id=?`).run(body.action === 'suspend' ? 'suspended' : row.status, now, userId);
+    if (body.action === 'suspend') {
+      db.prepare("DELETE FROM role_grants WHERE user_id=? AND role IN ('mentor','supervisor')").run(userId);
+      const cohorts = require('../admin/cohort-service');
+      cohorts.unassignForSuspension(reviewerId, userId, now);
+      const released = require('../admin/teaching-projects').releaseSuspendedSupervisor(reviewerId, userId, now);
+      if (released.length) cohorts.notifyStaff(`A suspended mentor supervised ${released.length} research project(s). They need a new supervisor; open projects were closed to new applications.`, '/admin/projects', now);
+    }
+    db.prepare('INSERT INTO mentor_decisions(user_id,reviewer_id,decision,reason,created_at) VALUES (?,?,?,?,?)').run(userId, reviewerId, body.action === 'suspend' ? 'suspended' : 'hidden', reason, now);
     audit(reviewerId, `mentor_${body.action}`, userId);
     return reviewDetail(userId);
   })();
@@ -184,4 +340,4 @@ function hideOwn(userId, body) {
   })();
 }
 
-module.exports = { input, text, integer, id, profile, saveProfile, ownApplication, saveApplication, transitionOwn, queue, reviewDetail, decide, moderate, hideOwn };
+module.exports = { storedQualifications, storedLinks, ownPrivateDetails, savePrivateDetails, input, text, integer, id, profile, saveProfile, ownApplication, saveApplication, transitionOwn, queue, reviewDetail, decide, moderate, hideOwn };

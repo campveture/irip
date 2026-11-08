@@ -30,11 +30,18 @@ async function main() {
     CREATE TABLE mentor_profiles(user_id INTEGER PRIMARY KEY,bio TEXT,expertise TEXT,rate INTEGER,status TEXT,updated_at TEXT);
     INSERT INTO users VALUES(1,'Existing Synthetic Mentor');
     INSERT INTO mentor_profiles VALUES(1,'Existing biography','Research',1000,'approved','2026-01-01');
-    INSERT INTO learner_profiles VALUES(1,'old phone','old goals','old plan','2026-01-01');`);
+    INSERT INTO learner_profiles VALUES(1,'old phone','old goals','old plan','2026-01-01');
+    CREATE TABLE mentor_decisions(id INTEGER PRIMARY KEY AUTOINCREMENT, application_id INTEGER, user_id INTEGER NOT NULL, reviewer_id INTEGER NOT NULL,
+      decision TEXT NOT NULL CHECK(decision IN ('approved','changes_requested','rejected','suspended','hidden')), reason TEXT NOT NULL,
+      verification_note TEXT NOT NULL DEFAULT '', grant_access INTEGER NOT NULL DEFAULT 0, publish INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL);
+    INSERT INTO mentor_decisions(user_id,reviewer_id,decision,reason,created_at) VALUES (1,1,'suspended','Legacy suspension reason','2026-01-01');`);
   require('./profiles/schema').initProfiles(legacyDb); require('./profiles/schema').initProfiles(legacyDb);
   assert.equal(legacyDb.prepare('SELECT public_name FROM mentor_profiles WHERE user_id=1').get().public_name, 'Existing Synthetic Mentor');
   assert.equal(legacyDb.prepare('SELECT goals FROM learner_profiles WHERE user_id=1').get().goals, 'old goals');
-  assert.equal(legacyDb.prepare('SELECT rate FROM mentor_profiles WHERE user_id=1').get().rate, 1000); legacyDb.close();
+  assert.equal(legacyDb.prepare('SELECT rate FROM mentor_profiles WHERE user_id=1').get().rate, 1000);
+  assert.equal(legacyDb.prepare("SELECT reason FROM mentor_decisions WHERE decision='suspended'").get().reason, 'Legacy suspension reason', 'decision history survives the CHECK rebuild');
+  legacyDb.prepare("INSERT INTO mentor_decisions(user_id,reviewer_id,decision,reason,created_at) VALUES (1,1,'reinstated','Legacy reinstatement ok','2026-01-02')").run();
+  legacyDb.close();
   initSchema(); seed(); initSchema();
   const original = db.prepare('SELECT * FROM learner_profiles WHERE user_id=6').get();
   initSchema(); assert.deepEqual(db.prepare('SELECT * FROM learner_profiles WHERE user_id=6').get(), original);
@@ -161,6 +168,11 @@ async function main() {
   assert.equal((await request(operations + '/decision', academic.cookie, 'POST', { ...reviewed(), grant_access: false })).status, 200, 'Approval can remain private after consent withdrawal');
   assert.equal((await request('/mentor/dashboard', learner.cookie)).status, 200, 'Profile-only approval preserves existing active mentor grants');
 
+  const taughtBefore = db.prepare('SELECT cohort_id FROM teaching_assignments WHERE mentor_id=?').all(mentor.id).map(r => r.cohort_id);
+  const supervisedBefore = db.prepare('SELECT id, status FROM projects WHERE supervisor_id=?').all(mentor.id);
+  assert.ok(taughtBefore.length > 0 && supervisedBefore.some(p => p.status === 'open'), 'fixture: demo mentor teaches and supervises');
+  const keptProject = supervisedBefore.find(p => p.status === 'open').id;
+  db.prepare("INSERT INTO project_applications(project_id,user_id,proposal,state,created_at) VALUES (?,?,?,'accepted',?)").run(keptProject, other.id, 'Synthetic accepted place', new Date().toISOString());
   const legacy = (await request(`/accounts/operations/mentors/${mentor.id}`, admin.cookie)).body;
   assert.equal((await request(`/accounts/operations/mentors/${mentor.id}/moderation`, admin.cookie, 'POST', { action: 'suspend', version: legacy.approved_profile.revision, reason: 'Synthetic suspension to verify immediate privilege revocation.' })).status, 200);
   assert.equal((await request('/mentor/dashboard', mentor.cookie)).status, 403);
@@ -170,6 +182,52 @@ async function main() {
   assert.equal((await request(`/public/mentors/${mentor.id}`)).status, 404);
   assert.equal((await request('/recorded-courses/catalog')).body.courses.length, 0);
   assert.equal(require('./growth').canReview(mentor.id, learner.id), false);
+
+  // Suspension cascade: teaching assignments and project supervision are released in the same transaction.
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM teaching_assignments WHERE mentor_id=?').get(mentor.id).n, 0, 'suspension removes teaching assignments');
+  for (const cohortId of taughtBefore) assert.ok(db.prepare("SELECT 1 FROM access_changes WHERE kind='teaching_unassign' AND subject_user_id=? AND cohort_id=? AND reason='Mentor suspended'").get(mentor.id, cohortId), 'each removal is recorded so startup seeding never re-adds it');
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM projects WHERE supervisor_id=?').get(mentor.id).n, 0, 'suspension clears supervision');
+  for (const p of supervisedBefore) {
+    const now = db.prepare('SELECT status, supervisor_id FROM projects WHERE id=?').get(p.id);
+    assert.equal(now.supervisor_id, null); assert.equal(now.status, p.status === 'open' ? 'closed' : p.status, 'open projects stop recruiting; others keep their status');
+    assert.ok(db.prepare("SELECT 1 FROM teaching_changes WHERE project_id=? AND action='supervisor_released'").get(p.id));
+  }
+  assert.equal(db.prepare('SELECT state FROM project_applications WHERE project_id=? AND user_id=?').get(keptProject, other.id).state, 'accepted', 'accepted learners keep their places');
+  assert.ok(db.prepare("SELECT 1 FROM notifications WHERE user_id=? AND template LIKE '%needs a new supervisor%'").get(other.id), 'affected learner is told');
+  assert.ok(db.prepare("SELECT 1 FROM notifications WHERE user_id=? AND deep_link='/admin/projects'").get(admin.id), 'staff are told about unsupervised projects');
+  assert.ok(db.prepare("SELECT 1 FROM notifications WHERE user_id=? AND deep_link='/admin/cohorts'").get(admin.id), 'staff are told about cohorts without a mentor');
+  assert.ok((await request('/admin/teaching/projects', admin.cookie)).body.projects.find(p => p.id === keptProject).needs_supervisor, 'project list flags the missing supervisor');
+
+  // A suspended mentor may save drafts but not submit; nobody can approve their revisions until reinstated.
+  const suspendedOwn = (await request(mine, mentor.cookie)).body;
+  const suspendedDraft = await request(mine, mentor.cookie, 'PATCH', { ...draft, version: suspendedOwn.application?.version ?? 0 });
+  assert.equal(suspendedDraft.status, 200, 'suspended mentor can still save a draft');
+  const suspendedSubmit = await request(mine + '/submit', mentor.cookie, 'POST', { version: suspendedDraft.body.application.version });
+  assert.equal(suspendedSubmit.status, 409); assert.equal(suspendedSubmit.body.error, 'conflict'); assert.match(suspendedSubmit.body.message, /suspended/);
+  // Simulate a revision submitted just before the suspension.
+  db.prepare("UPDATE mentor_applications SET state='pending',submitted_at=?,version=version+1 WHERE id=?").run(new Date().toISOString(), suspendedDraft.body.application.id);
+  const stuck = (await request(`/accounts/operations/mentors/${mentor.id}`, admin.cookie)).body;
+  const approveSuspended = await request(`/accounts/operations/mentors/${mentor.id}/decision`, academic.cookie, 'POST', { ...decision, grant_access: false, application_id: stuck.application.id, version: stuck.application.version });
+  assert.equal(approveSuspended.status, 409, 'academic_ops cannot lift a suspension by approving a revision'); assert.match(approveSuspended.body.message, /reinstate/);
+  assert.equal((await request(`/accounts/operations/mentors/${mentor.id}/decision`, admin.cookie, 'POST', { ...decision, application_id: stuck.application.id, version: stuck.application.version })).status, 409, 'not even admin approval lifts it implicitly');
+  assert.equal(db.prepare('SELECT status FROM mentor_profiles WHERE user_id=?').get(mentor.id).status, 'suspended');
+
+  // Reinstate: admin/owner only, reason required, recorded in mentor_decisions + audit.
+  const reinstate = { action: 'reinstate', version: stuck.approved_profile.revision, reason: 'Synthetic review cleared the concern behind the suspension.' };
+  const opsReinstate = await request(`/accounts/operations/mentors/${mentor.id}/moderation`, academic.cookie, 'POST', reinstate);
+  assert.equal(opsReinstate.status, 403); assert.equal(opsReinstate.body.error, 'forbidden');
+  assert.equal((await request(`/accounts/operations/mentors/${mentor.id}/moderation`, admin.cookie, 'POST', { ...reinstate, reason: 'short' })).status, 400, 'reinstating needs a reason');
+  const reinstated = await request(`/accounts/operations/mentors/${mentor.id}/moderation`, admin.cookie, 'POST', reinstate);
+  assert.equal(reinstated.status, 200); assert.equal(reinstated.body.approved_profile.status, 'approved'); assert.equal(reinstated.body.approved_profile.public_visible, 0, 'listing stays hidden');
+  assert.equal(reinstated.body.history[0].decision, 'reinstated');
+  assert.ok(db.prepare("SELECT 1 FROM audit_events WHERE action='mentor_reinstate' AND actor_id=?").get(admin.id));
+  assert.equal((await request(`/accounts/operations/mentors/${mentor.id}/moderation`, admin.cookie, 'POST', { ...reinstate, version: reinstated.body.approved_profile.revision })).status, 409, 'cannot reinstate twice');
+  assert.equal((await request('/mentor/dashboard', mentor.cookie)).status, 200, 'mentor access restored');
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM teaching_assignments WHERE mentor_id=?').get(mentor.id).n, 0, 'cohorts are not silently restored');
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM projects WHERE supervisor_id=?').get(mentor.id).n, 0, 'projects are not silently restored');
+  // Error codes match the status.
+  const missingMentor = await request('/accounts/operations/mentors/999999', admin.cookie);
+  assert.equal(missingMentor.status, 404); assert.equal(missingMentor.body.error, 'not_found');
   db.prepare("UPDATE users SET status='inactive' WHERE id=?").run(other.id);
   assert.equal((await request('/accounts/profile', other.cookie)).status, 401);
   db.prepare("INSERT INTO role_grants(user_id,role,scope,created_at) VALUES (?,'admin','cohort:999',?)").run(learner.id, new Date().toISOString());

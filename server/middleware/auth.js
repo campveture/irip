@@ -54,7 +54,8 @@ function attachUser(req, res, next) {
       delete req.session.userId;
     }
   }
-  next();
+  // Session epoch + "must change password" (accounts area, admin/account-guard.js).
+  require('../admin/account-guard').accountGuard(req, res, next);
 }
 
 function auditLog({ actorId, action, target, meta }) {

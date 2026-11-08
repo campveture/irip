@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { READ_ONLY_PREVIEW, allowsPreviewRoute } from './lib/readOnlyPreview';
 import { ReadOnlyPreviewPage } from './components/shared/ReadOnlyPreview';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -78,28 +78,38 @@ import GradeSubmission from './pages/mentor/GradeSubmission';
 import MentorProjects from './pages/mentor/MentorProjects';
 import MentorProjectDetail from './pages/mentor/MentorProjectDetail';
 import MentorAvailability from './pages/mentor/MentorAvailability';
-import MentorTopics from './pages/mentor/MentorTopics';
-import MentorEarnings from './pages/mentor/MentorEarnings';
 
 // Admin pages
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminModules from './pages/admin/AdminModules';
 import AdminLearners from './pages/admin/AdminLearners';
 import AdminLearnerDetail from './pages/admin/AdminLearnerDetail';
-import AdminCatalog from './pages/admin/AdminCatalog';
-import AdminCohorts from './pages/admin/AdminCohorts';
+import { CohortList, CohortDetailPage } from './components/admin/CohortTeaching';
+import StaffAccess from './components/admin/StaffAccess';
+import AuditLog from './components/admin/AuditLog';
+import WebsiteContent from './components/admin/website/WebsiteContent';
+import ProgramList from './components/admin/programs/ProgramList';
+import ProgramEditor from './components/admin/programs/ProgramEditor';
+import ProjectList from './components/admin/projects/ProjectList';
+import ProjectEditor from './components/admin/projects/ProjectEditor';
+import AdminHome from './components/admin/operations/AdminHome';
+import SupportDesk from './components/admin/operations/SupportDesk';
+import Inquiries from './components/admin/operations/Inquiries';
+import CertificatesAdmin from './components/admin/operations/CertificatesAdmin';
 import AdminAdmissions from './pages/admin/AdminAdmissions';
-import AdminCRM from './pages/admin/AdminCRM';
-import AdminSupport from './pages/admin/AdminSupport';
 import AdminFinance from './pages/admin/AdminFinance';
-import AdminCertificates from './pages/admin/AdminCertificates';
 import AdminReports from './pages/admin/AdminReports';
-import AdminSettings from './pages/admin/AdminSettings';
-import AdminAcademics from './pages/admin/AdminAcademics';
 import { MentorQueue as AdminMentors, MentorReview } from './components/accounts/MentorOperations';
 import { MentorIntakeReview } from './components/accounts/MentorIntakeOperations';
-import AdminProjects from './pages/admin/AdminProjects';
-import AdminAutomations from './pages/admin/AdminAutomations';
+
+function LegacyProgramRedirect() {
+  const { search, hash } = useLocation();
+  return <Navigate to={`/programs/research-methods-acceleration${search}${hash}`} replace />;
+}
+
+function LegacyEnrolRedirect() {
+  const { intake } = useParams();
+  const { search, hash } = useLocation();
+  return <Navigate to={`/enrol/research-methods-acceleration/${encodeURIComponent(intake ?? '')}${search}${hash}`} replace />;
+}
 
 function RouterApp() {
   const { user, roles, loading } = useAuth();
@@ -115,6 +125,7 @@ function RouterApp() {
       <Route path="/demo-guide" element={<DemoGuide />} />
       <Route path="/student-value" element={<StudentValueRoadmap />} />
       <Route path="/programs" element={<Programs />} />
+      <Route path="/programs/research-bootcamp" element={<LegacyProgramRedirect />} />
       <Route path="/programs/:slug" element={<ProgramDetail />} />
       <Route path="/projects" element={<Projects />} />
       <Route path="/projects/:id" element={<PublicProjectDetail />} />
@@ -140,6 +151,7 @@ function RouterApp() {
       <Route path="/ideas/mine" element={<IdeaWorkspace />} />
       <Route path="/internships/:slug/apply" element={<InternshipApplication />} />
       <Route path="/enroll/:offerId" element={<EnrollmentOffer />} />
+      <Route path="/enrol/research-bootcamp/:intake" element={<LegacyEnrolRedirect />} />
       <Route path="/enrol/:slug/:intake" element={<DemoCheckout />} />
       <Route path="/enroll/offers/:id" element={<AdmissionOfferResponse />} />
       <Route path="/checkout/:orderId" element={<Checkout />} />
@@ -214,8 +226,9 @@ function RouterApp() {
         <Route path="projects" element={<MentorProjects />} />
         <Route path="projects/:id" element={<MentorProjectDetail />} />
         <Route path="availability" element={<MentorAvailability />} />
-        <Route path="topics" element={<MentorTopics />} />
-        <Route path="earnings" element={<MentorEarnings />} />
+        {/* Retired: no payable ledger / no real topic data. */}
+        <Route path="topics" element={<Navigate to="/mentor" replace />} />
+        <Route path="earnings" element={<Navigate to="/mentor" replace />} />
       </Route>
 
       {/* Admin panel */}
@@ -227,28 +240,37 @@ function RouterApp() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<AdminDashboard />} />
-        <Route path="modules" element={<AdminModules />} />
+        <Route index element={<AdminHome />} />
         <Route path="learners" element={<AdminLearners />} />
         <Route path="learners/:id" element={<AdminLearnerDetail />} />
-        <Route path="catalog" element={<AdminCatalog />} />
-        <Route path="academics" element={<AdminAcademics />} />
-        <Route path="learner-success" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><GrowthOperations /></ProtectedRoute>} />
         <Route path="mentors" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><AdminMentors /></ProtectedRoute>} />
         <Route path="approvals" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><AdminMentors approvals /></ProtectedRoute>} />
         <Route path="mentors/:id" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><MentorReview /></ProtectedRoute>} />
         <Route path="mentor-applications/:id" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><MentorIntakeReview /></ProtectedRoute>} />
-        <Route path="projects" element={<AdminProjects />} />
-        <Route path="automations" element={<AdminAutomations />} />
-        <Route path="content" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><ExpansionCuration /></ProtectedRoute>} />
-        <Route path="cohorts" element={<AdminCohorts />} />
+        <Route path="staff" element={<ProtectedRoute roles={['admin', 'owner']}><StaffAccess /></ProtectedRoute>} />
+        <Route path="programs" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><ProgramList /></ProtectedRoute>} />
+        <Route path="programs/:id" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><ProgramEditor /></ProtectedRoute>} />
+        <Route path="cohorts" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><CohortList /></ProtectedRoute>} />
+        <Route path="cohorts/:id" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><CohortDetailPage /></ProtectedRoute>} />
+        <Route path="projects" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><ProjectList /></ProtectedRoute>} />
+        <Route path="projects/:id" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><ProjectEditor /></ProtectedRoute>} />
         <Route path="admissions" element={<AdminAdmissions />} />
-        <Route path="crm" element={<AdminCRM />} />
-        <Route path="support" element={<AdminSupport />} />
+        <Route path="website" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><WebsiteContent /></ProtectedRoute>} />
+        <Route path="content" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><ExpansionCuration /></ProtectedRoute>} />
+        <Route path="support" element={<ProtectedRoute roles={['support', 'admin', 'owner']}><SupportDesk /></ProtectedRoute>} />
+        <Route path="inquiries" element={<ProtectedRoute roles={['academic_ops', 'support', 'admin', 'owner']}><Inquiries /></ProtectedRoute>} />
+        <Route path="certificates" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><CertificatesAdmin /></ProtectedRoute>} />
         <Route path="finance" element={<AdminFinance />} />
-        <Route path="certificates" element={<AdminCertificates />} />
         <Route path="reports" element={<AdminReports />} />
-        <Route path="settings" element={<AdminSettings />} />
+        <Route path="audit" element={<ProtectedRoute roles={['admin', 'owner']}><AuditLog /></ProtectedRoute>} />
+        <Route path="learner-success" element={<ProtectedRoute roles={['academic_ops', 'admin', 'owner']}><GrowthOperations /></ProtectedRoute>} />
+        {/* Retired admin pages: old links land on their replacement. */}
+        <Route path="modules" element={<Navigate to="/admin" replace />} />
+        <Route path="catalog" element={<Navigate to="/admin/programs" replace />} />
+        <Route path="academics" element={<Navigate to="/admin/programs" replace />} />
+        <Route path="crm" element={<Navigate to="/admin/inquiries" replace />} />
+        <Route path="settings" element={<Navigate to="/admin/website" replace />} />
+        <Route path="automations" element={<Navigate to="/admin/audit" replace />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

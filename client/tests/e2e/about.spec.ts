@@ -7,11 +7,8 @@ test('About keeps the IRIP story concise, without decorative cards', async ({ pa
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Curiosity, withsomewhere to go.');
     await expect(page.getByRole('heading', { name: 'About IRIP', exact: true })).toBeVisible();
     await expect(page.locator('[data-public-hero] figure, [data-public-hero] img')).toHaveCount(0);
-    await expect(page.getByRole('region', { name: 'Our proposed approach' }).getByRole('listitem')).toHaveCount(3);
-    await expect(page.locator('#our-approach details')).not.toHaveAttribute('open');
-    await page.getByText('More about IRIP', { exact: true }).click();
-    await expect(page.locator('#our-approach details')).toHaveAttribute('open', '');
-    await page.getByText('More about IRIP', { exact: true }).click();
+    await expect(page.getByRole('region', { name: 'Our approach' }).getByRole('listitem')).toHaveCount(3);
+    await expect(page.locator('#our-approach details')).toHaveCount(0);
     await expect(page.getByRole('complementary', { name: 'What is available today' })).toContainText('No guaranteed publication, qualification, internship or job is promised.');
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
     await expect(page.locator('#route-content .skeleton')).toHaveCount(0);

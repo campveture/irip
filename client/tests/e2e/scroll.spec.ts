@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('a page link starts at the destination top instead of retaining footer position', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/programs');
-  await expect(page.getByRole('heading', { name: '3 programs found' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '1 program found' })).toBeVisible();
   await page.locator('footer').getByRole('link', { name: 'Projects', exact: true }).click();
   await expect(page).toHaveURL(/\/projects$/);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
@@ -19,12 +19,12 @@ test('hash destinations clear the measured global header, including delayed targ
     // Fractional header heights can round a pixel either way; clearance should stay within 1px.
     return Math.abs(element.getBoundingClientRect().top - header.getBoundingClientRect().height - 16) < 1;
   })).toBe(true);
-  await page.route('**/api/public/programs/research-bootcamp', async route => {
+  await page.route('**/api/public/programs/research-methods-acceleration', async route => {
     const response = await route.fetch();
     await new Promise(resolve => setTimeout(resolve, 250));
     await route.fulfill({ response });
   });
-  await page.goto('/programs/research-bootcamp#program-tab-panel');
+  await page.goto('/programs/research-methods-acceleration#program-tab-panel');
   const panel = page.locator('#program-tab-panel');
   await expect(panel).toBeVisible();
   await expect.poll(() => panel.evaluate(element => {
@@ -36,7 +36,7 @@ test('hash destinations clear the measured global header, including delayed targ
 test('query-only catalog filter updates do not reset the viewport', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/programs');
-  await expect(page.getByRole('heading', { name: '3 programs found' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '1 program found' })).toBeVisible();
   await page.getByRole('searchbox').scrollIntoViewIfNeeded();
   const search = page.getByRole('searchbox');
   await search.focus();

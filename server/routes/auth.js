@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { db, hashPassword, verifyPassword } = require('../db');
 const { requireAuth, auditLog, getRolesForUser } = require('../middleware/auth');
+// Accounts area: session epoch, temporary passwords and sign-in throttling.
+const guard = require('../admin/account-guard');
 
 router.post('/signup', (req, res) => {
   try {
@@ -35,8 +37,8 @@ router.post('/signup', (req, res) => {
     const u = db.prepare('SELECT id, email, full_name, role, status FROM users WHERE id = ?').get(userId);
     return req.session.regenerate((err) => {
       if (err) return res.status(500).json({ error: 'server', message: 'Could not start session.' });
-      req.session.userId = userId;
-      res.status(201).json({ user: u, roles: getRolesForUser(userId) });
+      guard.startSession(req, userId);
+      res.status(201).json({ user: u, roles: getRolesForUser(userId), must_change_password: false });
     });
   } catch (e) {
     console.error('signup error', e);
@@ -51,25 +53,38 @@ router.post('/login', (req, res) => {
     if (!email || typeof password !== 'string' || password.length < 1 || password.length > 128 || email.length > 254) {
       return res.status(400).json({ error: 'validation', message: 'Email and password are required.' });
     }
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    if (guard.loginFailures.blocked(email, req.ip)) {
+      res.set('Retry-After', String(guard.loginFailures.retryAfter(email, req.ip)));
+      return res.status(429).json({ error: 'rate_limited', message: 'Too many failed sign-in attempts for this account. Wait 15 minutes and try again.' });
+    }
+    const user = db.prepare('SELECT id, email, full_name, role, status, password_hash FROM users WHERE email = ?').get(email);
     if (!user) {
-      // Do not reveal whether account exists
+      // Do not reveal whether account exists (same work, same answer).
+      guard.verifyAgainstDummy(password);
+      guard.loginFailures.fail(email, req.ip);
       return res.status(401).json({ error: 'invalid_credentials', message: 'Invalid email or password.' });
     }
     if (!verifyPassword(password, user.password_hash)) {
+      guard.loginFailures.fail(email, req.ip);
       return res.status(401).json({ error: 'invalid_credentials', message: 'Invalid email or password.' });
     }
     if (user.status !== 'active') {
       return res.status(403).json({ error: 'account_disabled', message: 'This account is not active.' });
     }
+    const passwordState = guard.passwordState(user.id);
+    if (passwordState.temp_expired) {
+      return res.status(403).json({ error: 'temporary_password_expired', message: 'This temporary password has expired. Ask an administrator for a new one.' });
+    }
+    guard.loginFailures.clear(email, req.ip);
     const roles = getRolesForUser(user.id);
     auditLog({ actorId: user.id, action: 'login', target: 'users', meta: '{"payload_logged":false}' });
     return req.session.regenerate((err) => {
       if (err) return res.status(500).json({ error: 'server', message: 'Could not start session.' });
-      req.session.userId = user.id;
+      guard.startSession(req, user.id);
       res.json({
         user: { id: user.id, email: user.email, full_name: user.full_name, role: user.role, status: user.status },
         roles,
+        must_change_password: passwordState.must_change_password,
       });
     });
   } catch (e) {
@@ -101,6 +116,7 @@ router.get('/me', requireAuth, (req, res) => {
   res.json({
     user: { id: req.user.id, email: req.user.email, full_name: req.user.full_name, role: req.user.role, status: req.user.status },
     roles,
+    must_change_password: guard.passwordState(req.session.userId).must_change_password,
   });
 });
 
@@ -114,7 +130,9 @@ router.patch('/profile', requireAuth, (req, res) => {
 
 router.get('/security', requireAuth, (req, res) => {
   const user = db.prepare('SELECT email, email_verified FROM users WHERE id = ?').get(req.session.userId);
-  res.json({ email: user.email, email_verified: !!user.email_verified, mfa_available: false, session_management_available: false });
+  const state = guard.passwordState(req.session.userId);
+  res.json({ email: user.email, email_verified: !!user.email_verified, mfa_available: false, session_management_available: false,
+    must_change_password: state.must_change_password, temporary_password_expires_at: state.temp_expires_at });
 });
 
 router.post('/security/password', requireAuth, (req, res) => {
@@ -123,17 +141,36 @@ router.post('/security/password', requireAuth, (req, res) => {
   if (typeof current !== 'string' || typeof next !== 'string' || next.length < 8 || next.length > 128 || current === next) {
     return res.status(400).json({ error: 'validation', message: 'Provide your current password and a different new password of 8–128 characters.' });
   }
-  const user = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(req.session.userId);
+  const userId = req.session.userId;
+  // An expired temporary password cannot be exchanged for a new one (accountGuard also
+  // ends such sessions; this is the route-level backstop).
+  if (guard.passwordState(userId).temp_expired) {
+    return res.status(403).json({ error: 'temporary_password_expired', message: 'This temporary password has expired. Ask an administrator for a new one.' });
+  }
+  const failureKey = `user:${userId}`;
+  if (guard.passwordFailures.blocked(failureKey)) {
+    res.set('Retry-After', String(guard.passwordFailures.retryAfter(failureKey)));
+    return res.status(429).json({ error: 'rate_limited', message: 'Too many incorrect current passwords. Wait 15 minutes and try again.' });
+  }
+  const user = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(userId);
   if (!user || !verifyPassword(current, user.password_hash)) {
+    guard.passwordFailures.fail(failureKey);
     return res.status(400).json({ error: 'invalid_credentials', message: 'Current password is incorrect.' });
   }
-  const userId = req.session.userId;
-  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hashPassword(next), userId);
-  auditLog({ actorId: userId, action: 'account_password_change', target: 'users' });
+  guard.passwordFailures.clear(failureKey);
+  const wasTemporary = guard.passwordState(userId).must_change_password;
+  const at = Date.now();
+  db.transaction(() => {
+    db.prepare('UPDATE users SET password_hash = ?, must_change_password = 0, temp_password_expires_at = NULL WHERE id = ?').run(hashPassword(next), userId);
+    if (wasTemporary) db.prepare('UPDATE password_resets SET replaced_at = ? WHERE user_id = ? AND replaced_at IS NULL').run(new Date(at).toISOString(), userId);
+    // Every other session of this account ends; this one is re-issued below.
+    guard.endSessionsBefore(userId, at);
+  })();
+  auditLog({ actorId: userId, action: wasTemporary ? 'account_temporary_password_replaced' : 'account_password_change', target: 'users', meta: '{"payload_logged":false}' });
   req.session.regenerate((error) => {
     if (error) return res.status(500).json({ error: 'server', message: 'Password changed, but the session could not be refreshed. Please sign in again.' });
-    req.session.userId = userId;
-    res.json({ ok: true });
+    guard.startSession(req, userId, at);
+    res.json({ ok: true, other_sessions_signed_out: true });
   });
 });
 

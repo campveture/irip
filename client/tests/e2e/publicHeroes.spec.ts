@@ -30,8 +30,8 @@ test('editorial heroes keep useful shortcuts; the homepage alone uses approved s
 
 test('hero shortcuts open actual intake details and on-page destinations', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('navigation', { name: 'IRIP shortcuts' }).getByRole('link', { name: /Bootcamp intakes/ }).click();
-  await expect(page).toHaveURL(/\/programs\/research-bootcamp#cohorts$/);
+  await page.getByRole('navigation', { name: 'IRIP shortcuts' }).getByRole('link', { name: /Research Methods Acceleration intakes/ }).click();
+  await expect(page).toHaveURL(/\/programs\/research-methods-acceleration#cohorts$/);
   await expect(page.getByRole('tab', { name: 'Cohorts', exact: true })).toHaveAttribute('aria-selected', 'true');
   for (const [path, label, target] of [
     ['/courses', 'Browse syllabi', '#recorded-catalog-heading'],
@@ -51,7 +51,7 @@ test('directory pages skip the hero so programs, projects and mentors are search
     await page.setViewportSize({ width, height: 900 });
     for (const [path, heading, search] of [
       ['/programs', 'Programs', 'Search programs, topics, skills…'],
-      ['/projects', 'Projects', 'Search title, track or journal'],
+      ['/projects', 'Projects', 'Search title, track or supervisor'],
       ['/mentors', 'Mentors', 'Search name or expertise'],
     ] as const) {
       await page.goto(path);
@@ -66,11 +66,11 @@ test('directory pages skip the hero so programs, projects and mentors are search
   }
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/programs');
-  await expect(page.locator('a[href="/programs/research-bootcamp"]').first()).toBeVisible();
+  await expect(page.locator('a[href="/programs/research-methods-acceleration"]').first()).toBeVisible();
   await page.goto('/mentors');
   await expect(page.locator('a[href^="/mentors/"]').first()).toBeVisible();
   await page.goto('/projects');
-  await expect(page.locator('[data-project-row] button[aria-expanded]').first()).toBeVisible();
+  await expect(page.locator('[data-project-row] a').first()).toBeVisible();
 });
 
 test('directory pages keep their next-step actions below the listing', async ({ page }) => {
@@ -79,7 +79,7 @@ test('directory pages keep their next-step actions below the listing', async ({ 
 
   await page.goto('/programs');
   const programAction = page.getByRole('main').getByRole('link', { name: 'Ask about a program', exact: true });
-  expect(await depth(page.locator('a[href="/programs/research-bootcamp"]').first())).toBeLessThan(await depth(programAction));
+  expect(await depth(page.locator('a[href="/programs/research-methods-acceleration"]').first())).toBeLessThan(await depth(programAction));
   await programAction.click();
   await expect(page).toHaveURL(/\/contact$/);
 
@@ -99,7 +99,7 @@ test('directory pages keep their next-step actions below the listing', async ({ 
 
 test('photographic home preserves catalog access and keeps detailed answers closed until requested', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('a[href="/programs/research-bootcamp"]').first()).toBeVisible();
+  await expect(page.locator('a[href="/programs/research-methods-acceleration"]').first()).toBeVisible();
   const installments = page.getByRole('button', { name: 'How will program installments work?', exact: true });
   await expect(installments).toHaveAttribute('aria-expanded', 'false');
   await installments.click();

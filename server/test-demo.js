@@ -46,14 +46,14 @@ async function main() {
 
   // 2. Public stats
   r = await fetchJson(`${BASE}/api/public/stats`);
-  check('public stats', r.status === 200, JSON.stringify(r.body));
+  check('public stats', r.status === 200 && r.body.programs === 1 && r.body.cohorts === 1, JSON.stringify(r.body));
 
   // 3. Public programs
   r = await fetchJson(`${BASE}/api/public/programs`);
-  check('public programs', r.status === 200 && Array.isArray(r.body), `count=${r.body.length}`);
+  check('public programs', r.status === 200 && Array.isArray(r.body) && r.body.length === 1 && r.body[0]?.slug === 'research-methods-acceleration', `count=${r.body.length}`);
 
   // 4. Program detail
-  r = await fetchJson(`${BASE}/api/public/programs/research-bootcamp`);
+  r = await fetchJson(`${BASE}/api/public/programs/research-methods-acceleration`);
   check('program detail', r.status === 200 && !!r.body.program, r.body.program ? r.body.program.title : 'missing');
 
   // 5. Login learner
@@ -136,8 +136,13 @@ async function main() {
   check('inquiry requires consent', r.status === 400);
   r = await fetchJson(`${BASE}/api/public/inquiries`, { method: 'POST', body: JSON.stringify({ name: 'Test Person', email: 'test@example.test', message: 'Please tell me about your next course.', consent: true }) });
   check('inquiry saved', r.status === 201 && !!r.body.inquiry_id);
-  r = await fetchJson(`${BASE}/api/crm/persons`, { headers: { Cookie: learnerCookie } });
+  r = await fetchJson(`${BASE}/api/admin/crm/persons`, { headers: { Cookie: learnerCookie } });
   check('learner blocked from CRM', r.status === 403);
+  // The legacy /api/crm and /api/finance routers were removed (ad-hoc role checks, no validation or audit).
+  for (const legacy of ['/api/crm/persons', '/api/crm/opportunities', '/api/finance/orders', '/api/finance/installments']) {
+    r = await fetchJson(`${BASE}${legacy}`, { headers: { Cookie: adminCookie } });
+    check(`legacy router removed ${legacy}`, r.status === 404, `status=${r.status}`);
+  }
 
   r = await fetchJson(`${BASE}/api/auth/mentor-application`, { method: 'POST', headers: { Cookie: learnerCookie }, body: JSON.stringify({ bio: 'I teach practical research methods and quantitative analysis.', expertise: 'Research methods', rate: 1000 }) });
   check('legacy mentor mutation retired', r.status === 410);
@@ -148,20 +153,21 @@ async function main() {
   r = await fetchJson(`${BASE}/api/admin/dashboard`, { headers: { Cookie: learnerCookie } });
   check('learner blocked from admin', r.status === 403, `status=${r.status}`);
 
-  r = await fetchJson(`${BASE}/api/finance/orders`, { headers: { Cookie: learnerCookie } });
+  r = await fetchJson(`${BASE}/api/admin/finance/orders`, { headers: { Cookie: learnerCookie } });
   check('learner blocked from finance records', r.status === 403, `status=${r.status}`);
   r = await fetchJson(`${BASE}/api/finance/webhooks/payments/demo`, {
     method: 'POST', headers: { Cookie: adminCookie }, body: JSON.stringify({ reference: 'REF-DEMO-001', state: 'succeeded' }),
   });
-  check('unverified payment webhook cannot settle', r.status === 501, `status=${r.status}`);
+  check('unverified payment webhook cannot settle', r.status === 404, `status=${r.status}`);
   r = await fetchJson(`${BASE}/api/student/lessons/7/access`, { headers: { Cookie: learnerCookie } });
-  check('cross-program lesson hides private content', r.body.authorized === false && !r.body.lesson?.transcript, JSON.stringify(r.body).slice(0, 110));
+  // Lesson 7 is in the draft Statistics program: a non-enrolled learner gets 404 and no titles (a published program shows the locked view).
+  check('cross-program lesson hides private content', (r.status === 404 || r.body.authorized === false) && !r.body.lesson?.transcript && !JSON.stringify(r.body).includes('Central Tendency'), JSON.stringify(r.body).slice(0, 110));
   r = await fetchJson(`${BASE}/api/student/assignments/5`, { headers: { Cookie: learnerCookie } });
   check('cross-program assessment blocked', r.status === 404, `status=${r.status}`);
   r = await fetchJson(`${BASE}/api/student/assignments/5/submit`, {
     method: 'POST', headers: { Cookie: learnerCookie }, body: JSON.stringify({ brief: 'Cross-program submission should not work.' }),
   });
-  check('cross-program submission blocked', r.status === 403, `status=${r.status}`);
+  check('cross-program submission blocked', r.status === 403 || r.status === 404, `status=${r.status}`);
   r = await fetchJson(`${BASE}/api/student/projects/1`, { headers: { Cookie: learnerCookie } });
   check('unassigned research workspace blocked', r.status === 404, `status=${r.status}`);
 
@@ -169,7 +175,7 @@ async function main() {
     r = await fetchJson(`${BASE}/api${route}`, { headers: { Cookie: learnerCookie } });
     check(`learner ${route}`, r.status === 200, `status=${r.status}`);
   }
-  for (const route of ['/mentor/classes', '/mentor/classes/1', '/mentor/grading', '/mentor/projects', '/mentor/earnings']) {
+  for (const route of ['/mentor/classes', '/mentor/classes/1', '/mentor/grading', '/mentor/projects', '/mentor/availability']) {
     r = await fetchJson(`${BASE}/api${route}`, { headers: { Cookie: mentorCookie } });
     check(`mentor ${route}`, r.status === 200, `status=${r.status}`);
   }

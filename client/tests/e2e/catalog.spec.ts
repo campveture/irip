@@ -1,28 +1,24 @@
 import { test, expect, type Page } from '@playwright/test';
 import { DEMO_DISCLAIMER } from '../../src/components/shared/compliance';
 
-test('multi-select filtering, counts, URL history and topic artwork', async ({ page }) => {
+test('single-program filtering, URL history and topic artwork', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('/programs');
-  await expect(page.getByRole('heading', { name: '3 programs found' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '1 program found' })).toBeVisible();
   const filters = page.getByRole('complementary', { name: 'Catalog filters', exact: true });
   await filters.getByRole('button', { name: /^Research Methods/ }).click();
   await expect(page.getByRole('heading', { name: '1 program found' })).toBeVisible();
-  await filters.getByRole('button', { name: /^Economics \/ Statistics/ }).click();
-  await expect(page.getByRole('heading', { name: '2 programs found' })).toBeVisible();
-  expect(new URL(page.url()).searchParams.getAll('domain')).toHaveLength(2);
+  expect(new URL(page.url()).searchParams.getAll('domain')).toHaveLength(1);
   await page.goBack();
   await expect(page.getByRole('heading', { name: '1 program found' })).toBeVisible();
   await page.reload();
   await expect(page.locator('a img[src="/images/program-research.svg"]')).toBeVisible();
-  await page.getByRole('button', { name: 'Clear all', exact: true }).click();
-  await page.getByRole('searchbox', { name: 'Search programs' }).fill('statistics');
+  await page.getByRole('searchbox', { name: 'Search programs' }).fill('acceleration');
   await expect(page.getByRole('heading', { name: '1 program found' })).toBeVisible();
-  await expect(page.locator('a img[src="/images/program-statistics.svg"]')).toBeVisible();
   await page.getByRole('searchbox').fill('no-such-program');
   await expect(page.getByRole('heading', { name: 'No matching programs' })).toBeVisible();
   await page.getByRole('button', { name: 'Clear filters', exact: true }).click();
-  await expect(page.getByRole('heading', { name: '3 programs found' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '1 program found' })).toBeVisible();
 });
 
 test('malformed or failed API responses expose retry, not commercial or fabricated records', async ({ page }) => {
@@ -35,13 +31,13 @@ test('malformed or failed API responses expose retry, not commercial or fabricat
   await expect(page.getByRole('alert')).toContainText('Invalid catalog record');
   fail = false;
   await page.getByRole('button', { name: 'Retry catalog' }).click();
-  await expect(page.getByRole('heading', { name: '3 programs found' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '1 program found' })).toBeVisible();
 });
 
 test('mobile filter sheet contains focus, closes with Escape, and preserves selected filters', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/programs');
-  await expect(page.getByRole('heading', { name: '3 programs found' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '1 program found' })).toBeVisible();
   const opener = page.getByRole('button', { name: 'Filters', exact: true });
   await opener.click();
   const sheet = page.getByRole('dialog', { name: 'Catalog filters' });
@@ -49,7 +45,7 @@ test('mobile filter sheet contains focus, closes with Escape, and preserves sele
   await sheet.getByRole('button', { name: 'Clear filters' }).focus();
   await page.keyboard.press('Tab');
   await expect(sheet.getByRole('button', { name: 'Close catalog filters' })).toBeFocused();
-  await sheet.getByRole('button', { name: /^Social Sciences/ }).click();
+  await sheet.getByRole('button', { name: /^Research Methods/ }).click();
   await expect(sheet.getByRole('button', { name: 'Show 1 result' })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(sheet).not.toBeVisible();
@@ -95,7 +91,7 @@ test('header uses bounded frosted glass with a clear surround; sheets and catalo
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 1000 });
     await page.goto('/programs');
-    await expect(page.getByRole('heading', { name: '3 programs found' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '1 program found' })).toBeVisible();
     const headerStyle = await page.locator('header').evaluate(element => {
       const style = getComputedStyle(element);
       return { background: style.backgroundColor, backdrop: style.backdropFilter };

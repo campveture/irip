@@ -21,4 +21,4 @@ createServer(async (req, res) => {
   catch { name = path.join(output, 'index.html'); file = await readFile(name); }
   res.writeHead(200, { 'Content-Type': types[path.extname(name)] || 'application/octet-stream' });
   res.end(req.method === 'HEAD' ? undefined : file);
-}).listen(Number(process.env.PORT || 43140), '127.0.0.1', () => console.log('Read-only static demo ready. No database or authentication service is running.'));
+}).listen(Number(process.env.PORT || 43140), process.env.HOST || '127.0.0.1', () => console.log('Read-only static demo ready. No database or authentication service is running.'));

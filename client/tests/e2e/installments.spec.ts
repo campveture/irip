@@ -3,14 +3,14 @@ import { test, expect } from '@playwright/test';
 test('installment cards appear only in program Pricing with whole-taka amounts', async ({ page }, info) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('/programs');
-  const card = page.getByRole('heading', { name: 'Research Methods Bootcamp (3 Months)', exact: true }).locator('..').locator('..');
+  const card = page.getByRole('heading', { name: 'Research Methods Acceleration', exact: true }).locator('..').locator('..');
   await expect(card.getByText('Next intake total: BDT 21,000', { exact: true })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Proposed three-installment plan' })).toHaveCount(0);
-  await page.goto('/programs/research-bootcamp');
+  await page.goto('/programs/research-methods-acceleration');
   await expect(page.getByRole('region', { name: 'Proposed three-installment plan' })).toHaveCount(0);
   await page.getByRole('tab', { name: 'Pricing', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Proposed three-installment plan' }).getByRole('listitem').locator('strong')).toHaveText([/BDT\s7,000$/, /BDT\s7,000$/, /BDT\s7,000$/]);
-  await page.getByRole('group', { name: 'Choose launch intake' }).getByRole('button', { name: /February 2027 Bootcamp/ }).click();
+  await page.getByRole('group', { name: 'Choose launch intake' }).getByRole('button', { name: /February 2027 Research Methods Acceleration/ }).click();
   const schedule = page.getByRole('region', { name: 'Proposed three-installment plan' }).first();
   await expect(schedule.getByRole('listitem')).toHaveCount(3);
   await expect(schedule.getByRole('listitem').nth(0)).toContainText('At enrollment');
@@ -37,7 +37,7 @@ test('installment cards appear only in program Pricing with whole-taka amounts',
 
 test('mobile pricing is readable and recorded-course membership remains separate', async ({ page }, info) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/programs/research-bootcamp');
+  await page.goto('/programs/research-methods-acceleration');
   await page.getByRole('tab', { name: 'Pricing', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Proposed three-installment plan' }).first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

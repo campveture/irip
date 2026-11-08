@@ -15,7 +15,7 @@ async function main() {
   initSchema();
   assert.equal(db.prepare('SELECT COUNT(*) AS count FROM cohorts').get().count, cohortCount);
   assert.equal(db.prepare('PRAGMA table_info(cohorts)').all().filter(column => column.name === 'enrollment_deadline').length, 1);
-  const program = db.prepare("SELECT * FROM programs WHERE slug = 'research-bootcamp'").get();
+  const program = db.prepare("SELECT * FROM programs WHERE slug = 'research-methods-acceleration'").get();
   const cohort = programCohorts(program.id)[0];
   assert.equal(cohort.enrollment_deadline, null, 'No deadline is fabricated from the cohort start or first class');
   const deadline = '2026-11-01T17:59:00Z';
@@ -94,7 +94,7 @@ async function main() {
   await new Promise(resolve => server.once('listening', resolve));
   try {
     const base = `http://127.0.0.1:${server.address().port}`;
-    const detail = await fetch(`${base}/api/public/programs/research-bootcamp`).then(r => r.json());
+    const detail = await fetch(`${base}/api/public/programs/research-methods-acceleration`).then(r => r.json());
     assert.equal(detail.cohorts[0].plan.sessions.length, 24); assert.equal(detail.assessment_count, 4);
     assert.equal(detail.cohorts.length, 2);
     assert.equal(detail.cohorts[0].enrollment_deadline, new Date(Date.parse(`${detail.cohorts[0].start_date}T17:59:00Z`) - 5 * 86400000).toISOString());

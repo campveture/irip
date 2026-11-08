@@ -9,11 +9,14 @@ test('static preview renders public catalogs and details without calling any run
   await expect(page.locator('header').getByRole('complementary')).toHaveCount(0);
   await expect(page.locator('footer').getByRole('complementary', { name: 'Hosted read-only preview' })).toBeVisible();
   await expect(page.locator('footer').getByRole('complementary', { name: 'Local demonstration disclaimer' })).toHaveText(DEMO_DISCLAIMER);
-  await expect(page.getByRole('heading', { name: 'Research Methods Bootcamp (3 Months)', exact: true })).toBeVisible();
-  await page.goto('/programs/research-bootcamp#curriculum');
-  await expect(page.getByRole('heading', { name: 'Research Methods Bootcamp (3 Months)', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Research Methods Acceleration', exact: true })).toBeVisible();
+  await page.goto('/programs/research-bootcamp#pricing');
+  await expect(page).toHaveURL('/programs/research-methods-acceleration#pricing');
+  await expect(page.getByRole('region', { name: 'Monthly Research Methods Acceleration pricing' })).toBeVisible();
+  await page.goto('/programs/research-methods-acceleration#curriculum');
+  await expect(page.getByRole('heading', { name: 'Research Methods Acceleration', exact: true })).toBeVisible();
   await page.getByRole('tab', { name: 'Pricing', exact: true }).click();
-  await page.getByRole('group', { name: 'Choose launch intake' }).getByRole('button', { name: /February 2027 Bootcamp/ }).click();
+  await page.getByRole('group', { name: 'Choose launch intake' }).getByRole('button', { name: /February 2027 Research Methods Acceleration/ }).click();
   const schedule = page.getByRole('region', { name: 'Proposed three-installment plan' }).first();
   await expect(schedule.getByRole('listitem')).toHaveCount(3);
   await expect(schedule).toContainText('At enrollment');
@@ -36,6 +39,7 @@ test('static preview renders public catalogs and details without calling any run
   await page.evaluate(() => window.scrollBy({ top: 220, behavior: 'instant' }));
   await expect.poll(() => tabs.evaluate((element, previousTop) => Math.round(element.getBoundingClientRect().top - previousTop), before)).toBe(-220);
   await page.goto('/enrol/research-bootcamp/2027-01?amount=1&paid=true');
+  await expect(page).toHaveURL('/enrol/research-methods-acceleration/2027-01?amount=1&paid=true');
   await expect(page.getByRole('region', { name: 'First installment preview' })).toContainText('BDT 7,000');
   await expect(page.getByRole('button', { name: 'Payment gateway not connected' })).toBeDisabled();
   await expect(page.locator('input,textarea,form')).toHaveCount(0);
@@ -68,9 +72,9 @@ test('hosting rejects writes, exposes only a synthetic allowlist and includes no
   const data = await snapshot.json();
   expect(data.mode).toBe('read_only_synthetic');
   // Eight added public project briefs contribute ID + slug GET snapshots.
-  expect(Object.keys(data.routes)).toHaveLength(52);
+  expect(Object.keys(data.routes)).toHaveLength(130); // 49 projects x (id + slug) + site + project directory + catalog
   const projects = data.routes['/api/public/projects'];
-  expect(projects).toHaveLength(9);
+  expect(projects).toHaveLength(49); // 9 original cards + 40 research topics now stored in the database
   for (const project of projects) {
     expect(data.routes[`/api/public/projects/${project.id}`]?.project.title).toBe(project.title);
     expect(data.routes[`/api/public/projects/${project.slug}`]?.project.title).toBe(project.title);
@@ -85,7 +89,7 @@ test('hosting rejects writes, exposes only a synthetic allowlist and includes no
     expect(response.status()).toBe(405);
   }
   expect((await request.get('/api/auth/me')).status()).toBe(404);
-  const deepLink = await request.get('/programs/research-bootcamp');
+  const deepLink = await request.get('/programs/research-methods-acceleration');
   expect(deepLink.ok()).toBe(true);
   expect(deepLink.headers()['x-robots-tag']).toContain('noindex');
   expect(deepLink.headers()['content-security-policy']).toContain("form-action 'none'");

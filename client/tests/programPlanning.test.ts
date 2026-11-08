@@ -12,7 +12,7 @@ const cohort = {
 const syllabus = { status: 'proposed', weeks: 'Weeks 1–2', contact_hours: 8, outcomes: ['Frame a question.'], topics: [{ title: 'Ethics', items: ['Consent and privacy.'] }], practice: ['Critique a question.'], deliverable: 'Question brief.', criteria: ['Feasibility'], preparation: ['Choose an interest.'] };
 
 const launchCohort = {
-  ...cohort, id: 'research-bootcamp-2027-01', start_date: '2027-01-15', end_date: '2027-04-08', enrollment_deadline: '2027-01-10T17:59:00.000Z',
+  ...cohort, id: 'research-methods-acceleration-2027-01', start_date: '2027-01-15', end_date: '2027-04-08', enrollment_deadline: '2027-01-10T17:59:00.000Z',
   seats: { ...cohort.seats, active: 0, remaining: 30 },
   plan: { ...cohort.plan, sessions: [{ date: '2027-01-15', start_time: '20:30', end_time: '22:30', duration_minutes: 120 }, { date: '2027-01-16', start_time: '20:30', end_time: '22:30', duration_minutes: 120 }] },
   launch: { key: '2027-01', position: 0, standard_fee: 25000, discount: 4000, total_fee: 21000, currency: 'BDT', payment_mode: 'demo_only',
@@ -22,7 +22,7 @@ const launchCohort = {
 test('monthly launch prices and installment due dates are verified, not trusted from URL or paid flags', () => {
   assert.equal(parseCohortPlans([launchCohort])[0]!.launch?.total_fee, 21000);
   for (const bad of [
-    { ...launchCohort, id: 'research-bootcamp-2027-02' },
+    { ...launchCohort, id: 'research-methods-acceleration-2027-02' },
     { ...launchCohort, enrollment_deadline: '2027-01-14T17:59:00Z' },
     { ...launchCohort, launch: { ...launchCohort.launch, total_fee: 1 } },
     { ...launchCohort, launch: { ...launchCohort.launch, payment_mode: 'live' } },

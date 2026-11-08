@@ -24,9 +24,9 @@ No API, database, route, authentication, permission, commercial guard, dataset, 
 
 ## Before/after review
 
-The existing full-app browser suite passed all **70 tests before editing**. Matching 1440/390px captures cover Home, Programs, bootcamp Pricing, Courses, About and the hosted Contact guard. Captured headings, link text/targets and pricing matched exactly across all 12 states. Screenshots are in `review/`; full capture records and additional screenshots remain under the approved temporary `opencode/irip-archive-before` and `opencode/irip-archive-after` folders.
+The existing full-app browser suite passed all **70 tests before editing**. Matching 1440/390px captures cover Home, Programs, Research Methods Acceleration Pricing, Courses, About and the hosted Contact guard. Captured headings, link text/targets and pricing matched exactly across all 12 states. Screenshots are in `review/`; full capture records and additional screenshots remain under the approved temporary `opencode/irip-archive-before` and `opencode/irip-archive-after` folders.
 
-The preview tests additionally exercise 320, 360, 390, 768, 1024, 1279, 1280 and 1440px widths across Home, Programs, bootcamp Pricing, Courses, About, Projects and Mentors. A 640px CSS viewport checks compact reflow equivalent to a 1280px display at 200% zoom; this is **not** a claim that every OS/browser zoom combination was manually certified. Failed-font testing blocks the existing Google font endpoints and verifies readable fallback layout and keyboard-operable mobile navigation.
+The preview tests additionally exercise 320, 360, 390, 768, 1024, 1279, 1280 and 1440px widths across Home, Programs, Research Methods Acceleration Pricing, Courses, About, Projects and Mentors. A 640px CSS viewport checks compact reflow equivalent to a 1280px display at 200% zoom; this is **not** a claim that every OS/browser zoom combination was manually certified. Failed-font testing blocks the existing Google font endpoints and verifies readable fallback layout and keyboard-operable mobile navigation.
 
 ### Actual verification outcomes
 

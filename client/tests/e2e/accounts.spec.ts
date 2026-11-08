@@ -19,7 +19,9 @@ async function login(page: Page, account: string) {
 async function fillApplication(page: Page, name: string) {
   await page.getByLabel('Public display name', { exact: true }).fill(name);
   await page.getByLabel('Public biography', { exact: true }).fill('A synthetic teaching and supervision biography for a local-only profile review.');
-  await page.getByLabel('Areas of expertise', { exact: true }).fill('Research methods and evidence review');
+  // Expertise is now a tag editor: type an area and press Enter.
+  await page.getByLabel('Add an area of expertise', { exact: true }).fill('Research methods and evidence review');
+  await page.getByLabel('Add an area of expertise', { exact: true }).press('Enter');
   await page.getByLabel('Experience and evidence summary (private)', { exact: true }).fill('Synthetic experience evidence, no actual credential or partnership is claimed.');
   await page.getByLabel('Supervision availability (private)', { exact: true }).fill('Two proposed hours per week.');
 }
@@ -66,7 +68,7 @@ test('mentor revision flows through changes requested, approval, public projecti
     await page.getByRole('button', { name: 'Refresh status', exact: true }).click();
     await expect(page.getByRole('region', { name: 'Application decision history' })).toContainText('Please clarify your proposed weekly supervision capacity.');
     await page.getByLabel('Supervision availability (private)', { exact: true }).fill('Three synthetic hours per week, with assigned supervision only.');
-    await page.getByRole('button', { name: 'Save private draft', exact: true }).click();
+    await page.getByRole('button', { name: 'Save new revision', exact: true }).click();
     await expect(page.getByRole('status')).toContainText('Draft saved privately');
     await page.getByRole('button', { name: 'Submit for review', exact: true }).click();
     await expect(page.getByRole('status')).toContainText('submitted to the admin approval queue');
@@ -80,7 +82,7 @@ test('mentor revision flows through changes requested, approval, public projecti
     await expect(admin.getByRole('status')).toContainText('Decision saved');
     await admin.screenshot({ path: info.outputPath('mentor-admin-approval.png'), fullPage: true });
     await page.getByRole('button', { name: 'Refresh status', exact: true }).click();
-    await expect(page.getByText('Application status:', { exact: false })).toContainText('approved');
+    await expect(page.getByText('Latest revision:', { exact: false })).toContainText('approved');
     expect(await (await page.request.get(`/api/public/mentors/${id}`)).json()).not.toHaveProperty('experience');
     await page.goto(`/mentors/${id}`);
     await expect(page.getByRole('heading', { name: 'Synthetic Mentor Pilot', exact: true })).toBeVisible();
@@ -116,10 +118,11 @@ test('stale learner updates show conflict instead of pretending to save', async 
 test('mobile partial mentor drafts stay private, persist and enforce minimum submission evidence', async ({ page }, info) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await signup(page, 'mobile-draft'); await page.goto('/account/mentor-application');
-  await page.getByLabel('Areas of expertise', { exact: true }).fill('Research');
+  await page.getByLabel('Add an area of expertise', { exact: true }).fill('Research');
+  await page.getByLabel('Add an area of expertise', { exact: true }).press('Enter');
   await page.getByRole('button', { name: 'Save private draft', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Draft saved privately');
-  await page.reload(); await expect(page.getByLabel('Areas of expertise', { exact: true })).toHaveValue('Research');
+  await page.reload(); await expect(page.getByRole('button', { name: 'Remove Research', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Submit for review', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Biography must contain');
   await expect(page.getByLabel('Public biography', { exact: true })).toBeEnabled();

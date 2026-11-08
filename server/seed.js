@@ -1,4 +1,4 @@
-const { db, initSchema, seed } = require('./db');
+const { db, initSchema, seed, migrateProgramCatalog } = require('./db');
 
 initSchema();
 if (db.prepare('SELECT COUNT(*) AS count FROM users').get().count === 0) {
@@ -6,4 +6,5 @@ if (db.prepare('SELECT COUNT(*) AS count FROM users').get().count === 0) {
 } else {
   console.log('Existing data found; seed skipped.');
 }
+migrateProgramCatalog();
 db.close();

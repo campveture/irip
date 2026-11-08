@@ -20,7 +20,8 @@ async function createArtifact(page: Page, title: string) {
 test('guided path saves language, enforces prerequisites, and never awards alumni eligibility for self-completion', async ({ page }, info) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await login(page); await page.request.delete('/api/growth/workspace', { headers: apiHeaders });
-  await page.goto('/app'); await page.getByRole('link', { name: 'Start guided practice', exact: true }).click();
+  // Out of the learner nav since the portal declutter; still reachable directly.
+  await page.goto('/app/growth');
   await expect(page).toHaveURL(/\/app\/growth$/);
   await expect(page.getByRole('complementary', { name: 'Local demonstration disclaimer' })).toHaveText(DEMO_DISCLAIMER);
   await expect(page.getByText('Save a goal and complete the preceding tasks to save work here. Lesson text remains available to read.')).toHaveCount(4);

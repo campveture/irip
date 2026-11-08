@@ -20,7 +20,7 @@ test('photographic academic homepage preserves truthful captions, catalog access
     await expect(hero.locator('figcaption')).toContainText('Stock photo, not IRIP people or premises');
     await expect(hero.getByRole('link', { name: 'Explore programs', exact: true })).toHaveAttribute('href', '/programs');
     await expect(hero.getByRole('link', { name: 'How it works', exact: true })).toHaveAttribute('href', '#how-it-works');
-    await expect(page.locator('.irip-home-program')).toHaveCount(3);
+    await expect(page.locator('.irip-home-program')).toHaveCount(1);
     for (const image of await page.locator('.irip-home-program img').all()) {
       await image.evaluate(async (element: HTMLImageElement) => { element.loading = 'eager'; await element.decode(); });
       expect(await image.getAttribute('src')).toMatch(/\.jpg$/);

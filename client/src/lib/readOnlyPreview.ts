@@ -29,6 +29,6 @@ export async function appFetch(path: string, init: RequestInit = {}): Promise<Re
 export function allowsPreviewRoute(path: string): boolean {
   let decoded: string;
   try { decoded = decodeURIComponent(path); } catch { return false; }
-  if (/^\/enrol\/research-bootcamp\/\d{4}-(?:0[1-9]|1[0-2])\/?$/.test(decoded)) return true;
+  if (/^\/enrol\/(?:research-methods-acceleration|research-bootcamp)\/\d{4}-(?:0[1-9]|1[0-2])\/?$/.test(decoded)) return true;
   return /^\/(?:$|preview-info\/?$|student-value\/?$|about\/?$|how-it-works\/?$|faq\/?$|teach\/?$|programs(?:\/[^/]+)?\/?$|courses(?:\/recorded\/[^/]+|\/[^/]+)?\/?$|projects(?:\/[^/]+)?\/?$|mentors(?:\/[^/]+)?\/?$|(?:resources|events|stories|ideas|internships)(?:\/[^/]+)?\/?$|institutions\/?$|labs\/?$|policies\/[^/]+\/?$)/.test(decoded) && !/^\/(?:ideas\/mine|teach\/apply)(?:\/|$)/.test(decoded);
 }
