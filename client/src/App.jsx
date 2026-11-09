@@ -9,7 +9,6 @@ import { Spinner } from './components/Spinner';
 
 // Public pages
 import Home from './pages/public/Home';
-import DemoGuide from './pages/public/DemoGuide';
 import Programs from './pages/public/Programs';
 import ProgramDetail from './pages/public/ProgramDetail';
 import CourseDetail from './pages/public/CourseDetail';
@@ -122,7 +121,6 @@ function RouterApp() {
       {/* Public */}
       <Route path="/" element={<Home />} />
       {READ_ONLY_PREVIEW && <Route path="/preview-info" element={<ReadOnlyPreviewPage />} />}
-      <Route path="/demo-guide" element={<DemoGuide />} />
       <Route path="/student-value" element={<StudentValueRoadmap />} />
       <Route path="/programs" element={<Programs />} />
       <Route path="/programs/research-bootcamp" element={<LegacyProgramRedirect />} />

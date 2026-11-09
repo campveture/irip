@@ -349,6 +349,101 @@
     .irip-project-pilot { padding: 16px; }
     .irip-project-journal { width: 100%; }
   }
+  /* Projects catalogue: a publisher's list rather than a card wall. Hairline rules, a serif
+     section opener per track, Inter entries (brand doc: card titles stay sans), no shadows. */
+  .irip-catalog-masthead { border-top: 2px solid rgb(var(--irip-indigo)); padding-top: 20px; }
+  .irip-catalog-filters { margin-block: 0 32px; border-bottom: 1px solid var(--color-border); padding-block: 0 0; }
+  .irip-catalog-filter-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 22px; }
+  .irip-catalog-filter-label { min-width: 4.5rem; font-size: 12px; font-weight: 600; letter-spacing: .075em; text-transform: uppercase; color: rgb(var(--irip-lavender-deep)); }
+  .irip-catalog-filter { display: inline-flex; min-height: 44px; align-items: center; gap: 6px; border-bottom: 2px solid transparent; padding: 0 2px; font-size: 14px; font-weight: 500; color: var(--color-text-muted); transition: color .18s ease, border-color .18s ease; }
+  .irip-catalog-filter span { font-size: 12px; font-variant-numeric: tabular-nums; color: rgb(var(--irip-lavender-deep)); }
+  .irip-catalog-filter:hover { color: var(--color-text); border-bottom-color: rgb(var(--irip-lavender)); }
+  .irip-catalog-filter[aria-pressed="true"] { border-bottom-color: rgb(var(--irip-indigo)); font-weight: 600; color: var(--color-text); }
+  .irip-catalog-track { scroll-margin-top: calc(var(--irip-header-height) + 24px); }
+  .irip-catalog-opener { display: grid; gap: 4px 40px; border-top: 2px solid rgb(var(--irip-indigo)); padding-top: 16px; padding-bottom: 8px; }
+  .irip-catalog-folio { font-size: 12px; font-weight: 600; letter-spacing: .075em; text-transform: uppercase; color: rgb(var(--irip-lavender-deep)); }
+  .irip-catalog-track-title { font-family: var(--font-editorial); font-weight: 600; font-size: clamp(1.625rem, 2.4vw, 2.125rem); line-height: 1.2; letter-spacing: -.02em; color: var(--color-text); text-wrap: balance; }
+  .irip-catalog-track-note { max-width: 36rem; font-size: 15px; line-height: 1.7; color: var(--color-text-muted); }
+  .irip-catalog-count { font-size: 13px; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .irip-catalog-list { display: grid; gap: 0 56px; list-style: none; margin-top: 8px; }
+  .irip-catalog-entry { position: relative; display: flex; min-width: 0; flex-direction: column; border-top: 1px solid var(--color-border); padding-block: 22px 24px; scroll-margin-top: calc(var(--irip-header-height) + 16px); }
+  .irip-catalog-entry:focus-within { border-top-color: rgb(var(--irip-indigo)); }
+  .irip-catalog-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 12px; line-height: 1.4; }
+  .irip-catalog-title { margin-top: 12px; font-size: clamp(1.125rem, 1.06rem + .3vw, 1.3rem); font-weight: 600; line-height: 1.35; letter-spacing: -.015em; color: rgb(var(--irip-indigo)); text-wrap: balance; }
+  .irip-catalog-dek { margin-top: 8px; max-width: 38rem; font-size: 15px; line-height: 1.7; color: var(--color-text); }
+  .irip-catalog-facts { margin-top: 16px; display: grid; gap: 6px; font-size: 14px; line-height: 1.55; }
+  .irip-catalog-fact { display: grid; grid-template-columns: 6.25rem minmax(0, 1fr); gap: 12px; }
+  .irip-catalog-fact dt { font-size: 12px; font-weight: 600; letter-spacing: .075em; text-transform: uppercase; line-height: 1.9; color: rgb(var(--irip-lavender-deep)); }
+  .irip-catalog-fact dd { color: var(--color-text); }
+  .irip-catalog-more { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: rgb(var(--irip-indigo)); text-decoration: underline; text-decoration-color: rgb(var(--irip-lavender)); text-underline-offset: 5px; transition: text-decoration-color .18s ease; }
+  .irip-catalog-more:hover { text-decoration-color: rgb(var(--irip-indigo)); }
+  .irip-catalog-more svg { transition: transform .18s ease; }
+  .irip-catalog-more:hover svg { transform: translateX(3px); }
+  @media (min-width: 768px) {
+    .irip-catalog-opener { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+    .irip-catalog-opener > .irip-catalog-folio { grid-column: 1 / -1; }
+    .irip-catalog-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 479px) {
+    .irip-catalog-fact { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .irip-catalog-fact dt { line-height: 1.6; }
+    .irip-catalog-filter-label { flex-basis: 100%; padding-top: 8px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .irip-catalog-filter, .irip-catalog-more, .irip-catalog-more svg { transition: none; }
+    .irip-catalog-more:hover svg { transform: none; }
+  }
+  /* Track accents: hues from the indigo's harmonies, deepened so each passes AA (>=5.4:1)
+     as text on ivory, white and its own tint. Indigo stays the base; the accent only marks the track. */
+  [data-accent="teal"] { --accent: 27 107 98; --accent-tint: 223 240 236; --irip-lavender-deep: 27 107 98; --irip-lavender-pale: 223 240 236; }
+  [data-accent="rust"] { --accent: 154 68 37; --accent-tint: 248 230 220; --irip-lavender-deep: 154 68 37; --irip-lavender-pale: 248 230 220; }
+  [data-accent="ochre"] { --accent: 122 87 0; --accent-tint: 250 239 207; --irip-lavender-deep: 122 87 0; --irip-lavender-pale: 250 239 207; }
+  [data-accent="rose"] { --accent: 138 52 83; --accent-tint: 245 227 234; --irip-lavender-deep: 138 52 83; --irip-lavender-pale: 245 227 234; }
+  [data-accent="blue"] { --accent: 44 91 147; --accent-tint: 225 235 247; --irip-lavender-deep: 44 91 147; --irip-lavender-pale: 225 235 247; }
+  .irip-catalog-opener { border-top-color: rgb(var(--accent, var(--irip-indigo))); }
+  .irip-catalog-folio, .irip-catalog-fact dt { color: rgb(var(--accent, var(--irip-lavender-deep))); }
+  .irip-catalog-count { align-self: end; justify-self: start; border-radius: 999px; background: rgb(var(--accent-tint, var(--irip-lavender-pale))); padding: 3px 12px; font-weight: 600; color: rgb(var(--accent, var(--irip-indigo))); }
+  @media (min-width: 768px) { .irip-catalog-count { justify-self: end; } }
+  .irip-catalog-entry { border-top-color: rgb(var(--accent, var(--irip-border)) / .35); border-top-width: 2px; }
+  .irip-catalog-entry:focus-within, .irip-catalog-entry:hover { border-top-color: rgb(var(--accent, var(--irip-indigo))); }
+  .irip-catalog-meta > span:first-child:not(.irip-project-decision) { color: rgb(var(--accent, var(--irip-lavender-deep))); }
+  .irip-catalog-more { text-decoration-color: rgb(var(--accent, var(--irip-lavender))); color: rgb(var(--accent, var(--irip-indigo))); }
+  .irip-catalog-more:hover { text-decoration-color: rgb(var(--accent, var(--irip-indigo))); }
+  /* Project detail page */
+  .irip-detail-hero { border-bottom: 6px solid rgb(var(--accent, var(--irip-lavender))); }
+  .irip-detail-chip { display: inline-flex; align-items: center; border-radius: 999px; background: rgb(var(--accent-tint, var(--irip-lavender-pale))); padding: 4px 12px; font-size: 12px; font-weight: 600; line-height: 1.4; color: rgb(var(--accent, var(--irip-indigo))); }
+  .irip-detail-body .irip-project-label { color: rgb(var(--accent, var(--irip-lavender-deep))); }
+  .irip-detail-body .irip-project-card-question { border-left-color: rgb(var(--accent, var(--irip-lavender))); background: rgb(var(--accent-tint, var(--irip-lavender-pale))); }
+  .irip-detail-body .irip-detail-icon { color: rgb(var(--accent, var(--irip-lavender-deep))); }
+  .irip-detail-timeline { border-left: 2px solid rgb(var(--accent-tint, var(--irip-border))); }
+  .irip-detail-dot { background: rgb(var(--accent, var(--irip-indigo))); box-shadow: 0 0 0 4px rgb(var(--accent-tint, var(--irip-lavender-pale))); }
+  .irip-detail-card { border: 1px solid var(--color-border); border-radius: 12px; background: rgb(var(--irip-white)); padding: 20px; box-shadow: inset 0 4px 0 rgb(var(--accent, var(--irip-indigo))); padding-top: 24px; }
+  .irip-detail-notice { border-left: 4px solid rgb(var(--accent, var(--irip-lavender-deep))); background: rgb(var(--accent-tint, var(--irip-lavender-pale))); }
+  /* ---- Bolder pass: colour carries the page, indigo stays the ink ---- */
+  .irip-catalog-masthead { position: relative; border-top: 0; padding-top: 30px; }
+  .irip-catalog-masthead::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 6px; border-radius: 3px; background: rgb(var(--accent, var(--irip-indigo))); }
+  .irip-catalog-opener { border-top: 0; border-radius: 16px; background-color: rgb(var(--accent, var(--irip-indigo)));  padding: 22px 26px 24px; color: rgb(var(--irip-ivory)); }
+  .irip-catalog-opener .irip-catalog-folio { color: rgb(var(--irip-ivory) / .85); }
+  .irip-catalog-opener .irip-catalog-track-title { color: rgb(var(--irip-ivory)); }
+  .irip-catalog-opener .irip-catalog-track-note { color: rgb(var(--irip-ivory) / .92); }
+  .irip-catalog-opener .irip-catalog-count { background: rgb(var(--irip-ivory)); color: rgb(var(--accent, var(--irip-indigo))); }
+  .irip-catalog-list { gap: 20px; margin-top: 20px; }
+  .irip-catalog-entry { border: 1px solid var(--color-border); border-top: 5px solid rgb(var(--accent, var(--irip-lavender))); border-radius: 12px; background: rgb(var(--irip-white)); padding: 20px 22px 18px; transition: transform .2s ease, box-shadow .2s ease; }
+  .irip-catalog-entry:hover, .irip-catalog-entry:focus-within { border-color: var(--color-border); border-top-color: rgb(var(--accent, var(--irip-indigo))); box-shadow: var(--shadow-card); }
+  @media (hover: hover) { .irip-catalog-entry:hover { transform: translateY(-2px); } }
+  .irip-catalog-meta > span:first-child:not(.irip-project-decision) { border-radius: 6px; background: rgb(var(--accent, var(--irip-lavender-deep))); padding: 2px 8px; color: rgb(var(--irip-ivory)); letter-spacing: .06em; }
+  .irip-catalog-more { margin-top: 4px; min-height: 40px; border-radius: 999px; background: rgb(var(--accent-tint, var(--irip-lavender-pale))); padding: 0 16px; text-decoration: none; transition: background-color .18s ease, color .18s ease; }
+  .irip-catalog-more:hover { background: rgb(var(--accent, var(--irip-indigo))); color: rgb(var(--irip-ivory)); }
+  .irip-catalog-filter[data-accent][aria-pressed="true"] { border-bottom-color: transparent; border-radius: 999px; background: rgb(var(--accent)); padding: 0 12px; color: rgb(var(--irip-ivory)); }
+  .irip-catalog-filter[data-accent][aria-pressed="true"] span { color: rgb(var(--irip-ivory)); }
+  .irip-catalog-filter[aria-pressed="true"]:not([data-accent]) { border-radius: 999px; background: rgb(var(--irip-indigo)); padding: 0 12px; border-bottom-color: transparent; color: rgb(var(--irip-ivory)); }
+  .irip-catalog-filter[aria-pressed="true"]:not([data-accent]) span { color: rgb(var(--irip-inverse-muted)); }
+  .irip-detail-hero { border-bottom: 6px solid rgb(var(--accent, var(--irip-lavender))); }
+  .irip-detail-chip { background: rgb(var(--irip-ivory)); }
+  #timeline-heading::before, #brief-heading::before { content: ''; display: block; width: 40px; height: 5px; margin-bottom: 10px; border-radius: 3px; background: rgb(var(--accent, var(--irip-lavender-deep))); }
+  .irip-detail-card { box-shadow: none; }
+  .irip-detail-aside { border-radius: 12px; background: rgb(var(--accent-tint, var(--irip-lavender-pale))); padding: 20px; }
+  /* ---- Site-wide colour: per-area accent (set on <html> by route) recolours the lavender tokens ---- */
   @keyframes project-card-in {
     from { opacity: 0; }
     to { opacity: 1; }

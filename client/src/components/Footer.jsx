@@ -49,7 +49,6 @@ export function FooterView({ site, hideDemoNotices = false }) {
               <li><Link to="/mentors" className="hover:text-white">Mentors</Link></li>
               <li><Link to={READ_ONLY_PREVIEW ? '/teach' : '/teach/apply'} className="font-semibold text-brand-100 hover:text-white">{READ_ONLY_PREVIEW ? 'Mentor application info' : 'Apply as a mentor'}</Link></li>
               <li><Link to="/about" className="hover:text-white">About</Link></li>
-              {!hideDemoNotices && <li><Link to="/demo-guide" className="hover:text-white">Validate the demo</Link></li>}
             </ul>
           </div>
           <div>

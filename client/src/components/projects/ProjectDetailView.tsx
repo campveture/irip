@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { ArrowUpRight, CalendarClock, ChevronDown, PackageCheck, UserRound, Users } from 'lucide-react';
 import { PLANNING_TEXT, milestoneWhen, oneLiner, placesText, type DirectoryCopy, type PublicProjectDetail } from '../admin/projects/projectsModel';
 import { useInPreview } from '../admin/preview/PreviewKit';
-import { AvailabilityBadge, Spot, availabilityHelp } from './ProjectCard';
+import { AvailabilityBadge, Spot, accentFor, availabilityHelp } from './ProjectCard';
 import { ApplyPanel } from './ApplyPanel';
 import { JoinSteps } from './JoinSteps';
 
@@ -22,8 +22,8 @@ function Collapsible({ title, children, id }: { title: string; children: ReactNo
 
 export function ProjectHero({ project, editSpots = false }: { project: PublicProjectDetail; editSpots?: boolean }) {
   const t = (target: string) => editSpots ? target : null;
-  return <section className="irip-inverse"><div className="container-page py-10 sm:py-14">
-    <Spot target={t('track')} label="track"><p className="text-xs font-semibold text-inverse">{project.track?.label ?? 'Research project'}{project.code ? ` · ${project.code}` : ''}</p></Spot>
+  return <section className="irip-inverse irip-detail-hero" data-accent={accentFor(project.track?.id)}><div className="container-page py-10 sm:py-14">
+    <Spot target={t('track')} label="track"><p className="flex flex-wrap items-center gap-3 text-xs font-semibold text-inverse"><span className="irip-detail-chip">{project.track?.label ?? 'Research project'}</span>{project.code && <span>{project.code}</span>}</p></Spot>
     <Spot target={t('status')} label="status"><div className="mt-3 flex flex-wrap items-center gap-2 text-xs"><AvailabilityBadge availability={project.availability} />
       {project.pilot && <span className="irip-project-decision irip-project-decision-pilot">Pilot menu</span>}
       {project.planning_label && <span className="text-brand-200">{PLANNING_TEXT[project.planning_label]}</span>}</div></Spot>
@@ -43,21 +43,21 @@ function ApplyPreview({ project }: { project: PublicProjectDetail }) {
 export function ProjectDetailView({ project, copy, editSpots = false }: { project: PublicProjectDetail; copy: DirectoryCopy; editSpots?: boolean }) {
   const inPreview = useInPreview();
   const t = (target: string) => editSpots ? target : null;
-  return <section className="container-page grid items-start gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_320px] sm:py-14" aria-label="Project details">
+  return <section className="container-page irip-detail-body grid items-start gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_320px] sm:py-14" aria-label="Project details" data-accent={accentFor(project.track?.id)}>
     <div className="min-w-0 space-y-8">
       {project.research_question && project.research_question !== project.plain_summary && <Spot target={t('question')} label="research question"><dl className="irip-project-card-question !mt-0">
         <dt className="irip-project-label">Research question</dt><dd className="text-base">{project.research_question}</dd></dl></Spot>}
 
       <div className="grid gap-5 sm:grid-cols-2">
-        {project.deliverable && <Spot target={t('deliverable')} label="output"><div><h2 className="irip-project-label flex items-center gap-2"><PackageCheck size={15} aria-hidden="true" />What you'll produce</h2><p className="mt-2 text-sm leading-7 text-slate-700">{project.deliverable}</p></div></Spot>}
-        {project.weekly_expectation && <Spot target={t('weekly')} label="weekly expectation"><div><h2 className="irip-project-label flex items-center gap-2"><CalendarClock size={15} aria-hidden="true" />Each week</h2><p className="mt-2 text-sm leading-7 text-slate-700">{project.weekly_expectation}</p></div></Spot>}
+        {project.deliverable && <Spot target={t('deliverable')} label="output"><div><h2 className="irip-project-label flex items-center gap-2"><PackageCheck size={15} aria-hidden="true" className="irip-detail-icon" />What you'll produce</h2><p className="mt-2 text-sm leading-7 text-slate-700">{project.deliverable}</p></div></Spot>}
+        {project.weekly_expectation && <Spot target={t('weekly')} label="weekly expectation"><div><h2 className="irip-project-label flex items-center gap-2"><CalendarClock size={15} aria-hidden="true" className="irip-detail-icon" />Each week</h2><p className="mt-2 text-sm leading-7 text-slate-700">{project.weekly_expectation}</p></div></Spot>}
         {project.eligibility && <Spot target={t('eligibility')} label="who can apply" className="sm:col-span-2"><div className="sm:col-span-2"><h2 className="irip-project-label">Who can apply</h2><p className="mt-2 text-sm leading-7 text-slate-700">{project.eligibility}</p></div></Spot>}
       </div>
 
       <Spot target={t('milestones')} label="timeline"><section aria-labelledby="timeline-heading">
         <h2 id="timeline-heading" className="text-xl font-semibold text-brand-900">Timeline</h2>
-        {project.milestones.length ? <ol className="mt-4 space-y-4 border-l-2 border-brand-200 pl-5">{project.milestones.map(m => <li key={m.id} className="relative">
-          <span aria-hidden="true" className="absolute -left-[27px] top-1.5 h-3 w-3 rounded-full bg-brand-700" />
+        {project.milestones.length ? <ol className="irip-detail-timeline mt-4 space-y-5 pl-5">{project.milestones.map(m => <li key={m.id} className="relative">
+          <span aria-hidden="true" className="irip-detail-dot absolute -left-[27px] top-1.5 h-3 w-3 rounded-full" />
           <p className="font-semibold text-brand-900">{m.title}</p>
           {milestoneWhen(m) && <p className="text-sm text-slate-600">{milestoneWhen(m)}</p>}
           {m.details && <p className="mt-1 text-sm leading-7 text-slate-700">{m.details}</p>}
@@ -81,18 +81,18 @@ export function ProjectDetailView({ project, copy, editSpots = false }: { projec
         </div>
       </section>}
 
-      <aside className="border-l-4 border-brand-600 bg-selected p-5 text-sm leading-7 text-brand-900" aria-label="Placement notice">{copy.disclaimer}</aside>
+      <aside className="irip-detail-notice p-5 text-sm leading-7 text-brand-900" aria-label="Placement notice">{copy.disclaimer}</aside>
     </div>
 
-    <div className="space-y-5 lg:sticky lg:top-24">
-      <div className="rounded-xl border border-stone bg-white p-5">
+    <div className="space-y-5">
+      <div className="irip-detail-card">
         <dl className="space-y-3 text-sm">
-          <Spot target={t('capacity')} label="team size"><div className="flex items-start gap-2"><Users size={16} aria-hidden="true" className="mt-0.5 text-brand-600" /><dt className="sr-only">Team</dt><dd className="font-semibold text-brand-900">{placesText(project)}</dd></div></Spot>
-          <Spot target={t('supervisor')} label="supervisor"><div className="flex items-start gap-2"><UserRound size={16} aria-hidden="true" className="mt-0.5 text-brand-600" /><dt className="sr-only">Supervisor</dt><dd className="text-brand-900">{project.supervisor_name ? <>Supervised by <strong>{project.supervisor_name}</strong></> : 'Supervisor to be confirmed'}</dd></div></Spot>
+          <Spot target={t('capacity')} label="team size"><div className="flex items-start gap-2"><Users size={16} aria-hidden="true" className="irip-detail-icon mt-0.5" /><dt className="sr-only">Team</dt><dd className="font-semibold text-brand-900">{placesText(project)}</dd></div></Spot>
+          <Spot target={t('supervisor')} label="supervisor"><div className="flex items-start gap-2"><UserRound size={16} aria-hidden="true" className="irip-detail-icon mt-0.5" /><dt className="sr-only">Supervisor</dt><dd className="text-brand-900">{project.supervisor_name ? <>Supervised by <strong>{project.supervisor_name}</strong></> : 'Supervisor to be confirmed'}</dd></div></Spot>
         </dl>
         <div className="mt-5 border-t border-stone pt-5">{inPreview ? <ApplyPreview project={project} /> : <ApplyPanel project={project} />}</div>
       </div>
-      <div className="rounded-xl border border-stone bg-white p-5"><JoinSteps copy={copy} compact /></div>
+      <div className="irip-detail-aside"><JoinSteps copy={copy} compact /></div>
     </div>
   </section>;
 }

@@ -3,7 +3,7 @@ import { apiHeaders } from './http';
 
 test('public pages share the same header, section and footer width at every breakpoint', async ({ page }, info) => {
   test.setTimeout(120000);
-  const paths = ['/', '/programs', '/courses', '/projects', '/mentors', '/about', '/teach', '/teach/apply', '/how-it-works', '/faq', '/contact', '/student-value', '/resources', '/events', '/stories', '/ideas', '/internships', '/institutions', '/labs', '/demo-guide', '/signup', '/login', '/recover', '/verify', '/certificates', '/policies/privacy', '/programs/research-methods-acceleration', '/enrol/research-methods-acceleration/2027-01'];
+  const paths = ['/', '/programs', '/courses', '/projects', '/mentors', '/about', '/teach', '/teach/apply', '/how-it-works', '/faq', '/contact', '/student-value', '/resources', '/events', '/stories', '/ideas', '/internships', '/institutions', '/labs', '/signup', '/login', '/recover', '/verify', '/certificates', '/policies/privacy', '/programs/research-methods-acceleration', '/enrol/research-methods-acceleration/2027-01'];
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     for (const path of paths) {

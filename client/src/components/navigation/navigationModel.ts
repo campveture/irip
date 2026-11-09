@@ -18,7 +18,6 @@ export const secondaryLinks: readonly NavigationLink[] = [
   { to: '/internships', label: 'Internship board (demo)' },
   { to: '/how-it-works', label: 'How it works' }, { to: '/faq', label: 'FAQ' },
   { to: '/contact', label: 'Contact' }, { to: '/certificates', label: 'Verify certificate' },
-  { to: '/demo-guide', label: 'Validate demo' },
 ];
 
 // A navigation affordance only. Protected routes and server RBAC remain authoritative.

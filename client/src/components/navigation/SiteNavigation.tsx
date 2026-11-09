@@ -19,7 +19,7 @@ export function SiteNavigation({ session }: { session: NavigationSession }) {
   const workspaces = workspacesFor(session.roles);
   const mentorHref = READ_ONLY_PREVIEW ? '/teach' : '/teach/apply';
   const mentorLabel = READ_ONLY_PREVIEW ? 'Mentor application info' : 'Apply as a mentor';
-  const moreLinks = READ_ONLY_PREVIEW ? [...secondaryLinks.filter(link => link.to !== '/demo-guide' && link.to !== '/contact' && link.to !== '/certificates' && link.to !== '/teach/apply'), { to: '/teach', label: 'Mentor application info' }, { to: '/preview-info', label: 'Read-only preview limits' }] : secondaryLinks;
+  const moreLinks = READ_ONLY_PREVIEW ? [...secondaryLinks.filter(link => link.to !== '/contact' && link.to !== '/certificates' && link.to !== '/teach/apply'), { to: '/teach', label: 'Mentor application info' }, { to: '/preview-info', label: 'Read-only preview limits' }] : secondaryLinks;
   async function signOut() {
     setSigningOut(true);
     setSignOutError('');
